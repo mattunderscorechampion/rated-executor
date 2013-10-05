@@ -34,6 +34,14 @@
     <tag>HEAD</tag>
   </scm>
 
+  <distributionManagement>
+    <site>
+      <id>com.mattunderscore</id>
+      <name>mattunderscore.com</name>
+      <url>scp://site@mattunderscore.com/rated-executor/</url>
+    </site>
+  </distributionManagement>
+
   <developers>
     <developer>
       <name>Matthew Champion</name>
@@ -121,11 +129,20 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>2.9</version>
         <configuration>
-          <links>
-            <link>http://docs.oracle.com/javase/6/docs/api/</link>
-            <link>http://docs.oracle.com/javaee/6/api/</link>
-          </links>
+          <javaApiLinks>
+            <property>
+              <name>api_1.7</name>
+              <value>http://docs.oracle.com/javase/7/docs/api/</value>
+            </property>
+          </javaApiLinks>
         </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>javadoc</report>
+            </reports>
+          </reportSet>
+        </reportSets>
       </plugin>
     </plugins>
   </reporting>
