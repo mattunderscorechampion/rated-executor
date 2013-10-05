@@ -33,24 +33,29 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import com.google.code.tempusfugit.concurrency.IntermittentTestRunner;
+import com.google.code.tempusfugit.concurrency.annotations.Intermittent;
 import com.mattunderscore.rated.executor.RatedExecutor;
 
 /**
  * Test for the Rated Executor
- * 
+ *
  * @author Matt Champion
  */
+@RunWith(IntermittentTestRunner.class)
 public class RatedExecutorTest
 {
     /**
      * Test tasks are executed and the values of the future are correctly set.
-     * 
+     *
      * @throws InterruptedException
      * @throws ExecutionException
      * @throws TimeoutException
      */
     @Test
+    @Intermittent(repetition = 50)
     public void testExecution0() throws InterruptedException, ExecutionException, TimeoutException
     {
         RatedExecutor executor = new RatedExecutor(100, TimeUnit.MILLISECONDS);
@@ -66,13 +71,14 @@ public class RatedExecutorTest
     }
 
     /**
-     * Test tasks are rate limited.
-     * 
+     * Test tasks submitted at the same time are rate limited.
+     *
      * @throws InterruptedException
      * @throws ExecutionException
      * @throws TimeoutException
      */
     @Test
+    @Intermittent(repetition = 50)
     public void testExecution1() throws InterruptedException, ExecutionException, TimeoutException
     {
         RatedExecutor executor = new RatedExecutor(100, TimeUnit.MILLISECONDS);
@@ -102,10 +108,63 @@ public class RatedExecutorTest
     }
 
     /**
-     * Test that tests are repeated and the values of futures are correctly set.
+     * Test that tasks submitted after execution of previous tasks are rate limited..
+     *
      * @throws InterruptedException
      */
     @Test
+    @Intermittent(repetition = 50)
+    public void testExecution2() throws InterruptedException
+    {
+        RatedExecutor executor = new RatedExecutor(100, TimeUnit.MILLISECONDS);
+        CountingTask task0 = new CountingTask();
+        CountingTask task1 = new CountingTask();
+
+        Future<?> future0 = executor.submit(task0);
+        TimeUnit.MILLISECONDS.sleep(20);
+
+        assertTrue(future0.isDone());
+        Future<?> future1 = executor.submit(task1);
+        TimeUnit.MILLISECONDS.sleep(20);
+        assertFalse(future1.isDone());
+
+        TimeUnit.MILLISECONDS.sleep(70);
+        assertTrue(future1.isDone());
+    }
+
+    /**
+     * Test that tasks are executed as soon as possible. Tasks scheduled after the last task has
+     * been executed and the period has been exceeded are scheduled immediately.
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    @Intermittent(repetition = 50)
+    public void testExecution3() throws InterruptedException
+    {
+        RatedExecutor executor = new RatedExecutor(100, TimeUnit.MILLISECONDS);
+        CountingTask task0 = new CountingTask();
+        CountingTask task1 = new CountingTask();
+
+        Future<?> future0 = executor.submit(task0);
+        TimeUnit.MILLISECONDS.sleep(5);
+
+        assertTrue(future0.isDone());
+        TimeUnit.MILLISECONDS.sleep(100);
+
+        Future<?> future1 = executor.submit(task1);
+        TimeUnit.MILLISECONDS.sleep(5);
+
+        assertTrue(future1.isDone());
+    }
+
+    /**
+     * Test that tests are repeated and the values of futures are correctly set.
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    @Intermittent(repetition = 50)
     public void testRepeatingExecution() throws InterruptedException
     {
         RatedExecutor executor = new RatedExecutor(100, TimeUnit.MILLISECONDS);
@@ -126,9 +185,11 @@ public class RatedExecutorTest
 
     /**
      * Test submitted tasks are cancellable.
+     *
      * @throws InterruptedException
      */
     @Test
+    @Intermittent(repetition = 50)
     public void testCancel0() throws InterruptedException
     {
         RatedExecutor executor = new RatedExecutor(100, TimeUnit.MILLISECONDS);
@@ -146,9 +207,11 @@ public class RatedExecutorTest
 
     /**
      * Test repeating tasks are cancellable.
+     *
      * @throws InterruptedException
      */
     @Test
+    @Intermittent(repetition = 50)
     public void testCancel1() throws InterruptedException
     {
         RatedExecutor executor = new RatedExecutor(100, TimeUnit.MILLISECONDS);
@@ -166,6 +229,7 @@ public class RatedExecutorTest
 
     /**
      * Test to ensure that there is not too much overhead or inaccuracy in the rate.
+     *
      * @throws InterruptedException
      */
     @Test
@@ -180,7 +244,7 @@ public class RatedExecutorTest
         future.cancel(false);
         long end = System.currentTimeMillis();
         long timeSpent = end - start;
-        long expectedNumber = (timeSpent/rate);
+        long expectedNumber = (timeSpent / rate);
         assertTrue(task.count > (expectedNumber - 5));
         assertTrue(task.count < (expectedNumber + 5));
         System.out.println("Expected: " + expectedNumber);
@@ -189,6 +253,7 @@ public class RatedExecutorTest
 
     /**
      * Simple task to execute.
+     *
      * @author Matt Champion
      */
     private static class CountingTask implements Runnable

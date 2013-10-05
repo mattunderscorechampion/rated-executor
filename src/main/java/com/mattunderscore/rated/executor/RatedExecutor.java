@@ -55,6 +55,7 @@ public class RatedExecutor
     private final long rate;
     private final TimeUnit unit;
     private ScheduledFuture<?> thisTask;
+    private ScheduledFuture<?> stoppingTask;
     private Queue<RunnableWrapper> taskQueue;
     private volatile boolean running;
     private volatile RunnableWrapper executingTask;
@@ -102,6 +103,10 @@ public class RatedExecutor
         RunnableWrapper wrapper = new RunnableWrapper(task, false);
         synchronized (this)
         {
+            if (stoppingTask != null)
+            {
+                stoppingTask.cancel(false);
+            }
             taskQueue.add(wrapper);
             if (!running)
             {
@@ -121,6 +126,10 @@ public class RatedExecutor
         RunnableWrapper wrapper = new RunnableWrapper(task, true);
         synchronized (this)
         {
+            if (stoppingTask != null)
+            {
+                stoppingTask.cancel(false);
+            }
             taskQueue.add(wrapper);
             if (!running)
             {
@@ -131,7 +140,7 @@ public class RatedExecutor
     }
 
     /**
-     * Being trying to consume tasks from the queue
+     * Being trying to consume tasks from the queue.
      */
     private synchronized void start()
     {
@@ -141,21 +150,8 @@ public class RatedExecutor
         }
         else
         {
-            thisTask = service.scheduleAtFixedRate(new Task(), 0, rate, unit);
+            thisTask = service.scheduleAtFixedRate(new ExecutingTask(), 0, rate, unit);
             running = true;
-        }
-    }
-
-    /**
-     * Stop trying to consume tasks from the queue
-     */
-    // TODO: This lock is alread held consider removing
-    private synchronized void stop()
-    {
-        if (running)
-        {
-            thisTask.cancel(false);
-            running = false;
         }
     }
 
@@ -164,12 +160,16 @@ public class RatedExecutor
      * 
      * @author Matt Champion
      */
-    private class Task implements Runnable
+    private class ExecutingTask implements Runnable
     {
         @Override
         public void run()
         {
             RunnableWrapper taskWrapper = taskQueue.poll();
+            if (taskWrapper == null)
+            {
+                return;
+            }
             executingTask = taskWrapper;
             taskWrapper.task.run();
             executingTask = null;
@@ -183,12 +183,33 @@ public class RatedExecutor
                 {
                     taskWrapper.done = true;
                 }
-            }
-            synchronized (this)
-            {
-                if (taskQueue.isEmpty())
+                synchronized (RatedExecutor.this)
                 {
-                    stop();
+                    if (taskQueue.isEmpty())
+                    {
+                        stoppingTask = service.schedule(new StoppingTask(), rate, unit);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Runnable that halts the scheduled task that consumes rated tasks.
+     *
+     * @author Matt Champion
+     */
+    private class StoppingTask implements Runnable
+    {
+        @Override
+        public void run()
+        {
+            synchronized (RatedExecutor.this)
+            {
+                if (running)
+                {
+                    thisTask.cancel(false);
+                    running = false;
                 }
             }
         }
@@ -197,7 +218,6 @@ public class RatedExecutor
     /**
      * Future that will be returned and placed on the queue.
      * <P>
-     * Returning the future allows the
      * 
      * @author Matt Champion
      */
