@@ -1,47 +1,47 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
-	</parent>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
 
-	<groupId>com.mattunderscore</groupId>
-	<artifactId>rated-executor</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+  <groupId>com.mattunderscore</groupId>
+  <artifactId>rated-executor</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
 
-	<name>Rated Executor</name>
-	<description>Executors that will execute tasks faster than some rate.</description>
+  <name>Rated Executor</name>
+  <description>Executors that will execute tasks faster than some rate.</description>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 
-	<licenses>
-		<license>
-			<name>New BSD License</name>
-			<url>http://www.opensource.org/licenses/bsd-license.php</url>
-		</license>
-	</licenses>
+  <licenses>
+    <license>
+      <name>New BSD License</name>
+      <url>http://www.opensource.org/licenses/bsd-license.php</url>
+    </license>
+  </licenses>
 
-	<scm>
-		<connection>scm:git</connection>
-		<developerConnection>scm:git</developerConnection>
-		<url></url>
-		<tag>HEAD</tag>
-	</scm>
+  <scm>
+    <connection>scm:git</connection>
+    <developerConnection>scm:git</developerConnection>
+    <url></url>
+    <tag>HEAD</tag>
+  </scm>
 
-	<developers>
-		<developer>
-			<name>Matthew Champion</name>
-			<url>http://www.mattunderscore.com</url>
-			<email>matt_champion1@yahoo.co.uk</email>
-			<timezone>+0</timezone>
-		</developer>
-	</developers>
+  <developers>
+    <developer>
+      <name>Matthew Champion</name>
+      <url>http://www.mattunderscore.com</url>
+      <email>matt_champion1@yahoo.co.uk</email>
+      <timezone>+0</timezone>
+    </developer>
+  </developers>
 
 
   <build>
@@ -54,7 +54,7 @@
           <target>1.7</target>
         </configuration>
       </plugin>
-    
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
