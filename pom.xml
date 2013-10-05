@@ -22,15 +22,15 @@
 
   <licenses>
     <license>
-      <name>New BSD License</name>
-      <url>http://www.opensource.org/licenses/bsd-license.php</url>
+      <name>BSD 3-clause License</name>
+      <url>https://raw.github.com/mattunderscorechampion/rated-executor/master/LICENSE</url>
     </license>
   </licenses>
 
   <scm>
-    <connection>scm:git</connection>
-    <developerConnection>scm:git</developerConnection>
-    <url></url>
+    <connection>scm:git:git://github.com/mattunderscorechampion/rated-executor</connection>
+    <developerConnection>scm:git:git://github.com/mattunderscorechampion/rated-executor</developerConnection>
+    <url>https://github.com/mattunderscorechampion/rated-executor</url>
     <tag>HEAD</tag>
   </scm>
 
