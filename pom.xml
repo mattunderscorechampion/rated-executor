@@ -28,8 +28,8 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:git://github.com/mattunderscorechampion/rated-executor</connection>
-    <developerConnection>scm:git:git://github.com/mattunderscorechampion/rated-executor</developerConnection>
+    <connection>scm:git:https://github.com/mattunderscorechampion/rated-executor</connection>
+    <developerConnection>scm:git:https://github.com/mattunderscorechampion/rated-executor</developerConnection>
     <url>https://github.com/mattunderscorechampion/rated-executor</url>
     <tag>HEAD</tag>
   </scm>
