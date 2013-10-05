@@ -49,7 +49,7 @@ import java.util.concurrent.TimeoutException;
  * @author Matt Champion
  * @since 0.0.1
  */
-public class RatedExecutor
+public class RatedExecutor implements IRatedExecutor
 {
     private final ScheduledExecutorService service;
     private final long rate;
@@ -94,10 +94,11 @@ public class RatedExecutor
     }
 
     /**
-     * Submit a task to be executed once.
-     * 
      * @param task
+     * @return
+     * @see com.mattunderscore.rated.executor.IRatedExecutor#submit(java.lang.Runnable)
      */
+    @Override
     public Future<?> submit(final Runnable task)
     {
         RunnableWrapper wrapper = new RunnableWrapper(task, false);
@@ -117,10 +118,11 @@ public class RatedExecutor
     }
 
     /**
-     * Submit a task to be executed repeatedly.
-     * 
      * @param task
+     * @return
+     * @see com.mattunderscore.rated.executor.IRatedExecutor#schedule(java.lang.Runnable)
      */
+    @Override
     public Future<?> schedule(final Runnable task)
     {
         RunnableWrapper wrapper = new RunnableWrapper(task, true);
