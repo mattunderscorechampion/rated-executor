@@ -30,8 +30,11 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
 /**
- * A rated executor. It will execute tasks at a fixed rate.
+ * Interface for rated executors, it will execute tasks at a fixed rate.
  * <P>
+ * Tasks, both {@link Runnable} and {@link Callable}, can be submitted for execution.
+ * {@link Runnable} tasks can also be scheduled for repeated execution. Rated executors should not
+ * execute tasks more frequently than a fixed rate.
  * 
  * @author Matt Champion
  * @since 0.0.1

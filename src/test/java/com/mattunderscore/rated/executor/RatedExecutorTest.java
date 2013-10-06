@@ -41,7 +41,7 @@ import com.google.code.tempusfugit.concurrency.IntermittentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Intermittent;
 
 /**
- * Test for the Rated Executor
+ * Test suite for the Rated Executor.
  * 
  * @author Matt Champion
  */
@@ -238,7 +238,8 @@ public class RatedExecutorTest
 
     /**
      * Test that getting the result throws an ExecutionException if a runnable threw an exception.
-     * @throws Throwable 
+     * 
+     * @throws Throwable
      */
     @Test(expected = TestException.class)
     @Intermittent(repetition = REPETITIONS)
@@ -260,7 +261,8 @@ public class RatedExecutorTest
 
     /**
      * Test that getting the result throws an ExecutionException if a callable threw an exception.
-     * @throws Throwable 
+     * 
+     * @throws Throwable
      */
     @Test(expected = TestException.class)
     @Intermittent(repetition = REPETITIONS)

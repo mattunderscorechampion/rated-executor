@@ -40,14 +40,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * A rated executor. It will execute tasks at a fixed rate.
+ * A rated executor, it will execute tasks at a fixed rate.
  * <P>
- * When a {@link Runnable} task is submitted it is placed on a queue. Tasks will be removed from the
- * queue at a fixed rate. A repeating task will be placed back on the queue when complete. If a
- * repeating task is placed on the queue it will be executed at an interval equal to the rate of the
- * executor. If two repeating tasks are added to the executor each task will execute at an interval
- * twice the executor rate and their execution will be separated from each other by an interval
- * equal to the rate of the executor. This executor is single threaded.
+ * When a {@link Runnable} or {@link Callable} task is submitted it is placed on a queue. Tasks will
+ * be removed from the queue at a fixed rate. A repeating task will be placed back on the queue when
+ * complete. If a single repeating task is submitted it will be executed at an interval equal to the
+ * rate of the executor. If two repeating tasks are submitted to the executor each task will execute
+ * at an interval twice the executor rate and their execution will be separated from each other by
+ * an interval equal to the rate of the executor. This executor is single threaded, if a task takes
+ * longer than the executor rate it will delay scheduled tasks.
  * 
  * @author Matt Champion
  * @since 0.0.1
@@ -67,7 +68,9 @@ public class RatedExecutor implements IRatedExecutor
      * Create a new RatedExecutor that will execute tasks at a fixed rate.
      * 
      * @param rate
+     *            The rate value
      * @param unit
+     *            The rate units
      */
     public RatedExecutor(final long rate, final TimeUnit unit)
     {
@@ -84,8 +87,11 @@ public class RatedExecutor implements IRatedExecutor
      * The thread will be constructed with the thread factory.
      * 
      * @param period
+     *            The rate value
      * @param unit
+     *            The rate units
      * @param threadFactory
+     *            A thread factory to construct the executor thread
      */
     public RatedExecutor(final long period, final TimeUnit unit, final ThreadFactory threadFactory)
     {
@@ -96,6 +102,9 @@ public class RatedExecutor implements IRatedExecutor
         this.running = false;
     }
 
+    /**
+     * @see java.util.concurrent.Executor#execute(java.lang.Runnable)
+     */
     @Override
     public void execute(final Runnable command)
     {
@@ -103,8 +112,6 @@ public class RatedExecutor implements IRatedExecutor
     }
 
     /**
-     * @param task
-     * @return
      * @see com.mattunderscore.rated.executor.IRatedExecutor#submit(java.lang.Runnable)
      */
     @Override
@@ -126,6 +133,9 @@ public class RatedExecutor implements IRatedExecutor
         return wrapper;
     }
 
+    /**
+     * @see com.mattunderscore.rated.executor.IRatedExecutor#submit(java.util.concurrent.Callable)
+     */
     @Override
     public <V> Future<V> submit(final Callable<V> task)
     {
@@ -146,8 +156,6 @@ public class RatedExecutor implements IRatedExecutor
     }
 
     /**
-     * @param task
-     * @return
      * @see com.mattunderscore.rated.executor.IRatedExecutor#schedule(java.lang.Runnable)
      */
     @Override
@@ -169,6 +177,9 @@ public class RatedExecutor implements IRatedExecutor
         return wrapper;
     }
 
+    /**
+     * @see com.mattunderscore.rated.executor.IRatedExecutor#schedule(java.lang.Runnable, int)
+     */
     @Override
     public Future<?> schedule(final Runnable task, final int repetitions)
     {
@@ -189,7 +200,7 @@ public class RatedExecutor implements IRatedExecutor
     }
 
     /**
-     * Being trying to consume tasks from the queue.
+     * Begin trying to consume tasks from the queue.
      */
     private synchronized void start()
     {
@@ -269,11 +280,17 @@ public class RatedExecutor implements IRatedExecutor
      */
     private abstract class TaskWrapper<V> implements Future<V>
     {
+        /**
+         * Number of repetitions, -1 is used to indicate infinite repetitions
+         */
         private volatile int repetitions;
         private volatile boolean done = false;
         private volatile boolean cancelled = false;
         private volatile ExecutionException exception;
         private volatile V result;
+        /**
+         * Used to block calls to get.
+         */
         private final CountDownLatch latch = new CountDownLatch(1);
 
         public TaskWrapper(final int repetitions)
@@ -283,6 +300,7 @@ public class RatedExecutor implements IRatedExecutor
 
         /**
          * Set the result of the task execution
+         * 
          * @param result
          */
         protected void setResult(V result)
@@ -299,6 +317,7 @@ public class RatedExecutor implements IRatedExecutor
 
         /**
          * Set the exception of the task
+         * 
          * @param exception
          */
         protected void setException(ExecutionException exception)
@@ -315,6 +334,7 @@ public class RatedExecutor implements IRatedExecutor
 
         /**
          * Check if get needs to throw an exception
+         * 
          * @throws ExecutionException
          */
         private void checkException() throws ExecutionException
