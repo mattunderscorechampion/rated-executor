@@ -39,7 +39,6 @@ import org.junit.runner.RunWith;
 
 import com.google.code.tempusfugit.concurrency.IntermittentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Intermittent;
-import com.mattunderscore.rated.executor.RatedExecutor;
 
 /**
  * Test for the Rated Executor
@@ -239,36 +238,46 @@ public class RatedExecutorTest
 
     /**
      * Test that getting the result throws an ExecutionException if a runnable threw an exception.
-     * 
-     * @throws InterruptedException
-     * @throws ExecutionException
+     * @throws Throwable 
      */
-    @Test(expected = ExecutionException.class)
+    @Test(expected = TestException.class)
     @Intermittent(repetition = REPETITIONS)
-    public void testExecutionException0() throws InterruptedException, ExecutionException
+    public void testExecutionException0() throws Throwable
     {
         IRatedExecutor executor = new RatedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
         ExceptionTask task0 = new ExceptionTask();
 
         Future<?> future0 = executor.submit(task0);
-        future0.get();
+        try
+        {
+            future0.get();
+        }
+        catch (ExecutionException e)
+        {
+            throw e.getCause();
+        }
     }
 
     /**
      * Test that getting the result throws an ExecutionException if a callable threw an exception.
-     * 
-     * @throws InterruptedException
-     * @throws ExecutionException
+     * @throws Throwable 
      */
-    @Test(expected = ExecutionException.class)
+    @Test(expected = TestException.class)
     @Intermittent(repetition = REPETITIONS)
-    public void testExecutionException1() throws InterruptedException, ExecutionException
+    public void testExecutionException1() throws Throwable
     {
         IRatedExecutor executor = new RatedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
         ExceptionCallable task0 = new ExceptionCallable();
 
         Future<Object> future0 = executor.submit(task0);
-        future0.get();
+        try
+        {
+            future0.get();
+        }
+        catch (ExecutionException e)
+        {
+            throw e.getCause();
+        }
     }
 
     /**
@@ -477,6 +486,11 @@ public class RatedExecutorTest
         }
     }
 
+    /**
+     * Exception to throw.
+     * 
+     * @author Matt Champion
+     */
     private static class TestException extends RuntimeException
     {
         private static final long serialVersionUID = 1L;
