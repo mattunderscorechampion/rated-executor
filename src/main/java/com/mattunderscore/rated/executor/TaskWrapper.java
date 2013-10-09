@@ -34,8 +34,12 @@ import java.lang.Runnable;
  * <P>
  * The result of the executed method should be passed to a {@link Future}.
  * @author Matt Champion
+ * @since 0.0.2
  */
 /*package*/ interface TaskWrapper
 {
+    /**
+     * Execute the task and set the result of the future.
+     */
     public void execute();
 }

@@ -39,8 +39,8 @@ import java.util.concurrent.TimeoutException;
  * The {@link #get()} methods inherited from {@link Future} refer to the most recent execution.
  * 
  * @author Matt Champion
- * 
- * @param <V>
+ * @param <V> The type of object returned by the task
+ * @since 0.0.2
  */
 public interface IRepeatingFuture<V> extends Future<V>
 {

@@ -29,8 +29,10 @@ import java.util.concurrent.Future;
 
 /**
  * Interface that allows the result of a future to be set.
+ * 
  * @author Matt Champion
  * @param <V> The type of object returned by the task
+ * @since 0.0.2
  */
 /*package*/ interface ISettableFuture<V> extends Future<V>
 {
