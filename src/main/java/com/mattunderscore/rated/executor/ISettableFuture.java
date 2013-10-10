@@ -29,22 +29,30 @@ import java.util.concurrent.Future;
 
 /**
  * Interface that allows the result of a future to be set.
+ * <P>
+ * The setters names are different because it is not possible to rely on parameter overloading as it
+ * is possible to return an exception as the result of a {@link Callable}.
  * 
  * @author Matt Champion
- * @param <V> The type of object returned by the task
- * @since 0.0.2
+ * @param <V>
+ *            The type of object returned by the task
+ * @since 0.1.0
  */
-/*package*/ interface ISettableFuture<V> extends Future<V>
+/* package */interface ISettableFuture<V> extends Future<V>
 {
     /**
      * Set the result of the task execution.
-     * @param result The result of the execution
+     * 
+     * @param result
+     *            The result of the execution
      */
     public void setResult(V result);
-    
+
     /**
      * Set the result of the task execution.
-     * @param result The execution thrown by the execution
+     * 
+     * @param result
+     *            The execution thrown by the execution
      */
-    public void setResult(Throwable result);
+    public void setException(Throwable result);
 }
