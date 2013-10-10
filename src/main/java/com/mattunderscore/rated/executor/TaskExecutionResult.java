@@ -37,7 +37,7 @@ import net.jcip.annotations.Immutable;
  * 
  * @author Matt Champion
  * @param <V> The type of object returned by the task
- * @since 0.0.2
+ * @since 0.1.0
  */
 @Immutable
 /* package */final class TaskExecutionResult<V>

@@ -40,7 +40,7 @@ import java.util.concurrent.TimeoutException;
  * 
  * @author Matt Champion
  * @param <V> The type of object returned by the task
- * @since 0.0.2
+ * @since 0.1.0
  */
 public interface IRepeatingFuture<V> extends Future<V>
 {
