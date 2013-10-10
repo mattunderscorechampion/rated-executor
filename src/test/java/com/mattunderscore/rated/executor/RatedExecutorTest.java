@@ -27,7 +27,6 @@ package com.mattunderscore.rated.executor;
 
 import static org.junit.Assert.*;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -44,6 +43,7 @@ import com.google.code.tempusfugit.concurrency.annotations.Intermittent;
  * Test suite for the Rated Executor.
  * 
  * @author Matt Champion
+ * @since 0.0.1
  */
 @RunWith(IntermittentTestRunner.class)
 public class RatedExecutorTest
@@ -51,6 +51,8 @@ public class RatedExecutorTest
     private static final int REPETITIONS = 50;
     private static final long STD_RATE = 100L;
     private static final long STD_EXTRA = 15L;
+    private static final long ACCURACY_RUN = 10000L;
+    private static final long ACCURACY_RATE = 10L;
 
     /**
      * Test tasks are executed.
@@ -117,7 +119,7 @@ public class RatedExecutorTest
         TimeUnit.MILLISECONDS.sleep(STD_RATE / 2);
 
         assertFalse(future.isDone());
-        TimeUnit.MILLISECONDS.sleep((STD_RATE / 2) + STD_EXTRA);
+        TimeUnit.MILLISECONDS.sleep(STD_RATE / 2);
 
         assertTrue(future.isDone());
         assertFalse(future.isCancelled());
@@ -321,10 +323,10 @@ public class RatedExecutorTest
         CountingTask task0 = new CountingTask();
 
         Future<?> future0 = executor.schedule(task0, repetitions);
-        TimeUnit.MILLISECONDS.sleep(STD_RATE * (repetitions + 3));
+        TimeUnit.MILLISECONDS.sleep((STD_RATE + STD_EXTRA) * (repetitions + 3));
 
-        assertTrue(future0.isDone());
         assertEquals(repetitions, task0.count);
+        assertTrue(future0.isDone());
     }
 
     /**
@@ -407,94 +409,18 @@ public class RatedExecutorTest
     @Test
     public void testAccuracy() throws InterruptedException
     {
-        long rate = 10L;
-        IRatedExecutor executor = new RatedExecutor(rate, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = new RatedExecutor(ACCURACY_RATE, TimeUnit.MILLISECONDS);
         CountingTask task = new CountingTask();
         long start = System.currentTimeMillis();
         Future<?> future = executor.schedule(task);
-        TimeUnit.MILLISECONDS.sleep(10000);
+        TimeUnit.MILLISECONDS.sleep(ACCURACY_RUN);
         future.cancel(false);
         long end = System.currentTimeMillis();
         long timeSpent = end - start;
-        long expectedNumber = (timeSpent / rate) + 1;
-        assertTrue(task.count > (expectedNumber - 2));
-        assertTrue(task.count < (expectedNumber + 2));
+        long expectedNumber = (timeSpent / ACCURACY_RATE) + 1;
         System.out.println("Expected: " + expectedNumber);
         System.out.println("Actual: " + task.count);
-    }
-
-    /**
-     * Simple runnable task to execute. Increments a counter.
-     * 
-     * @author Matt Champion
-     */
-    private static class CountingTask implements Runnable
-    {
-        private volatile int count = 0;
-
-        @Override
-        public void run()
-        {
-            count++;
-        }
-    }
-
-    /**
-     * Simple callable task to execute. Returns a number
-     * 
-     * @author Matt Champion
-     */
-    private static class NumberCallable implements Callable<Integer>
-    {
-        private final int value;
-
-        public NumberCallable(int value)
-        {
-            this.value = value;
-        }
-
-        @Override
-        public Integer call()
-        {
-            return value;
-        }
-    }
-
-    /**
-     * Simple runnable task to execute. Throws exception.
-     * 
-     * @author Matt Champion
-     */
-    private static class ExceptionTask implements Runnable
-    {
-        @Override
-        public void run()
-        {
-            throw new TestException();
-        }
-    }
-
-    /**
-     * Simple callable task to execute. Throws exception.
-     * 
-     * @author Matt Champion
-     */
-    private static class ExceptionCallable implements Callable<Object>
-    {
-        @Override
-        public Object call() throws Exception
-        {
-            throw new TestException();
-        }
-    }
-
-    /**
-     * Exception to throw.
-     * 
-     * @author Matt Champion
-     */
-    private static class TestException extends RuntimeException
-    {
-        private static final long serialVersionUID = 1L;
+        assertTrue(task.count > (expectedNumber - 2));
+        assertTrue(task.count < (expectedNumber + 2));
     }
 }
