@@ -27,9 +27,6 @@ package com.mattunderscore.rated.executor;
 
 import java.util.Queue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -37,7 +34,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * A rated executor, it will execute tasks at a fixed rate.
@@ -60,9 +56,9 @@ public class RatedExecutor implements IRatedExecutor
     private final TimeUnit unit;
     private ScheduledFuture<?> thisTask;
     private ScheduledFuture<?> stoppingTask;
-    private Queue<TaskWrapper<?>> taskQueue;
+    private Queue<BaseFuture<?>> taskQueue;
     private volatile boolean running;
-    private volatile TaskWrapper<?> executingTask;
+    private volatile TaskWrapper executingTask;
 
     /**
      * Create a new RatedExecutor that will execute tasks at a fixed rate.
@@ -77,7 +73,7 @@ public class RatedExecutor implements IRatedExecutor
         this.service = Executors.newSingleThreadScheduledExecutor();
         this.rate = rate;
         this.unit = unit;
-        this.taskQueue = new LinkedBlockingQueue<TaskWrapper<?>>();
+        this.taskQueue = new LinkedBlockingQueue<BaseFuture<?>>();
         this.running = false;
     }
 
@@ -98,7 +94,7 @@ public class RatedExecutor implements IRatedExecutor
         this.service = Executors.newSingleThreadScheduledExecutor(threadFactory);
         this.rate = period;
         this.unit = unit;
-        this.taskQueue = new LinkedBlockingQueue<TaskWrapper<?>>();
+        this.taskQueue = new LinkedBlockingQueue<BaseFuture<?>>();
         this.running = false;
     }
 
@@ -117,7 +113,7 @@ public class RatedExecutor implements IRatedExecutor
     @Override
     public Future<?> submit(final Runnable task)
     {
-        TaskWrapper<?> wrapper = new RunnableWrapper(task, 1);
+        RatedSingleRunnableFuture wrapper = new RatedSingleRunnableFuture(this, task);
         synchronized (this)
         {
             if (stoppingTask != null)
@@ -139,7 +135,7 @@ public class RatedExecutor implements IRatedExecutor
     @Override
     public <V> Future<V> submit(final Callable<V> task)
     {
-        TaskWrapper<V> wrapper = new CallableWrapper<V>(task, 1);
+        RatedSingleCallableFuture<V> wrapper = new RatedSingleCallableFuture<V>(this, task);
         synchronized (this)
         {
             if (stoppingTask != null)
@@ -161,7 +157,7 @@ public class RatedExecutor implements IRatedExecutor
     @Override
     public Future<?> schedule(final Runnable task)
     {
-        TaskWrapper<?> wrapper = new RunnableWrapper(task, -1);
+        RatedUnboundedRunnableFuture wrapper = new RatedUnboundedRunnableFuture(this, task);
         synchronized (this)
         {
             if (stoppingTask != null)
@@ -183,7 +179,29 @@ public class RatedExecutor implements IRatedExecutor
     @Override
     public Future<?> schedule(final Runnable task, final int repetitions)
     {
-        TaskWrapper<?> wrapper = new RunnableWrapper(task, repetitions);
+        RatedRepeatingRunnableFuture wrapper = new RatedRepeatingRunnableFuture(this, task, repetitions);
+        synchronized (this)
+        {
+            if (stoppingTask != null)
+            {
+                stoppingTask.cancel(false);
+            }
+            taskQueue.add(wrapper);
+            if (!running)
+            {
+                start();
+            }
+        }
+        return wrapper;
+    }
+
+    /**
+     * @see com.mattunderscore.rated.executor.IRatedExecutor#schedule(java.util.concurrent.Callable, int)
+     */
+    @Override
+    public <V> IRepeatingFuture<V> schedule(final Callable<V> task, final int repetitions)
+    {
+        RatedRepeatingCallableFuture<V> wrapper = new RatedRepeatingCallableFuture<V>(this, task, repetitions);
         synchronized (this)
         {
             if (stoppingTask != null)
@@ -225,7 +243,7 @@ public class RatedExecutor implements IRatedExecutor
         @Override
         public void run()
         {
-            TaskWrapper<?> taskWrapper = taskQueue.poll();
+            BaseFuture<?> taskWrapper = taskQueue.poll();
             if (taskWrapper == null)
             {
                 return;
@@ -233,7 +251,7 @@ public class RatedExecutor implements IRatedExecutor
             executingTask = taskWrapper;
             taskWrapper.execute();
             executingTask = null;
-            if (taskWrapper.repetitions != 0)
+            if (!taskWrapper.isDone())
             {
                 taskQueue.add(taskWrapper);
             }
@@ -272,238 +290,26 @@ public class RatedExecutor implements IRatedExecutor
     }
 
     /**
-     * Wrapper for tasks. Also serves as a Future.
-     * 
-     * @author Matt Champion
-     * @param <V>
-     *            Type of return value
+     * Cancel the task passed in.
+     * @param wrapper The task to cancel
+     * @param mayInterruptIfRunning Interrupt the thread if running
+     * @return Was the task cancelled
      */
-    private abstract class TaskWrapper<V> implements Future<V>
+    /*package*/ boolean cancelTask(TaskWrapper wrapper, boolean mayInterruptIfRunning)
     {
-        /**
-         * Number of repetitions, -1 is used to indicate infinite repetitions
-         */
-        private volatile int repetitions;
-        private volatile boolean done = false;
-        private volatile boolean cancelled = false;
-        private volatile ExecutionException exception;
-        private volatile V result;
-        /**
-         * Used to block calls to get.
-         */
-        private final CountDownLatch latch = new CountDownLatch(1);
-
-        public TaskWrapper(final int repetitions)
-        {
-            this.repetitions = repetitions;
-        }
-
-        /**
-         * Set the result of the task execution
-         * 
-         * @param result
-         */
-        protected void setResult(V result)
-        {
-            this.result = result;
-            this.done = true;
-            int reps = repetitions;
-            if (reps > 0)
+        if (executingTask == wrapper)
             {
-                repetitions = reps - 1;
-            }
-            latch.countDown();
-        }
-
-        /**
-         * Set the exception of the task
-         * 
-         * @param exception
-         */
-        protected void setException(ExecutionException exception)
-        {
-            this.exception = exception;
-            this.done = true;
-            int reps = repetitions;
-            if (reps > 0)
-            {
-                repetitions = reps - 1;
-            }
-            latch.countDown();
-        }
-
-        /**
-         * Check if get needs to throw an exception
-         * 
-         * @throws ExecutionException
-         */
-        private void checkException() throws ExecutionException
-        {
-            if (cancelled)
-            {
-                throw new CancellationException();
-            }
-            else
-            {
-                ExecutionException theException = exception;
-                if (theException != null)
+                if (mayInterruptIfRunning)
                 {
-                    throw theException;
+                    // TODO: interrupt
+                    return false;
+                }
+                else
+                {
+                    return false;
                 }
             }
-        }
-
-        @Override
-        public V get() throws InterruptedException, ExecutionException
-        {
-            latch.await();
-            checkException();
-            return result;
-        }
-
-        @Override
-        public V get(final long timeout, final TimeUnit unit) throws InterruptedException,
-                ExecutionException, TimeoutException
-        {
-            latch.await(timeout, unit);
-            checkException();
-            return result;
-        }
-
-        @Override
-        public synchronized boolean cancel(final boolean mayInterruptIfRunning)
-        {
-            if (done || cancelled)
-            {
-                return false;
-            }
-            else
-            {
-                if (executingTask == this)
-                {
-                    if (mayInterruptIfRunning)
-                    {
-                        // TODO: interrupt
-                        return false;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                taskQueue.remove(this);
-                cancelled = true;
-                latch.countDown();
-                return true;
-            }
-        }
-
-        @Override
-        public synchronized boolean isCancelled()
-        {
-            return cancelled;
-        }
-
-        @Override
-        public synchronized boolean isDone()
-        {
-            if (cancelled)
-            {
-                return true;
-            }
-            else if (repetitions != 0)
-            {
-                return false;
-            }
-            else
-            {
-                return done;
-            }
-        }
-
-        @Override
-        public boolean equals(Object object)
-        {
-            return this == object;
-        }
-
-        /**
-         * Execute the task
-         */
-        public abstract void execute();
-    }
-
-    /**
-     * TaskWrapper for Runnable tasks.
-     * 
-     * @author Matt Champion
-     */
-    private class RunnableWrapper extends TaskWrapper<Object>
-    {
-        private final Runnable task;
-
-        public RunnableWrapper(final Runnable task, final int repetitions)
-        {
-            super(repetitions);
-            this.task = task;
-        }
-
-        @Override
-        public int hashCode()
-        {
-            return task.hashCode();
-        }
-
-        @Override
-        public void execute()
-        {
-            try
-            {
-                task.run();
-                setResult(null);
-            }
-            catch (Throwable t)
-            {
-                setException(new ExecutionException(t));
-            }
-        }
-    }
-
-    /**
-     * TaskWrapper for Callable tasks.
-     * 
-     * @author Matt Champion
-     * @param <V>
-     *            Type returned by call
-     */
-    private class CallableWrapper<V> extends TaskWrapper<V>
-    {
-        private final Callable<V> task;
-
-        public CallableWrapper(final Callable<V> task, final int repetitions)
-        {
-            super(repetitions);
-            this.task = task;
-        }
-
-        @Override
-        public int hashCode()
-        {
-            return task.hashCode();
-        }
-
-        @Override
-        public void execute()
-        {
-            try
-            {
-                V result = task.call();
-                setResult(result);
-            }
-            catch (Throwable t)
-            {
-                setException(new ExecutionException(t));
-            }
-        }
+            taskQueue.remove(wrapper);
+            return true;
     }
 }

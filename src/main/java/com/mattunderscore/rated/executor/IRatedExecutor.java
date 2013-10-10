@@ -93,7 +93,21 @@ public interface IRatedExecutor extends Executor
      * @param repetitions
      *            The number of times the task will be executed
      * @return Future that allows the task to be cancelled and monitored
-     * @since 0.0.2
+     * @since 0.1.0
      */
     public Future<?> schedule(Runnable task, int repetitions);
+    
+    /**
+     * Submit a task to be executed repeatedly.
+     * <P>
+     * This task will be executed as soon as possible without exceeding the rate limit. A future
+     * will be returned to allow the task to be cancelled and monitored. This task will be repeated
+     * a limited number of times or until it is cancelled.
+     *
+     * @param task Task to execute
+     * @param repetitions The number of times the task will be executed
+     * @return Future that allows the task to be cancelled and monitored
+     * @since 0.1.0
+     */
+    public <V> IRepeatingFuture<V> schedule(Callable<V> task, int repetitions);
 }
