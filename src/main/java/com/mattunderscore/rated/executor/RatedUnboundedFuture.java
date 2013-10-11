@@ -31,12 +31,12 @@ package com.mattunderscore.rated.executor;
  * @author Matt Champion
  * @since 0.1.0
  */
-/*package*/ final class RatedUnboundedRunnableFuture extends UnboundedFuture
+/*package*/ final class RatedUnboundedFuture extends UnboundedFuture
 {
     private final RatedExecutor ratedExecutor;
     private final Runnable task;
 
-    public RatedUnboundedRunnableFuture(RatedExecutor ratedExecutor, final Runnable task)
+    public RatedUnboundedFuture(RatedExecutor ratedExecutor, final Runnable task)
     {
         super();
         this.ratedExecutor = ratedExecutor;

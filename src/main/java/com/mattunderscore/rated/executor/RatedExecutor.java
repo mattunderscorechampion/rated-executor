@@ -157,7 +157,7 @@ public class RatedExecutor implements IRatedExecutor
     @Override
     public Future<?> schedule(final Runnable task)
     {
-        RatedUnboundedRunnableFuture wrapper = new RatedUnboundedRunnableFuture(this, task);
+        RatedUnboundedFuture wrapper = new RatedUnboundedFuture(this, task);
         synchronized (this)
         {
             if (stoppingTask != null)
