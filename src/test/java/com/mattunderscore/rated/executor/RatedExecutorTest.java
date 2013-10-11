@@ -41,6 +41,8 @@ import com.google.code.tempusfugit.concurrency.annotations.Intermittent;
 
 /**
  * Test suite for the Rated Executor.
+ * <P>
+ * Integration tests. Nothing is mocked.
  * 
  * @author Matt Champion
  * @since 0.0.1
