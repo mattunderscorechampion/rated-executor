@@ -113,7 +113,7 @@ public class RatedExecutor implements IRatedExecutor
     @Override
     public Future<?> submit(final Runnable task)
     {
-        RatedSingleRunnableFuture wrapper = new RatedSingleRunnableFuture(this, task);
+        RatedSingleFuture<Object> wrapper = new RatedSingleFuture<Object>(this, task);
         synchronized (this)
         {
             if (stoppingTask != null)
@@ -135,7 +135,7 @@ public class RatedExecutor implements IRatedExecutor
     @Override
     public <V> Future<V> submit(final Callable<V> task)
     {
-        RatedSingleCallableFuture<V> wrapper = new RatedSingleCallableFuture<V>(this, task);
+        RatedSingleFuture<V> wrapper = new RatedSingleFuture<V>(this, task);
         synchronized (this)
         {
             if (stoppingTask != null)
@@ -179,7 +179,7 @@ public class RatedExecutor implements IRatedExecutor
     @Override
     public Future<?> schedule(final Runnable task, final int repetitions)
     {
-        RatedRepeatingRunnableFuture wrapper = new RatedRepeatingRunnableFuture(this, task, repetitions);
+        RatedRepeatingFuture<Object> wrapper = new RatedRepeatingFuture<Object>(this, task, repetitions);
         synchronized (this)
         {
             if (stoppingTask != null)
@@ -201,7 +201,7 @@ public class RatedExecutor implements IRatedExecutor
     @Override
     public <V> IRepeatingFuture<V> schedule(final Callable<V> task, final int repetitions)
     {
-        RatedRepeatingCallableFuture<V> wrapper = new RatedRepeatingCallableFuture<V>(this, task, repetitions);
+        RatedRepeatingFuture<V> wrapper = new RatedRepeatingFuture<V>(this, task, repetitions);
         synchronized (this)
         {
             if (stoppingTask != null)
@@ -298,18 +298,18 @@ public class RatedExecutor implements IRatedExecutor
     /*package*/ boolean cancelTask(TaskWrapper wrapper, boolean mayInterruptIfRunning)
     {
         if (executingTask == wrapper)
+        {
+            if (mayInterruptIfRunning)
             {
-                if (mayInterruptIfRunning)
-                {
-                    // TODO: interrupt
-                    return false;
-                }
-                else
-                {
-                    return false;
-                }
+                // TODO: interrupt
+                return false;
             }
-            taskQueue.remove(wrapper);
-            return true;
+            else
+            {
+                return false;
+            }
+        }
+        taskQueue.remove(wrapper);
+        return true;
     }
 }

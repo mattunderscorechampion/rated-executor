@@ -25,30 +25,96 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.rated.executor;
 
+import java.util.concurrent.Callable;
+
 /**
- * A {@link SingleFuture} for the {@link RatedExecutor}.
+ * A complete {@link SingleFuture} for the {@link RatedExecutor}.
  * <P>
- * Subclasses provide support for {@link Callable} or {@link Runnable} objects.
+ * Supports both {@link Runnable} and {@link Callable} tasks. 
+ *
  * @author Matt Champion
- * @param <T>
+ * @param <V>
  * @since 0.1.0
  */
-/*package*/ abstract class RatedSingleFuture<T> extends SingleFuture<T> implements TaskWrapper
+/*package*/ final class RatedSingleFuture<V> extends SingleFuture<V> implements TaskWrapper
 {
     /**
      * The executor the future belongs to.
      */
     private final RatedExecutor ratedExecutor;
+    /**
+     * The callable task
+     */
+    private final Callable<V> callableTask;
+    /**
+     * The runnable task
+     */
+    private final Runnable runnableTask;
 
-    public RatedSingleFuture(RatedExecutor ratedExecutor)
+    /**
+     * Constructor for a Rated Single Future from a runnable task.
+     * @param ratedExecutor The rated executor
+     * @param runnableTask The task
+     */
+    public RatedSingleFuture(final RatedExecutor ratedExecutor, final Runnable task)
     {
         super();
         this.ratedExecutor = ratedExecutor;
+        this.runnableTask = task;
+        this.callableTask = null;
+    }
+
+    /**
+     * Constructor for a Rated Single Future from a runnable task.
+     * @param ratedExecutor The rated executor
+     * @param runnableTask The task
+     */
+    public RatedSingleFuture(final RatedExecutor ratedExecutor, final Callable<V> task)
+    {
+        super();
+        this.ratedExecutor = ratedExecutor;
+        this.callableTask = task;
+        this.runnableTask = null;
     }
 
     @Override
     protected boolean performCancellation(boolean mayInterruptIfRunning)
     {
         return ratedExecutor.cancelTask(this,mayInterruptIfRunning);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        if (runnableTask == null)
+        {
+            return callableTask.hashCode();
+        }
+        else
+        {
+            return runnableTask.hashCode();
+        }
+    }
+
+    @Override
+    public void execute()
+    {
+        try
+        {
+            if (runnableTask == null)
+            {
+                V result = callableTask.call();
+                setResult(result);
+            }
+            else
+            {
+                runnableTask.run();
+                setResult(null);
+            }
+        }
+        catch (Throwable t)
+        {
+            setException(t);
+        }
     }
 }

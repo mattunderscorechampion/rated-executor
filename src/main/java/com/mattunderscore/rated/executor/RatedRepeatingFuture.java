@@ -25,30 +25,98 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.rated.executor;
 
+import java.util.concurrent.Callable;
+
 /**
- * A {@link RepeatingFuture} for the {@link RatedExecutor}.
+ * A complete {@link RepeatingFuture} for the {@link RatedExecutor}.
  * <P>
- * Subclasses provide support for {@link Callable} or {@link Runnable} objects.
+ * Supports both {@link Runnable} and {@link Callable} tasks. 
+ * 
  * @author Matt Champion
- * @param <T>
+ * @param <V>
  * @since 0.1.0
  */
-/*package*/ abstract class RatedRepeatingFuture<T> extends RepeatingFuture<T> implements TaskWrapper
+/*package*/ final class RatedRepeatingFuture<V> extends RepeatingFuture<V> implements TaskWrapper
 {
     /**
      * The executor the future belongs to.
      */
     private final RatedExecutor ratedExecutor;
+    /**
+     * The callable task
+     */
+    private final Callable<V> callableTask;
+    /**
+     * The runnable task
+     */
+    private final Runnable runnableTask;
 
-    public RatedRepeatingFuture(RatedExecutor ratedExecutor, int repetitions)
+    /**
+     * Constructor for a Rated Repeating Future from a runnable task.
+     * @param ratedExecutor The rated executor
+     * @param runnableTask The task
+     * @param repetitions The number of repetitions
+     */
+    public RatedRepeatingFuture(final RatedExecutor ratedExecutor, final Runnable runnableTask, final int repetitions)
     {
         super(repetitions);
         this.ratedExecutor = ratedExecutor;
+        this.runnableTask = runnableTask;
+        this.callableTask = null;
+    }
+
+    /**
+     * Constructor for a Rated Repeating Future from a callable task. 
+     * @param ratedExecutor The rated executor
+     * @param callableTask The task
+     * @param repetitions The number of repetitions
+     */
+    public RatedRepeatingFuture(final RatedExecutor ratedExecutor, final Callable<V> callableTask, final int repetitions)
+    {
+        super(repetitions);
+        this.ratedExecutor = ratedExecutor;
+        this.callableTask = callableTask;
+        this.runnableTask = null;
     }
 
     @Override
     protected boolean performCancellation(boolean mayInterruptIfRunning)
     {
         return ratedExecutor.cancelTask(this,mayInterruptIfRunning);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        if (runnableTask == null)
+        {
+            return callableTask.hashCode();
+        }
+        else
+        {
+            return runnableTask.hashCode();
+        }
+    }
+
+    @Override
+    public void execute()
+    {
+        try
+        {
+            if (runnableTask == null)
+            {
+                V result = callableTask.call();
+                setResult(result);
+            }
+            else
+            {
+                runnableTask.run();
+                setResult(null);
+            }
+        }
+        catch (Throwable t)
+        {
+            setException(t);
+        }
     }
 }
