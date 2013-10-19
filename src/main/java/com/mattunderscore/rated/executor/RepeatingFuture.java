@@ -158,7 +158,7 @@ import java.util.concurrent.TimeoutException;
     @Override
     protected TaskExecutionResult<V> getResult()
     {
-        return getStoredResult(results.size());
+        return getStoredResult(results.size()-1);
     }
 
     /**
