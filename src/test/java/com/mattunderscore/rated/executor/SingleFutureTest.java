@@ -30,10 +30,16 @@ import static org.mockito.Mockito.*;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Matchers;
+
+import com.google.code.tempusfugit.concurrency.IntermittentTestRunner;
+import com.google.code.tempusfugit.concurrency.annotations.Intermittent;
 
 /**
  * Test suite for the SingleFuture class.
@@ -43,8 +49,14 @@ import org.mockito.Matchers;
  * @author Matt Champion
  * @since 0.1.0
  */
+@RunWith(IntermittentTestRunner.class)
 public final class SingleFutureTest
 {
+    private static final int REPETITIONS = 50;
+    private static final long TIMEOUT = 200L;
+    private static final long TIMEOUT_MAX = 204L;
+    private static final long M_2_N = 1000L * 1000L;
+
     private TaskCanceller canceller;
 
     @Before
@@ -54,12 +66,12 @@ public final class SingleFutureTest
     }
 
     // Test setting of the cancellation flag
-    // This is based on the result of the Executor cancelTask method
+    // This is based on the result of the TaskCanceller cancelTask method
 
     @Test
     public void testIsCancelled0()
     {
-        SingleFuture<Object> future = new SingleFuture<Object>(canceller);
+        final SingleFuture<Object> future = new SingleFuture<Object>(canceller);
         new RunnableTaskWrapper(new CountingTask(),future);
         assertFalse(future.isCancelled());
     }
@@ -208,6 +220,8 @@ public final class SingleFutureTest
         assertFalse(cancelled1);
     }
 
+    // Test setting the done flag
+
     @Test
     public void testIsDone0()
     {
@@ -259,6 +273,8 @@ public final class SingleFutureTest
         task.execute();
         assertTrue(future.isDone());
     }
+
+    // Test getting the result
 
     @Test
     public void testGet0() throws CancellationException, InterruptedException, ExecutionException
@@ -318,5 +334,49 @@ public final class SingleFutureTest
         TaskWrapper task = new CallableTaskWrapper<Object>(new ExceptionCallable(),future);
         task.execute();
         future.get();
+    }
+
+    @Test(expected = TimeoutException.class)
+    @Intermittent(repetition = REPETITIONS)
+    public void testTimeout0() throws Throwable
+    {
+        long start = System.nanoTime();
+        try
+        {
+            SingleFuture<Object> future = new SingleFuture<Object>(canceller);
+            new RunnableTaskWrapper(new CountingTask(),future);
+            start = System.nanoTime();
+            future.get(TIMEOUT, TimeUnit.MILLISECONDS);
+        }
+        catch (Throwable t)
+        {
+            long end = System.nanoTime();
+            long time = end - start;
+            System.out.println("Time: " + time + " Target:" + (TIMEOUT * M_2_N) + " Max: " + (TIMEOUT_MAX * M_2_N));
+            assertTrue(time < (TIMEOUT_MAX * M_2_N));
+            throw t;
+        }
+    }
+
+    @Test(expected = TimeoutException.class)
+    @Intermittent(repetition = REPETITIONS)
+    public void testTimeout1() throws Throwable
+    {
+        long start = System.nanoTime();
+        try
+        {
+            SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
+            new CallableTaskWrapper<Integer>(new NumberCallable(5),future);
+            start = System.nanoTime();
+            future.get(TIMEOUT, TimeUnit.MILLISECONDS);
+        }
+        catch (Throwable t)
+        {
+            long end = System.nanoTime();
+            long time = end - start;
+            System.out.println("Time: " + time + " Target:" + (TIMEOUT * M_2_N) + " Max: " + (TIMEOUT_MAX * M_2_N));
+            assertTrue(time < (TIMEOUT_MAX * M_2_N));
+            throw t;
+        }
     }
 }
