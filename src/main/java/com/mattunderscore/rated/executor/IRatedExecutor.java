@@ -35,6 +35,13 @@ import java.util.concurrent.Future;
  * Tasks, both {@link Runnable} and {@link Callable}, can be submitted for execution.
  * {@link Runnable} tasks can also be scheduled for repeated execution. Rated executors should not
  * execute tasks more frequently than a fixed rate.
+ * <P>
+ * When a {@link Runnable} or {@link Callable} task is submitted it is placed on a queue. Tasks will
+ * be removed from the queue at a fixed rate. A repeating task will be placed back on the queue when
+ * complete. If a single repeating task is submitted it will be executed at an interval equal to the
+ * rate of the executor. If two repeating tasks are submitted to the executor each task will execute
+ * at an interval twice the executor rate and their execution will be separated from each other by
+ * an interval equal to the rate of the executor.
  * 
  * @author Matt Champion
  * @since 0.0.1

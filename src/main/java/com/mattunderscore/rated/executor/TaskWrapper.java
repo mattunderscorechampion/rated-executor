@@ -42,4 +42,10 @@ import java.lang.Runnable;
      * Execute the task and set the result of the future.
      */
     public void execute();
+
+    /**
+     * Get the future for this task.
+     * @return The future for the task
+     */
+    public Future<?> getFuture();
 }

@@ -55,4 +55,10 @@ import java.util.concurrent.Future;
      *            The execution thrown by the execution
      */
     public void setException(Throwable result);
+
+    /**
+     * Set the task
+     * @param wrapper TaskWrapper for task of the future
+     */
+    public void setTask(TaskWrapper wrapper);
 }

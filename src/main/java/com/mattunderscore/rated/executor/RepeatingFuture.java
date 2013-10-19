@@ -46,11 +46,13 @@ import java.util.concurrent.TimeoutException;
  *            The type of object returned by {@link #get()}
  * @since 0.1.0
  */
-/* package */abstract class RepeatingFuture<V> extends BaseFuture<V> implements IRepeatingFuture<V>
+/* package */ final class RepeatingFuture<V> extends BaseFuture<V> implements IRepeatingFuture<V>
 {
     private final List<TaskExecutionResult<V>> results = new ArrayList<TaskExecutionResult<V>>();
     private final int repetitions;
     private final CountDownLatch[] latches;
+    private final TaskCanceller canceller;
+    private TaskWrapper task;
     private int cancellationPoint = -1;
 
     /**
@@ -59,8 +61,9 @@ import java.util.concurrent.TimeoutException;
      * @param repetitions
      *            The number of times it is to repeat
      */
-    public RepeatingFuture(final int repetitions)
+    public RepeatingFuture(final TaskCanceller canceller, final int repetitions)
     {
+        this.canceller = canceller;
         this.repetitions = repetitions;
         latches = new CountDownLatch[repetitions];
         for (int i = 0; i < repetitions; i++)
@@ -130,7 +133,7 @@ import java.util.concurrent.TimeoutException;
         {
             latches[i].countDown();
         }
-        final boolean cancelled = performCancellation(mayInterruptIfRunning);
+        final boolean cancelled = canceller.cancelTask(task, mayInterruptIfRunning);
         return cancelled;
     }
 
@@ -170,5 +173,9 @@ import java.util.concurrent.TimeoutException;
         return results.get(index);
     }
 
-    protected abstract boolean performCancellation(final boolean mayInterruptIfRunning);
+    @Override
+    public void setTask(TaskWrapper wrapper)
+    {
+        this.task = wrapper;
+    }
 }

@@ -3,12 +3,12 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
+    * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
+    * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
- * Neither the name of mattunderscore.com nor the
+    * Neither the name of mattunderscore.com nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -25,49 +25,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.rated.executor;
 
-import java.util.concurrent.ExecutionException;
-
-import net.jcip.annotations.Immutable;
-
 /**
- * Wrap the result of a task execution into a single object.
- * <P>
- * The result of a task execution is either an object or an exception. This will wrap the exception
- * in a {@link ExecutionException}. This is a tuple, it is to make storage of the result easier.
  * 
  * @author Matt Champion
- * @param <V> The type of object returned by the task
  * @since 0.1.0
  */
-@Immutable
-/*package*/ final class TaskExecutionResult<V>
+/*package*/ interface TaskCanceller
 {
     /**
-     * The result of the execution.
+     * Cancel the task passed in.
+     * @param wrapper The task to cancel
+     * @param mayInterruptIfRunning Interrupt the thread if running
+     * @return Was the task cancelled
      */
-    public final V result;
-    /**
-     * The execution thrown by the execution wrapped in an {@link ExecutionException}.
-     */
-    public final ExecutionException exception;
-
-    /**
-     * Create a result from an exception.
-     * @param result The execution thrown by the execution
-     */
-    public TaskExecutionResult(Throwable t)
-    {
-        this.result = null;
-        this.exception = new ExecutionException(t);
-    }
-
-    /**
-     * Create a result from an object.
-     * @param result The result of the execution
-     */
-    public TaskExecutionResult(V result)
-    {
-        this.result = result;
-        this.exception = null;
-    }
+    public boolean cancelTask(TaskWrapper wrapper, boolean mayInterruptIfRunning);
 }

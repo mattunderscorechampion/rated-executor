@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  * @param <V> Type of object returned by the {@link #get()} method
  * @since 0.1.0
  */
-/*package*/ abstract class SingleFuture<V> extends BaseFuture<V>
+/*package*/ final class SingleFuture<V> extends BaseFuture<V>
 {
     /**
      * Has the task completed
@@ -49,7 +49,15 @@ import java.util.concurrent.TimeUnit;
     /**
      * Latch to block access to the result
      */
-    private final CountDownLatch latch = new CountDownLatch(1);
+    private final CountDownLatch latch;
+    private final TaskCanceller canceller;
+    private TaskWrapper task;
+    
+    public SingleFuture(final TaskCanceller canceller)
+    {
+        latch = new CountDownLatch(1);
+        this.canceller = canceller;
+    }
     
     @Override
     protected void processResult(TaskExecutionResult<V> result)
@@ -62,7 +70,7 @@ import java.util.concurrent.TimeUnit;
     @Override
     protected boolean processCancellation(boolean mayInterruptIfRunning)
     {
-        final boolean cancelled = performCancellation(mayInterruptIfRunning);
+        final boolean cancelled = canceller.cancelTask(task, mayInterruptIfRunning);
         latch.countDown();
         return cancelled;
     }
@@ -91,5 +99,9 @@ import java.util.concurrent.TimeUnit;
         return result;
     }
 
-    protected abstract boolean performCancellation(final boolean mayInterruptIfRunning);
+    @Override
+    public void setTask(TaskWrapper wrapper)
+    {
+        task = wrapper;
+    }
 }

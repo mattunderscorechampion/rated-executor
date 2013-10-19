@@ -25,22 +25,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.rated.executor;
 
-/**
- * Complete {@link Future} and {@link TaskWrapper} for unbounded {@link Runnable} tasks submitted
- * to the {@link RatedExecutor}.
- * @author Matt Champion
- * @since 0.1.0
- */
-/*package*/ final class RatedUnboundedFuture extends UnboundedFuture
-{
-    private final RatedExecutor ratedExecutor;
-    private final Runnable task;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
-    public RatedUnboundedFuture(RatedExecutor ratedExecutor, final Runnable task)
+/*package*/ final class CallableTaskWrapper<V> implements TaskWrapper
+{
+    private final Callable<V> task;
+    private final ISettableFuture<V> future;
+
+    public CallableTaskWrapper(final Callable<V> task, final ISettableFuture<V> future)
     {
-        super();
-        this.ratedExecutor = ratedExecutor;
         this.task = task;
+        this.future = future;
+        this.future.setTask(this);
     }
 
     @Override
@@ -48,18 +45,30 @@ package com.mattunderscore.rated.executor;
     {
         try
         {
-            task.run();
+            V result = task.call();
+            future.setResult(result);
         }
         catch (Throwable t)
         {
-            setException(t);
+            future.setException(t);
         }
+    }
+    
+    @Override
+    public int hashCode()
+    {
+        return task.hashCode();
     }
 
     @Override
-    protected boolean performCancellation(boolean mayInterruptIfRunning)
+    public boolean equals(Object object)
     {
-        return ratedExecutor.cancelTask(this,mayInterruptIfRunning);
+        return this == object;
     }
-    
+
+    @Override
+    public Future<?> getFuture()
+    {
+        return future;
+    }
 }

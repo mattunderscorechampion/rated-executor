@@ -16,4 +16,4 @@ Futures are returned that allow the result of the execution to be retrieved. The
 
 The execute and submit methods schedule the task to be executed once. The difference between them is that execute does not return a future. The schedule methods can be used to repeatedly execute the same task. The schedule method is overloaded so that it can take an optional integer parameter that specifies the number of times to execute the task.
 
-
+RatedExecutors can be constructed by using the static methods in the RatedExecutors class.

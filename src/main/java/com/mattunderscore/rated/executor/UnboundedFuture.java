@@ -39,10 +39,17 @@ import java.util.concurrent.TimeUnit;
  * @author Matt Champion
  * @since 0.1.0
  */
-/* package */ abstract class UnboundedFuture extends BaseFuture<Object>
+/* package */ final class UnboundedFuture extends BaseFuture<Object>
 {
+    private final TaskCanceller canceller;
     private CountDownLatch latch = new CountDownLatch(1);
     private volatile TaskExecutionResult<Object> result;
+    private TaskWrapper task;
+
+    public UnboundedFuture(final TaskCanceller canceller)
+    {
+        this.canceller = canceller;
+    }
 
     @Override
     protected void processResult(TaskExecutionResult<Object> result)
@@ -54,7 +61,7 @@ import java.util.concurrent.TimeUnit;
     @Override
     protected boolean processCancellation(boolean mayInterruptIfRunning)
     {
-        final boolean cancelled = performCancellation(mayInterruptIfRunning);
+        final boolean cancelled = canceller.cancelTask(task, mayInterruptIfRunning);
         latch.countDown();
         return cancelled;
     }
@@ -84,5 +91,9 @@ import java.util.concurrent.TimeUnit;
         return this.result;
     }
 
-    protected abstract boolean performCancellation(final boolean mayInterruptIfRunning);
+    @Override
+    public void setTask(TaskWrapper wrapper)
+    {
+        this.task = wrapper;
+    }
 }

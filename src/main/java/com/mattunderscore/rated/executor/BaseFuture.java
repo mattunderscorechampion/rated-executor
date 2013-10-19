@@ -50,7 +50,7 @@ import java.util.concurrent.TimeoutException;
  *            Type of the value returned by {{@link #get()}.
  * @since 0.1.0
  */
-/* package */abstract class BaseFuture<V> implements ISettableFuture<V>, TaskWrapper
+/* package */ abstract class BaseFuture<V> implements ISettableFuture<V>
 {
     /**
      * Has the cancelled task been cancelled.

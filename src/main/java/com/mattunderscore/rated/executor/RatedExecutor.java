@@ -35,6 +35,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import org.javatuples.Pair;
+
 /**
  * A rated executor, it will execute tasks at a fixed rate.
  * <P>
@@ -49,14 +51,14 @@ import java.util.concurrent.TimeUnit;
  * @author Matt Champion
  * @since 0.0.1
  */
-public class RatedExecutor implements IRatedExecutor
+/* package */ final class RatedExecutor implements IRatedExecutor, TaskCanceller
 {
     private final ScheduledExecutorService service;
     private final long rate;
     private final TimeUnit unit;
     private ScheduledFuture<?> thisTask;
     private ScheduledFuture<?> stoppingTask;
-    private Queue<BaseFuture<?>> taskQueue;
+    private Queue<TaskWrapper> taskQueue;
     private volatile boolean running;
     private volatile TaskWrapper executingTask;
 
@@ -73,7 +75,7 @@ public class RatedExecutor implements IRatedExecutor
         this.service = Executors.newSingleThreadScheduledExecutor();
         this.rate = rate;
         this.unit = unit;
-        this.taskQueue = new LinkedBlockingQueue<BaseFuture<?>>();
+        this.taskQueue = new LinkedBlockingQueue<TaskWrapper>();
         this.running = false;
     }
 
@@ -94,7 +96,7 @@ public class RatedExecutor implements IRatedExecutor
         this.service = Executors.newSingleThreadScheduledExecutor(threadFactory);
         this.rate = period;
         this.unit = unit;
-        this.taskQueue = new LinkedBlockingQueue<BaseFuture<?>>();
+        this.taskQueue = new LinkedBlockingQueue<TaskWrapper>();
         this.running = false;
     }
 
@@ -113,7 +115,8 @@ public class RatedExecutor implements IRatedExecutor
     @Override
     public Future<?> submit(final Runnable task)
     {
-        RatedSingleFuture<Object> wrapper = new RatedSingleFuture<Object>(this, task);
+        SingleFuture<Object> future = new SingleFuture<Object>(this);
+        RunnableTaskWrapper wrapper = new RunnableTaskWrapper(task, future);
         synchronized (this)
         {
             if (stoppingTask != null)
@@ -126,7 +129,7 @@ public class RatedExecutor implements IRatedExecutor
                 start();
             }
         }
-        return wrapper;
+        return future;
     }
 
     /**
@@ -135,7 +138,9 @@ public class RatedExecutor implements IRatedExecutor
     @Override
     public <V> Future<V> submit(final Callable<V> task)
     {
-        RatedSingleFuture<V> wrapper = new RatedSingleFuture<V>(this, task);
+        Pair<TaskWrapper, Future<V>> tuple = RatedExecutors.createTaskAndFuture(this, task);
+        Future<V> future = tuple.getValue1();
+        TaskWrapper wrapper = tuple.getValue0();
         synchronized (this)
         {
             if (stoppingTask != null)
@@ -148,7 +153,7 @@ public class RatedExecutor implements IRatedExecutor
                 start();
             }
         }
-        return wrapper;
+        return future;
     }
 
     /**
@@ -157,7 +162,9 @@ public class RatedExecutor implements IRatedExecutor
     @Override
     public Future<?> schedule(final Runnable task)
     {
-        RatedUnboundedFuture wrapper = new RatedUnboundedFuture(this, task);
+        Pair<TaskWrapper, Future<Object>> tuple = RatedExecutors.createTaskAndUnboundedFuture(this, task);
+        Future<Object> future = tuple.getValue1();
+        TaskWrapper wrapper = tuple.getValue0();
         synchronized (this)
         {
             if (stoppingTask != null)
@@ -170,7 +177,7 @@ public class RatedExecutor implements IRatedExecutor
                 start();
             }
         }
-        return wrapper;
+        return future;
     }
 
     /**
@@ -179,7 +186,10 @@ public class RatedExecutor implements IRatedExecutor
     @Override
     public Future<?> schedule(final Runnable task, final int repetitions)
     {
-        RatedRepeatingFuture<Object> wrapper = new RatedRepeatingFuture<Object>(this, task, repetitions);
+        Pair<TaskWrapper, Future<Object>> tuple = RatedExecutors.createTaskAndFuture(this, task,
+                repetitions);
+        Future<Object> future = tuple.getValue1();
+        TaskWrapper wrapper = tuple.getValue0();
         synchronized (this)
         {
             if (stoppingTask != null)
@@ -192,16 +202,19 @@ public class RatedExecutor implements IRatedExecutor
                 start();
             }
         }
-        return wrapper;
+        return future;
     }
 
     /**
-     * @see com.mattunderscore.rated.executor.IRatedExecutor#schedule(java.util.concurrent.Callable, int)
+     * @see com.mattunderscore.rated.executor.IRatedExecutor#schedule(java.util.concurrent.Callable,
+     *      int)
      */
     @Override
     public <V> IRepeatingFuture<V> schedule(final Callable<V> task, final int repetitions)
     {
-        RatedRepeatingFuture<V> wrapper = new RatedRepeatingFuture<V>(this, task, repetitions);
+        Pair<TaskWrapper, IRepeatingFuture<V>> tuple = RatedExecutors.createTaskAndFuture(this, task, repetitions);
+        IRepeatingFuture<V> future = tuple.getValue1();
+        TaskWrapper wrapper = tuple.getValue0();
         synchronized (this)
         {
             if (stoppingTask != null)
@@ -214,7 +227,7 @@ public class RatedExecutor implements IRatedExecutor
                 start();
             }
         }
-        return wrapper;
+        return future;
     }
 
     /**
@@ -243,7 +256,7 @@ public class RatedExecutor implements IRatedExecutor
         @Override
         public void run()
         {
-            BaseFuture<?> taskWrapper = taskQueue.poll();
+            TaskWrapper taskWrapper = taskQueue.poll();
             if (taskWrapper == null)
             {
                 return;
@@ -251,7 +264,7 @@ public class RatedExecutor implements IRatedExecutor
             executingTask = taskWrapper;
             taskWrapper.execute();
             executingTask = null;
-            if (!taskWrapper.isDone())
+            if (!taskWrapper.getFuture().isDone())
             {
                 taskQueue.add(taskWrapper);
             }
@@ -289,13 +302,8 @@ public class RatedExecutor implements IRatedExecutor
         }
     }
 
-    /**
-     * Cancel the task passed in.
-     * @param wrapper The task to cancel
-     * @param mayInterruptIfRunning Interrupt the thread if running
-     * @return Was the task cancelled
-     */
-    /*package*/ boolean cancelTask(TaskWrapper wrapper, boolean mayInterruptIfRunning)
+    @Override
+    public boolean cancelTask(TaskWrapper wrapper, boolean mayInterruptIfRunning)
     {
         if (executingTask == wrapper)
         {
