@@ -44,7 +44,7 @@ import com.google.code.tempusfugit.concurrency.annotations.Intermittent;
 /**
  * Test suite for the SingleFuture class.
  * <P>
- * Contains unit tests. It uses stubs for the tasks and mocks the executor.
+ * Contains unit tests. It uses stubs for the tasks and mocks the task canceller.
  * 
  * @author Matt Champion
  * @since 0.1.0
@@ -294,7 +294,6 @@ public final class SingleFutureTest
         new RunnableTaskWrapper(new CountingTask(),future);
         future.cancel(false);
         future.get();
-
     }
 
     @Test(expected = ExecutionException.class)
