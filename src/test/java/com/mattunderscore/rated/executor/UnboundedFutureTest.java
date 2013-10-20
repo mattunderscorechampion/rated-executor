@@ -36,6 +36,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 
+import com.mattunderscore.rated.executor.stubs.CountingTask;
+import com.mattunderscore.rated.executor.stubs.ExceptionTask;
+
 /**
  * Test suite for the {@link UnboundedFuture} class.
  * <P>

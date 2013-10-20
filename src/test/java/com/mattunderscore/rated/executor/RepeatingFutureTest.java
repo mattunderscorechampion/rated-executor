@@ -36,6 +36,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 
+import com.mattunderscore.rated.executor.stubs.CountingCallable;
+import com.mattunderscore.rated.executor.stubs.CountingTask;
+import com.mattunderscore.rated.executor.stubs.ExceptionCallable;
+import com.mattunderscore.rated.executor.stubs.ExceptionTask;
+import com.mattunderscore.rated.executor.stubs.NumberCallable;
+
 /**
  * Test suite for the {@link RepeatingFuture} class.
  * <P>

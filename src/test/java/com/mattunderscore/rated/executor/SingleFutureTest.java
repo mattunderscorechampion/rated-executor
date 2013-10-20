@@ -40,6 +40,10 @@ import org.mockito.Matchers;
 
 import com.google.code.tempusfugit.concurrency.IntermittentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Intermittent;
+import com.mattunderscore.rated.executor.stubs.CountingTask;
+import com.mattunderscore.rated.executor.stubs.ExceptionCallable;
+import com.mattunderscore.rated.executor.stubs.ExceptionTask;
+import com.mattunderscore.rated.executor.stubs.NumberCallable;
 
 /**
  * Test suite for the {@link SingleFuture} class.
