@@ -37,7 +37,7 @@ import org.junit.Test;
 import org.mockito.Matchers;
 
 /**
- * Test suite for the SingleFuture class.
+ * Test suite for the {@link RepeatingFuture} class.
  * <P>
  * Contains unit tests. It uses stubs for the tasks and mocks the executor.
  * 

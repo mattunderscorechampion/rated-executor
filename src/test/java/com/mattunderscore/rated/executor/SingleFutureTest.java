@@ -42,7 +42,7 @@ import com.google.code.tempusfugit.concurrency.IntermittentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Intermittent;
 
 /**
- * Test suite for the SingleFuture class.
+ * Test suite for the {@link SingleFuture} class.
  * <P>
  * Contains unit tests. It uses stubs for the tasks and mocks the task canceller.
  * 
