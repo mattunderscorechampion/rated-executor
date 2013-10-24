@@ -23,7 +23,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.mattunderscore.rated.executor;
+package com.mattunderscore.executors;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -36,7 +36,7 @@ import java.lang.Runnable;
  * @author Matt Champion
  * @since 0.1.0
  */
-/*package*/ interface TaskWrapper
+public interface TaskWrapper
 {
     /**
      * Execute the task and set the result of the future.

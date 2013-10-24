@@ -37,6 +37,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.javatuples.Pair;
 
+import com.mattunderscore.executors.IRepeatingFuture;
+import com.mattunderscore.executors.RunnableTaskWrapper;
+import com.mattunderscore.executors.SingleFuture;
+import com.mattunderscore.executors.TaskCanceller;
+import com.mattunderscore.executors.TaskWrapper;
+
 /**
  * A rated executor, it will execute tasks at a fixed rate.
  * <P>

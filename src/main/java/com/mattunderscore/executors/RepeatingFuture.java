@@ -23,7 +23,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.mattunderscore.rated.executor;
+package com.mattunderscore.executors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +46,7 @@ import java.util.concurrent.TimeoutException;
  *            The type of object returned by {@link #get()}
  * @since 0.1.0
  */
-/* package */ final class RepeatingFuture<V> extends BaseFuture<V> implements IRepeatingFuture<V>
+public final class RepeatingFuture<V> extends BaseFuture<V> implements IRepeatingFuture<V>
 {
     private final List<TaskExecutionResult<V>> results = new ArrayList<TaskExecutionResult<V>>();
     private final int repetitions;

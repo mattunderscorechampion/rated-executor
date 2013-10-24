@@ -23,12 +23,12 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.mattunderscore.rated.executor;
+package com.mattunderscore.executors;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-/*package*/ final class CallableTaskWrapper<V> implements TaskWrapper
+public final class CallableTaskWrapper<V> implements TaskWrapper
 {
     private final Callable<V> task;
     private final ISettableFuture<V> future;

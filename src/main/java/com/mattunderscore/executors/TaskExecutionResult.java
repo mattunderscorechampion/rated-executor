@@ -23,7 +23,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.mattunderscore.rated.executor;
+package com.mattunderscore.executors;
 
 import java.util.concurrent.ExecutionException;
 
@@ -40,7 +40,7 @@ import net.jcip.annotations.Immutable;
  * @since 0.1.0
  */
 @Immutable
-/*package*/ final class TaskExecutionResult<V>
+public final class TaskExecutionResult<V>
 {
     /**
      * The result of the execution.

@@ -3,12 +3,12 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
+    * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
+    * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
- * Neither the name of mattunderscore.com nor the
+    * Neither the name of mattunderscore.com nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -23,42 +23,21 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.mattunderscore.rated.executor;
+package com.mattunderscore.executors;
 
-import java.util.concurrent.Future;
 
 /**
- * Interface that allows the result of a future to be set.
- * <P>
- * The setters names are different because it is not possible to rely on parameter overloading as it
- * is possible to return an exception as the result of a {@link Callable}.
  * 
  * @author Matt Champion
- * @param <V>
- *            The type of object returned by the task
  * @since 0.1.0
  */
-/* package */interface ISettableFuture<V> extends Future<V>
+public interface TaskCanceller
 {
     /**
-     * Set the result of the task execution.
-     * 
-     * @param result
-     *            The result of the execution
+     * Cancel the task passed in.
+     * @param wrapper The task to cancel
+     * @param mayInterruptIfRunning Interrupt the thread if running
+     * @return Was the task cancelled
      */
-    public void setResult(V result);
-
-    /**
-     * Set the result of the task execution.
-     * 
-     * @param result
-     *            The execution thrown by the execution
-     */
-    public void setException(Throwable result);
-
-    /**
-     * Set the task
-     * @param wrapper TaskWrapper for task of the future
-     */
-    public void setTask(TaskWrapper wrapper);
+    public boolean cancelTask(TaskWrapper wrapper, boolean mayInterruptIfRunning);
 }

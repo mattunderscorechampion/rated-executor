@@ -40,6 +40,11 @@ import org.mockito.Matchers;
 
 import com.google.code.tempusfugit.concurrency.IntermittentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Intermittent;
+import com.mattunderscore.executors.CallableTaskWrapper;
+import com.mattunderscore.executors.RunnableTaskWrapper;
+import com.mattunderscore.executors.SingleFuture;
+import com.mattunderscore.executors.TaskCanceller;
+import com.mattunderscore.executors.TaskWrapper;
 import com.mattunderscore.rated.executor.stubs.CountingTask;
 import com.mattunderscore.rated.executor.stubs.ExceptionCallable;
 import com.mattunderscore.rated.executor.stubs.ExceptionTask;

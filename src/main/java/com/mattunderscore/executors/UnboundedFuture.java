@@ -23,7 +23,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.mattunderscore.rated.executor;
+package com.mattunderscore.executors;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
  * @author Matt Champion
  * @since 0.1.0
  */
-/* package */ final class UnboundedFuture extends BaseFuture<Object>
+public final class UnboundedFuture extends BaseFuture<Object>
 {
     private final TaskCanceller canceller;
     private CountDownLatch latch = new CountDownLatch(1);

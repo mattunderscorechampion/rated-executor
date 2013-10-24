@@ -29,6 +29,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
+import com.mattunderscore.executors.IRepeatingFuture;
+
 /**
  * Interface for rated executors, it will execute tasks at a fixed rate.
  * <P>

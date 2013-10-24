@@ -36,6 +36,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 
+import com.mattunderscore.executors.CallableTaskWrapper;
+import com.mattunderscore.executors.RepeatingFuture;
+import com.mattunderscore.executors.RunnableTaskWrapper;
+import com.mattunderscore.executors.TaskCanceller;
+import com.mattunderscore.executors.TaskWrapper;
 import com.mattunderscore.rated.executor.stubs.CountingCallable;
 import com.mattunderscore.rated.executor.stubs.CountingTask;
 import com.mattunderscore.rated.executor.stubs.ExceptionCallable;
