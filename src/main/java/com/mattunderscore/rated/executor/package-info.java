@@ -25,5 +25,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 /**
  * Executors that will not execute tasks faster than some rate.
+ * @author Matt Champion
  */
 package com.mattunderscore.rated.executor;
