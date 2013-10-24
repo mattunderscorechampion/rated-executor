@@ -60,5 +60,5 @@ public interface ISettableFuture<V> extends Future<V>
      * Set the task
      * @param wrapper TaskWrapper for task of the future
      */
-    public void setTask(TaskWrapper wrapper);
+    public void setTask(ITaskWrapper wrapper);
 }

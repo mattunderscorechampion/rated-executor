@@ -38,8 +38,8 @@ import com.mattunderscore.executors.ISettableFuture;
 import com.mattunderscore.executors.RepeatingFuture;
 import com.mattunderscore.executors.RunnableTaskWrapper;
 import com.mattunderscore.executors.SingleFuture;
-import com.mattunderscore.executors.TaskCanceller;
-import com.mattunderscore.executors.TaskWrapper;
+import com.mattunderscore.executors.ITaskCanceller;
+import com.mattunderscore.executors.ITaskWrapper;
 import com.mattunderscore.executors.UnboundedFuture;
 
 /**
@@ -104,12 +104,12 @@ public final class RatedExecutors
      * @param task
      * @return Tuple of task wrapper and future
      */
-    /* package */static Pair<TaskWrapper, Future<Object>> createTaskAndFuture(
-            final TaskCanceller canceller, final Runnable task)
+    /* package */static Pair<ITaskWrapper, Future<Object>> createTaskAndFuture(
+            final ITaskCanceller canceller, final Runnable task)
     {
         ISettableFuture<Object> future = new SingleFuture<Object>(canceller);
-        TaskWrapper wrapper = new RunnableTaskWrapper(task, future);
-        return Pair.<TaskWrapper, Future<Object>> with(wrapper, future);
+        ITaskWrapper wrapper = new RunnableTaskWrapper(task, future);
+        return Pair.<ITaskWrapper, Future<Object>> with(wrapper, future);
     }
 
     /**
@@ -122,12 +122,12 @@ public final class RatedExecutors
      * @param task
      * @return Tuple of task wrapper and future
      */
-    /* package */static <V> Pair<TaskWrapper, Future<V>> createTaskAndFuture(
-            final TaskCanceller canceller, final Callable<V> task)
+    /* package */static <V> Pair<ITaskWrapper, Future<V>> createTaskAndFuture(
+            final ITaskCanceller canceller, final Callable<V> task)
     {
         ISettableFuture<V> future = new SingleFuture<V>(canceller);
-        TaskWrapper wrapper = new CallableTaskWrapper<V>(task, future);
-        return Pair.<TaskWrapper, Future<V>> with(wrapper, future);
+        ITaskWrapper wrapper = new CallableTaskWrapper<V>(task, future);
+        return Pair.<ITaskWrapper, Future<V>> with(wrapper, future);
     }
 
     /**
@@ -140,12 +140,12 @@ public final class RatedExecutors
      * @param task
      * @return Tuple of task wrapper and future
      */
-    /* package */static Pair<TaskWrapper, Future<Object>> createTaskAndFuture(
-            final TaskCanceller canceller, final Runnable task, final int repetitions)
+    /* package */static Pair<ITaskWrapper, Future<Object>> createTaskAndFuture(
+            final ITaskCanceller canceller, final Runnable task, final int repetitions)
     {
         ISettableFuture<Object> future = new RepeatingFuture<Object>(canceller, repetitions);
-        TaskWrapper wrapper = new RunnableTaskWrapper(task, future);
-        return Pair.<TaskWrapper, Future<Object>> with(wrapper, future);
+        ITaskWrapper wrapper = new RunnableTaskWrapper(task, future);
+        return Pair.<ITaskWrapper, Future<Object>> with(wrapper, future);
     }
 
     /**
@@ -158,12 +158,12 @@ public final class RatedExecutors
      * @param task
      * @return Tuple of task wrapper and future
      */
-    /* package */static <V> Pair<TaskWrapper, IRepeatingFuture<V>> createTaskAndFuture(
-            final TaskCanceller canceller, final Callable<V> task, final int repetitions)
+    /* package */static <V> Pair<ITaskWrapper, IRepeatingFuture<V>> createTaskAndFuture(
+            final ITaskCanceller canceller, final Callable<V> task, final int repetitions)
     {
         RepeatingFuture<V> future = new RepeatingFuture<V>(canceller, repetitions);
-        TaskWrapper wrapper = new CallableTaskWrapper<V>(task, future);
-        return Pair.<TaskWrapper, IRepeatingFuture<V>> with(wrapper, future);
+        ITaskWrapper wrapper = new CallableTaskWrapper<V>(task, future);
+        return Pair.<ITaskWrapper, IRepeatingFuture<V>> with(wrapper, future);
     }
 
     /**
@@ -176,11 +176,11 @@ public final class RatedExecutors
      * @param task
      * @return Tuple of task wrapper and future
      */
-    /* package */static Pair<TaskWrapper, Future<Object>> createTaskAndUnboundedFuture(
-            final TaskCanceller canceller, final Runnable task)
+    /* package */static Pair<ITaskWrapper, Future<Object>> createTaskAndUnboundedFuture(
+            final ITaskCanceller canceller, final Runnable task)
     {
         ISettableFuture<Object> future = new UnboundedFuture(canceller);
-        TaskWrapper wrapper = new RunnableTaskWrapper(task, future);
-        return Pair.<TaskWrapper, Future<Object>> with(wrapper, future);
+        ITaskWrapper wrapper = new RunnableTaskWrapper(task, future);
+        return Pair.<ITaskWrapper, Future<Object>> with(wrapper, future);
     }
 }

@@ -28,7 +28,7 @@ package com.mattunderscore.executors;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-public final class CallableTaskWrapper<V> implements TaskWrapper
+public final class CallableTaskWrapper<V> implements ITaskWrapper
 {
     private final Callable<V> task;
     private final ISettableFuture<V> future;

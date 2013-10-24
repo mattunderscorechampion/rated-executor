@@ -51,8 +51,8 @@ public final class RepeatingFuture<V> extends BaseFuture<V> implements IRepeatin
     private final List<TaskExecutionResult<V>> results = new ArrayList<TaskExecutionResult<V>>();
     private final int repetitions;
     private final CountDownLatch[] latches;
-    private final TaskCanceller canceller;
-    private TaskWrapper task;
+    private final ITaskCanceller canceller;
+    private ITaskWrapper task;
     private int cancellationPoint = -1;
 
     /**
@@ -61,7 +61,7 @@ public final class RepeatingFuture<V> extends BaseFuture<V> implements IRepeatin
      * @param repetitions
      *            The number of times it is to repeat
      */
-    public RepeatingFuture(final TaskCanceller canceller, final int repetitions)
+    public RepeatingFuture(final ITaskCanceller canceller, final int repetitions)
     {
         this.canceller = canceller;
         this.repetitions = repetitions;
@@ -174,7 +174,7 @@ public final class RepeatingFuture<V> extends BaseFuture<V> implements IRepeatin
     }
 
     @Override
-    public void setTask(TaskWrapper wrapper)
+    public void setTask(ITaskWrapper wrapper)
     {
         this.task = wrapper;
     }

@@ -27,7 +27,7 @@ package com.mattunderscore.executors;
 
 import java.util.concurrent.Future;
 
-public final class RunnableTaskWrapper implements TaskWrapper
+public final class RunnableTaskWrapper implements ITaskWrapper
 {
     private final Runnable task;
     private final ISettableFuture<Object> future;

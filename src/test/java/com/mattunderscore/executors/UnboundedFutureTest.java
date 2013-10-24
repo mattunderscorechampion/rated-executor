@@ -38,8 +38,8 @@ import org.mockito.Matchers;
 
 import com.mattunderscore.executors.RepeatingFuture;
 import com.mattunderscore.executors.RunnableTaskWrapper;
-import com.mattunderscore.executors.TaskCanceller;
-import com.mattunderscore.executors.TaskWrapper;
+import com.mattunderscore.executors.ITaskCanceller;
+import com.mattunderscore.executors.ITaskWrapper;
 import com.mattunderscore.executors.UnboundedFuture;
 import com.mattunderscore.task.stubs.CountingTask;
 import com.mattunderscore.task.stubs.ExceptionTask;
@@ -56,12 +56,12 @@ public class UnboundedFutureTest
 {
     private static final int REPETITIONS = 5;
 
-    private TaskCanceller canceller;
+    private ITaskCanceller canceller;
 
     @Before
     public void before() throws Exception
     {
-        canceller = mock(TaskCanceller.class);
+        canceller = mock(ITaskCanceller.class);
     }
 
     // Test setting of the cancellation flag
@@ -78,7 +78,7 @@ public class UnboundedFutureTest
     @Test
     public void testIsCancelled1()
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
                 true);
         final UnboundedFuture future = new UnboundedFuture(canceller);
         new RunnableTaskWrapper(new CountingTask(),future);
@@ -91,7 +91,7 @@ public class UnboundedFutureTest
     @Test
     public void testIsCancelled2()
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
                 false);
         final UnboundedFuture future = new UnboundedFuture(canceller);
         new RunnableTaskWrapper(new CountingTask(),future);
@@ -104,7 +104,7 @@ public class UnboundedFutureTest
     @Test
     public void testIsCancelled3()
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(true))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 true);
         final UnboundedFuture future = new UnboundedFuture(canceller);
         new RunnableTaskWrapper(new CountingTask(),future);
@@ -117,7 +117,7 @@ public class UnboundedFutureTest
     @Test
     public void testIsCancelled4()
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(true))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 false);
         final RepeatingFuture<Object> future = new RepeatingFuture<Object>(canceller,REPETITIONS);
         new RunnableTaskWrapper(new CountingTask(),future);
@@ -130,7 +130,7 @@ public class UnboundedFutureTest
     @Test
     public void testIsCancelled5()
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(true))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 true);
         final UnboundedFuture future = new UnboundedFuture(canceller);
         new RunnableTaskWrapper(new CountingTask(),future);
@@ -157,7 +157,7 @@ public class UnboundedFutureTest
     public void testIsDone1()
     {
         final UnboundedFuture future = new UnboundedFuture(canceller);
-        final TaskWrapper task = new RunnableTaskWrapper(new CountingTask(),future);
+        final ITaskWrapper task = new RunnableTaskWrapper(new CountingTask(),future);
         for (int i = 0; i < REPETITIONS; i++)
         {
             assertFalse(future.isDone());
@@ -172,7 +172,7 @@ public class UnboundedFutureTest
     public void testGet0() throws CancellationException, InterruptedException, ExecutionException
     {
         final UnboundedFuture future = new UnboundedFuture(canceller);
-        final TaskWrapper task = new RunnableTaskWrapper(new CountingTask(),future);
+        final ITaskWrapper task = new RunnableTaskWrapper(new CountingTask(),future);
         task.execute();
         assertTrue(future.get() == null);
     }
@@ -180,7 +180,7 @@ public class UnboundedFutureTest
     @Test(expected = CancellationException.class)
     public void testGet1() throws CancellationException, InterruptedException, ExecutionException
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
                 true);
         final UnboundedFuture future = new UnboundedFuture(canceller);
         new RunnableTaskWrapper(new CountingTask(),future);
@@ -192,7 +192,7 @@ public class UnboundedFutureTest
     public void testGet2() throws CancellationException, InterruptedException, ExecutionException
     {
         final UnboundedFuture future = new UnboundedFuture(canceller);
-        final TaskWrapper task = new RunnableTaskWrapper(new ExceptionTask(),future);
+        final ITaskWrapper task = new RunnableTaskWrapper(new ExceptionTask(),future);
         task.execute();
         future.get();
     }

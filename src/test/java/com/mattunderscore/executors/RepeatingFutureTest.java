@@ -39,8 +39,8 @@ import org.mockito.Matchers;
 import com.mattunderscore.executors.CallableTaskWrapper;
 import com.mattunderscore.executors.RepeatingFuture;
 import com.mattunderscore.executors.RunnableTaskWrapper;
-import com.mattunderscore.executors.TaskCanceller;
-import com.mattunderscore.executors.TaskWrapper;
+import com.mattunderscore.executors.ITaskCanceller;
+import com.mattunderscore.executors.ITaskWrapper;
 import com.mattunderscore.task.stubs.CountingCallable;
 import com.mattunderscore.task.stubs.CountingTask;
 import com.mattunderscore.task.stubs.ExceptionCallable;
@@ -59,12 +59,12 @@ public final class RepeatingFutureTest
 {
     private static final int REPETITIONS = 5;
 
-    private TaskCanceller canceller;
+    private ITaskCanceller canceller;
 
     @Before
     public void before() throws Exception
     {
-        canceller = mock(TaskCanceller.class);
+        canceller = mock(ITaskCanceller.class);
     }
 
     // Test setting of the cancellation flag
@@ -81,7 +81,7 @@ public final class RepeatingFutureTest
     @Test
     public void testIsCancelled1()
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
                 true);
         final RepeatingFuture<Object> future = new RepeatingFuture<Object>(canceller,REPETITIONS);
         new RunnableTaskWrapper(new CountingTask(),future);
@@ -94,7 +94,7 @@ public final class RepeatingFutureTest
     @Test
     public void testIsCancelled2()
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
                 false);
         final RepeatingFuture<Object> future = new RepeatingFuture<Object>(canceller,REPETITIONS);
         new RunnableTaskWrapper(new CountingTask(),future);
@@ -107,7 +107,7 @@ public final class RepeatingFutureTest
     @Test
     public void testIsCancelled3()
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(true))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 true);
         final RepeatingFuture<Object> future = new RepeatingFuture<Object>(canceller,REPETITIONS);
         new RunnableTaskWrapper(new CountingTask(),future);
@@ -120,7 +120,7 @@ public final class RepeatingFutureTest
     @Test
     public void testIsCancelled4()
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(true))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 false);
         final RepeatingFuture<Object> future = new RepeatingFuture<Object>(canceller,REPETITIONS);
         new RunnableTaskWrapper(new CountingTask(),future);
@@ -133,7 +133,7 @@ public final class RepeatingFutureTest
     @Test
     public void testIsCancelled5()
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(true))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 true);
         final RepeatingFuture<Object> future = new RepeatingFuture<Object>(canceller,REPETITIONS);
         new RunnableTaskWrapper(new CountingTask(),future);
@@ -157,7 +157,7 @@ public final class RepeatingFutureTest
     @Test
     public void testIsCancelled7()
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
                 true);
         final RepeatingFuture<Integer> future = new RepeatingFuture<Integer>(canceller,REPETITIONS);
         new CallableTaskWrapper<Integer>(new NumberCallable(5),future);
@@ -170,7 +170,7 @@ public final class RepeatingFutureTest
     @Test
     public void testIsCancelled9()
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
                 false);
         final RepeatingFuture<Integer> future = new RepeatingFuture<Integer>(canceller,REPETITIONS);
         new CallableTaskWrapper<Integer>(new NumberCallable(5),future);
@@ -183,7 +183,7 @@ public final class RepeatingFutureTest
     @Test
     public void testIsCancelled10()
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(true))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 true);
         final RepeatingFuture<Integer> future = new RepeatingFuture<Integer>(canceller,REPETITIONS);
         new CallableTaskWrapper<Integer>(new NumberCallable(5),future);
@@ -196,7 +196,7 @@ public final class RepeatingFutureTest
     @Test
     public void testIsCancelled11()
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(true))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 false);
         final RepeatingFuture<Integer> future = new RepeatingFuture<Integer>(canceller,REPETITIONS);
         new CallableTaskWrapper<Integer>(new NumberCallable(5),future);
@@ -209,7 +209,7 @@ public final class RepeatingFutureTest
     @Test
     public void testIsCancelled12()
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(true))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 true);
         final RepeatingFuture<Integer> future = new RepeatingFuture<Integer>(canceller,REPETITIONS);
         new CallableTaskWrapper<Integer>(new NumberCallable(5),future);
@@ -236,7 +236,7 @@ public final class RepeatingFutureTest
     public void testIsDone1()
     {
         final RepeatingFuture<Object> future = new RepeatingFuture<Object>(canceller,REPETITIONS);
-        final TaskWrapper task = new RunnableTaskWrapper(new CountingTask(),future);
+        final ITaskWrapper task = new RunnableTaskWrapper(new CountingTask(),future);
         for (int i = 0; i < REPETITIONS; i++)
         {
             assertFalse(future.isDone());
@@ -257,7 +257,7 @@ public final class RepeatingFutureTest
     public void testIsDone3()
     {
         final RepeatingFuture<Integer> future = new RepeatingFuture<Integer>(canceller,REPETITIONS);
-        final TaskWrapper task = new CallableTaskWrapper<Integer>(new NumberCallable(5),future);
+        final ITaskWrapper task = new CallableTaskWrapper<Integer>(new NumberCallable(5),future);
         for (int i = 0; i < REPETITIONS; i++)
         {
             assertFalse(future.isDone());
@@ -272,7 +272,7 @@ public final class RepeatingFutureTest
     public void testGet0() throws CancellationException, InterruptedException, ExecutionException
     {
         final RepeatingFuture<Object> future = new RepeatingFuture<Object>(canceller,REPETITIONS);
-        final TaskWrapper task = new RunnableTaskWrapper(new CountingTask(),future);
+        final ITaskWrapper task = new RunnableTaskWrapper(new CountingTask(),future);
         task.execute();
         assertTrue(future.get() == null);
         assertTrue(future.getResult(0) == null);
@@ -281,7 +281,7 @@ public final class RepeatingFutureTest
     @Test(expected = CancellationException.class)
     public void testGet1() throws CancellationException, InterruptedException, ExecutionException
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
                 true);
         final RepeatingFuture<Object> future = new RepeatingFuture<Object>(canceller,REPETITIONS);
         new RunnableTaskWrapper(new CountingTask(),future);
@@ -293,7 +293,7 @@ public final class RepeatingFutureTest
     public void testGet2() throws CancellationException, InterruptedException, ExecutionException
     {
         final RepeatingFuture<Object> future = new RepeatingFuture<Object>(canceller,REPETITIONS);
-        final TaskWrapper task = new RunnableTaskWrapper(new ExceptionTask(),future);
+        final ITaskWrapper task = new RunnableTaskWrapper(new ExceptionTask(),future);
         task.execute();
         future.get();
     }
@@ -302,7 +302,7 @@ public final class RepeatingFutureTest
     public void testGet3() throws CancellationException, InterruptedException, ExecutionException
     {
         final RepeatingFuture<Integer> future = new RepeatingFuture<Integer>(canceller,REPETITIONS);
-        final TaskWrapper task = new CallableTaskWrapper<Integer>(new NumberCallable(5),future);
+        final ITaskWrapper task = new CallableTaskWrapper<Integer>(new NumberCallable(5),future);
         task.execute();
         assertEquals(Integer.valueOf(5), future.get());
         assertEquals(Integer.valueOf(5), future.getResult(0));
@@ -311,7 +311,7 @@ public final class RepeatingFutureTest
     @Test(expected = CancellationException.class)
     public void testGet4() throws CancellationException, InterruptedException, ExecutionException
     {
-        when(canceller.cancelTask(Matchers.any(TaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
                 true);
         final RepeatingFuture<Integer> future = new RepeatingFuture<Integer>(canceller,REPETITIONS);
         new CallableTaskWrapper<Integer>(new NumberCallable(5),future);
@@ -323,7 +323,7 @@ public final class RepeatingFutureTest
     public void testGet5() throws CancellationException, InterruptedException, ExecutionException
     {
         final RepeatingFuture<Object> future = new RepeatingFuture<Object>(canceller,REPETITIONS);
-        final TaskWrapper task = new CallableTaskWrapper<Object>(new ExceptionCallable(),future);
+        final ITaskWrapper task = new CallableTaskWrapper<Object>(new ExceptionCallable(),future);
         task.execute();
         future.get();
     }
@@ -332,7 +332,7 @@ public final class RepeatingFutureTest
     public void testGet6() throws CancellationException, InterruptedException, ExecutionException
     {
         final RepeatingFuture<Integer> future = new RepeatingFuture<Integer>(canceller,REPETITIONS);
-        final TaskWrapper task = new CallableTaskWrapper<Integer>(new CountingCallable(),future);
+        final ITaskWrapper task = new CallableTaskWrapper<Integer>(new CountingCallable(),future);
         task.execute();
         assertEquals(Integer.valueOf(1),future.get());
         assertEquals(Integer.valueOf(1),future.getResult(0));

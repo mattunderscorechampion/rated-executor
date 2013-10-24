@@ -50,10 +50,10 @@ public final class SingleFuture<V> extends BaseFuture<V>
      * Latch to block access to the result
      */
     private final CountDownLatch latch;
-    private final TaskCanceller canceller;
-    private TaskWrapper task;
+    private final ITaskCanceller canceller;
+    private ITaskWrapper task;
     
-    public SingleFuture(final TaskCanceller canceller)
+    public SingleFuture(final ITaskCanceller canceller)
     {
         latch = new CountDownLatch(1);
         this.canceller = canceller;
@@ -100,7 +100,7 @@ public final class SingleFuture<V> extends BaseFuture<V>
     }
 
     @Override
-    public void setTask(TaskWrapper wrapper)
+    public void setTask(ITaskWrapper wrapper)
     {
         task = wrapper;
     }

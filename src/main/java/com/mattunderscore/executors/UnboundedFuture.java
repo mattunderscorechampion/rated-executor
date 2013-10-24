@@ -41,12 +41,12 @@ import java.util.concurrent.TimeUnit;
  */
 public final class UnboundedFuture extends BaseFuture<Object>
 {
-    private final TaskCanceller canceller;
+    private final ITaskCanceller canceller;
     private CountDownLatch latch = new CountDownLatch(1);
     private volatile TaskExecutionResult<Object> result;
-    private TaskWrapper task;
+    private ITaskWrapper task;
 
-    public UnboundedFuture(final TaskCanceller canceller)
+    public UnboundedFuture(final ITaskCanceller canceller)
     {
         this.canceller = canceller;
     }
@@ -92,7 +92,7 @@ public final class UnboundedFuture extends BaseFuture<Object>
     }
 
     @Override
-    public void setTask(TaskWrapper wrapper)
+    public void setTask(ITaskWrapper wrapper)
     {
         this.task = wrapper;
     }

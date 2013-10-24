@@ -40,7 +40,7 @@ import java.util.concurrent.TimeoutException;
  * to access the result, block until the result is set to determine if the task is done and to
  * perform the cancellation.
  * <P>
- * This is also a {@link TaskWrapper} because the task, executor and the future are tightly
+ * This is also a {@link ITaskWrapper} because the task, executor and the future are tightly
  * coupled. The task must be executed and the result passed to the future, cancellation is passed
  * from the future to the executor and the task. After the executor runs the task it must set the
  * {@link Future} result.

@@ -25,27 +25,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.executors;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.lang.Runnable;
 
 /**
- * Provides a single interface for both {@link Runnable} and {@link Callable}.
- * <P>
- * The result of the executed method should be passed to a {@link Future}.
+ * 
  * @author Matt Champion
  * @since 0.1.0
  */
-public interface TaskWrapper
+public interface ITaskCanceller
 {
     /**
-     * Execute the task and set the result of the future.
+     * Cancel the task passed in.
+     * @param wrapper The task to cancel
+     * @param mayInterruptIfRunning Interrupt the thread if running
+     * @return Was the task cancelled
      */
-    public void execute();
-
-    /**
-     * Get the future for this task.
-     * @return The future for the task
-     */
-    public Future<?> getFuture();
+    public boolean cancelTask(ITaskWrapper wrapper, boolean mayInterruptIfRunning);
 }

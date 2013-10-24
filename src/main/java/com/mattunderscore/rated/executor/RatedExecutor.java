@@ -40,8 +40,8 @@ import org.javatuples.Pair;
 import com.mattunderscore.executors.IRepeatingFuture;
 import com.mattunderscore.executors.RunnableTaskWrapper;
 import com.mattunderscore.executors.SingleFuture;
-import com.mattunderscore.executors.TaskCanceller;
-import com.mattunderscore.executors.TaskWrapper;
+import com.mattunderscore.executors.ITaskCanceller;
+import com.mattunderscore.executors.ITaskWrapper;
 
 /**
  * A rated executor, it will execute tasks at a fixed rate.
@@ -57,16 +57,16 @@ import com.mattunderscore.executors.TaskWrapper;
  * @author Matt Champion
  * @since 0.0.1
  */
-/* package */ final class RatedExecutor implements IRatedExecutor, TaskCanceller
+/* package */ final class RatedExecutor implements IRatedExecutor, ITaskCanceller
 {
     private final ScheduledExecutorService service;
     private final long rate;
     private final TimeUnit unit;
     private ScheduledFuture<?> thisTask;
     private ScheduledFuture<?> stoppingTask;
-    private Queue<TaskWrapper> taskQueue;
+    private Queue<ITaskWrapper> taskQueue;
     private volatile boolean running;
-    private volatile TaskWrapper executingTask;
+    private volatile ITaskWrapper executingTask;
 
     /**
      * Create a new RatedExecutor that will execute tasks at a fixed rate.
@@ -81,7 +81,7 @@ import com.mattunderscore.executors.TaskWrapper;
         this.service = Executors.newSingleThreadScheduledExecutor();
         this.rate = rate;
         this.unit = unit;
-        this.taskQueue = new LinkedBlockingQueue<TaskWrapper>();
+        this.taskQueue = new LinkedBlockingQueue<ITaskWrapper>();
         this.running = false;
     }
 
@@ -102,7 +102,7 @@ import com.mattunderscore.executors.TaskWrapper;
         this.service = Executors.newSingleThreadScheduledExecutor(threadFactory);
         this.rate = period;
         this.unit = unit;
-        this.taskQueue = new LinkedBlockingQueue<TaskWrapper>();
+        this.taskQueue = new LinkedBlockingQueue<ITaskWrapper>();
         this.running = false;
     }
 
@@ -144,9 +144,9 @@ import com.mattunderscore.executors.TaskWrapper;
     @Override
     public <V> Future<V> submit(final Callable<V> task)
     {
-        Pair<TaskWrapper, Future<V>> tuple = RatedExecutors.createTaskAndFuture(this, task);
+        Pair<ITaskWrapper, Future<V>> tuple = RatedExecutors.createTaskAndFuture(this, task);
         Future<V> future = tuple.getValue1();
-        TaskWrapper wrapper = tuple.getValue0();
+        ITaskWrapper wrapper = tuple.getValue0();
         synchronized (this)
         {
             if (stoppingTask != null)
@@ -168,9 +168,9 @@ import com.mattunderscore.executors.TaskWrapper;
     @Override
     public Future<?> schedule(final Runnable task)
     {
-        Pair<TaskWrapper, Future<Object>> tuple = RatedExecutors.createTaskAndUnboundedFuture(this, task);
+        Pair<ITaskWrapper, Future<Object>> tuple = RatedExecutors.createTaskAndUnboundedFuture(this, task);
         Future<Object> future = tuple.getValue1();
-        TaskWrapper wrapper = tuple.getValue0();
+        ITaskWrapper wrapper = tuple.getValue0();
         synchronized (this)
         {
             if (stoppingTask != null)
@@ -192,10 +192,10 @@ import com.mattunderscore.executors.TaskWrapper;
     @Override
     public Future<?> schedule(final Runnable task, final int repetitions)
     {
-        Pair<TaskWrapper, Future<Object>> tuple = RatedExecutors.createTaskAndFuture(this, task,
+        Pair<ITaskWrapper, Future<Object>> tuple = RatedExecutors.createTaskAndFuture(this, task,
                 repetitions);
         Future<Object> future = tuple.getValue1();
-        TaskWrapper wrapper = tuple.getValue0();
+        ITaskWrapper wrapper = tuple.getValue0();
         synchronized (this)
         {
             if (stoppingTask != null)
@@ -218,9 +218,9 @@ import com.mattunderscore.executors.TaskWrapper;
     @Override
     public <V> IRepeatingFuture<V> schedule(final Callable<V> task, final int repetitions)
     {
-        Pair<TaskWrapper, IRepeatingFuture<V>> tuple = RatedExecutors.createTaskAndFuture(this, task, repetitions);
+        Pair<ITaskWrapper, IRepeatingFuture<V>> tuple = RatedExecutors.createTaskAndFuture(this, task, repetitions);
         IRepeatingFuture<V> future = tuple.getValue1();
-        TaskWrapper wrapper = tuple.getValue0();
+        ITaskWrapper wrapper = tuple.getValue0();
         synchronized (this)
         {
             if (stoppingTask != null)
@@ -262,7 +262,7 @@ import com.mattunderscore.executors.TaskWrapper;
         @Override
         public void run()
         {
-            TaskWrapper taskWrapper = taskQueue.poll();
+            ITaskWrapper taskWrapper = taskQueue.poll();
             if (taskWrapper == null)
             {
                 return;
@@ -309,7 +309,7 @@ import com.mattunderscore.executors.TaskWrapper;
     }
 
     @Override
-    public boolean cancelTask(TaskWrapper wrapper, boolean mayInterruptIfRunning)
+    public boolean cancelTask(ITaskWrapper wrapper, boolean mayInterruptIfRunning)
     {
         if (executingTask == wrapper)
         {
