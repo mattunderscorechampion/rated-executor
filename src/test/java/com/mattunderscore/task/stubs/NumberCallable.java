@@ -23,19 +23,28 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.mattunderscore.rated.executor.stubs;
+package com.mattunderscore.task.stubs;
+
+import java.util.concurrent.Callable;
 
 /**
- * Simple runnable task to execute. Throws exception.
+ * Simple callable task to execute. Returns a number
  * 
  * @author Matt Champion
  * @since 0.0.1
  */
-public final class ExceptionTask implements Runnable
+public final class NumberCallable implements Callable<Integer>
 {
-    @Override
-    public void run()
+    public final int value;
+
+    public NumberCallable(int value)
     {
-        throw new TestException();
+        this.value = value;
+    }
+
+    @Override
+    public Integer call()
+    {
+        return value;
     }
 }

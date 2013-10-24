@@ -23,7 +23,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.mattunderscore.rated.executor;
+package com.mattunderscore.executors;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -41,11 +41,11 @@ import com.mattunderscore.executors.RepeatingFuture;
 import com.mattunderscore.executors.RunnableTaskWrapper;
 import com.mattunderscore.executors.TaskCanceller;
 import com.mattunderscore.executors.TaskWrapper;
-import com.mattunderscore.rated.executor.stubs.CountingCallable;
-import com.mattunderscore.rated.executor.stubs.CountingTask;
-import com.mattunderscore.rated.executor.stubs.ExceptionCallable;
-import com.mattunderscore.rated.executor.stubs.ExceptionTask;
-import com.mattunderscore.rated.executor.stubs.NumberCallable;
+import com.mattunderscore.task.stubs.CountingCallable;
+import com.mattunderscore.task.stubs.CountingTask;
+import com.mattunderscore.task.stubs.ExceptionCallable;
+import com.mattunderscore.task.stubs.ExceptionTask;
+import com.mattunderscore.task.stubs.NumberCallable;
 
 /**
  * Test suite for the {@link RepeatingFuture} class.

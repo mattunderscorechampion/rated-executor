@@ -38,11 +38,11 @@ import org.junit.runner.RunWith;
 
 import com.google.code.tempusfugit.concurrency.IntermittentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Intermittent;
-import com.mattunderscore.rated.executor.stubs.CountingTask;
-import com.mattunderscore.rated.executor.stubs.ExceptionCallable;
-import com.mattunderscore.rated.executor.stubs.ExceptionTask;
-import com.mattunderscore.rated.executor.stubs.NumberCallable;
-import com.mattunderscore.rated.executor.stubs.TestException;
+import com.mattunderscore.task.stubs.CountingTask;
+import com.mattunderscore.task.stubs.ExceptionCallable;
+import com.mattunderscore.task.stubs.ExceptionTask;
+import com.mattunderscore.task.stubs.NumberCallable;
+import com.mattunderscore.task.stubs.TestException;
 
 /**
  * Test suite for the Rated Executor.

@@ -23,15 +23,19 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.mattunderscore.rated.executor.stubs;
+package com.mattunderscore.task.stubs;
 
 /**
- * Exception to throw.
+ * Simple runnable task to execute. Throws exception.
  * 
  * @author Matt Champion
  * @since 0.0.1
  */
-public final class TestException extends RuntimeException
+public final class ExceptionTask implements Runnable
 {
-    private static final long serialVersionUID = 1L;
+    @Override
+    public void run()
+    {
+        throw new TestException();
+    }
 }
