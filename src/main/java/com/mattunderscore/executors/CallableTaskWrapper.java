@@ -3,12 +3,12 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
+ * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
+ * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of mattunderscore.com nor the
+ * Neither the name of mattunderscore.com nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -28,11 +28,26 @@ package com.mattunderscore.executors;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+/**
+ * TaskWrapper for Callable tasks.
+ * <P>
+ * The value returned by the call method will be passed to the future as the result. If any
+ * Throwable is caught it will be passed to the Future as the exception.
+ * 
+ * @author Matt Champion
+ * @param <V> Type of the value returned by the task
+ * @since 0.1.0
+ */
 public final class CallableTaskWrapper<V> implements ITaskWrapper
 {
     private final Callable<V> task;
     private final ISettableFuture<V> future;
 
+    /**
+     * Create a task wrapper from a Callable task.
+     * @param task The Callable task
+     * @param future The Future to pass the result to
+     */
     public CallableTaskWrapper(final Callable<V> task, final ISettableFuture<V> future)
     {
         this.task = task;
@@ -53,7 +68,7 @@ public final class CallableTaskWrapper<V> implements ITaskWrapper
             future.setException(t);
         }
     }
-    
+
     @Override
     public int hashCode()
     {

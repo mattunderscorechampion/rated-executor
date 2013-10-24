@@ -3,12 +3,12 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
+ * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
+ * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of mattunderscore.com nor the
+ * Neither the name of mattunderscore.com nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -27,11 +27,25 @@ package com.mattunderscore.executors;
 
 import java.util.concurrent.Future;
 
+/**
+ * TaskWrapper for Runnable tasks.
+ * <P>
+ * If any Throwable is caught it will be passed to the Future as the exception. If no exception is
+ * caught the result will be set to the null reference.
+ * 
+ * @author Matt Champion
+ * @since 0.1.0
+ */
 public final class RunnableTaskWrapper implements ITaskWrapper
 {
     private final Runnable task;
     private final ISettableFuture<Object> future;
 
+    /**
+     * Create a task wrapper from a Runnable task.
+     * @param task The Runnable task
+     * @param future The Future to pass the result to
+     */
     public RunnableTaskWrapper(final Runnable task, final ISettableFuture<Object> future)
     {
         this.task = task;
