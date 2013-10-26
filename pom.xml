@@ -134,6 +134,9 @@
               <value>http://docs.oracle.com/javase/7/docs/api/</value>
             </property>
           </javaApiLinks>
+          <links>
+            <link>http://www.javatuples.org/apidocs</link>
+          </links>
         </configuration>
         <reportSets>
           <reportSet>
