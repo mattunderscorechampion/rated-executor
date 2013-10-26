@@ -41,8 +41,6 @@ import org.javatuples.Pair;
 
 import com.mattunderscore.executors.Futures;
 import com.mattunderscore.executors.IRepeatingFuture;
-import com.mattunderscore.executors.RunnableTaskWrapper;
-import com.mattunderscore.executors.SingleFuture;
 import com.mattunderscore.executors.ITaskCanceller;
 import com.mattunderscore.executors.ITaskWrapper;
 
@@ -126,8 +124,9 @@ import com.mattunderscore.executors.ITaskWrapper;
     @Override
     public Future<?> submit(final Runnable task)
     {
-        final SingleFuture<Object> future = new SingleFuture<Object>(this);
-        final RunnableTaskWrapper wrapper = new RunnableTaskWrapper(task, future);
+        final Pair<ITaskWrapper, Future<Object>> tuple = Futures.createTaskAndFuture(this, task);
+        final Future<Object> future = tuple.getValue1();
+        final ITaskWrapper wrapper = tuple.getValue0();
         synchronized (this)
         {
             if (stoppingTask != null)
