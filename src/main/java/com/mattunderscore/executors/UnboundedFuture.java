@@ -39,11 +39,11 @@ import java.util.concurrent.TimeUnit;
  * @author Matt Champion
  * @since 0.1.0
  */
-public final class UnboundedFuture extends BaseFuture<Object>
+public final class UnboundedFuture extends BaseFuture<Void>
 {
     private final ITaskCanceller canceller;
     private CountDownLatch latch = new CountDownLatch(1);
-    private volatile TaskExecutionResult<Object> result;
+    private volatile TaskExecutionResult<Void> result;
     private ITaskWrapper task;
 
     /*package*/ UnboundedFuture(final ITaskCanceller canceller)
@@ -52,7 +52,7 @@ public final class UnboundedFuture extends BaseFuture<Object>
     }
 
     @Override
-    protected void processResult(TaskExecutionResult<Object> result)
+    protected void processResult(TaskExecutionResult<Void> result)
     {
         this.result = result;
         latch.countDown();
@@ -86,7 +86,7 @@ public final class UnboundedFuture extends BaseFuture<Object>
     }
 
     @Override
-    protected TaskExecutionResult<Object> getResult()
+    protected TaskExecutionResult<Void> getResult()
     {
         return this.result;
     }

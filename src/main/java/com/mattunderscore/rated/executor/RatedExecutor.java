@@ -124,8 +124,8 @@ import com.mattunderscore.executors.ITaskWrapper;
     @Override
     public Future<?> submit(final Runnable task)
     {
-        final Pair<ITaskWrapper, Future<Object>> tuple = Futures.createTaskAndFuture(this, task);
-        final Future<Object> future = tuple.getValue1();
+        final Pair<ITaskWrapper, Future<Void>> tuple = Futures.createTaskAndFuture(this, task);
+        final Future<Void> future = tuple.getValue1();
         final ITaskWrapper wrapper = tuple.getValue0();
         synchronized (this)
         {
@@ -172,9 +172,9 @@ import com.mattunderscore.executors.ITaskWrapper;
     @Override
     public Future<?> schedule(final Runnable task)
     {
-        final Pair<ITaskWrapper, Future<Object>> tuple = Futures.createTaskAndUnboundedFuture(this,
+        final Pair<ITaskWrapper, Future<Void>> tuple = Futures.createTaskAndUnboundedFuture(this,
                 task);
-        final Future<Object> future = tuple.getValue1();
+        final Future<Void> future = tuple.getValue1();
         final ITaskWrapper wrapper = tuple.getValue0();
         synchronized (this)
         {
@@ -197,9 +197,9 @@ import com.mattunderscore.executors.ITaskWrapper;
     @Override
     public Future<?> schedule(final Runnable task, final int repetitions)
     {
-        final Pair<ITaskWrapper, Future<Object>> tuple = Futures.createTaskAndFuture(this, task,
+        final Pair<ITaskWrapper, Future<Void>> tuple = Futures.createTaskAndFuture(this, task,
                 repetitions);
-        final Future<Object> future = tuple.getValue1();
+        final Future<Void> future = tuple.getValue1();
         final ITaskWrapper wrapper = tuple.getValue0();
         synchronized (this)
         {

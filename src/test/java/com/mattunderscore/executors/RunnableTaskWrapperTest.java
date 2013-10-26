@@ -40,7 +40,7 @@ import com.mattunderscore.task.stubs.TestException;
 
 public class RunnableTaskWrapperTest
 {
-    private ISettableFuture<Object> future;
+    private ISettableFuture<Void> future;
 
     @SuppressWarnings("unchecked")
     @Before

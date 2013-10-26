@@ -50,12 +50,12 @@ public final class Futures
      * @param task
      * @return Tuple of task wrapper and future
      */
-    public static Pair<ITaskWrapper, Future<Object>> createTaskAndFuture(
+    public static Pair<ITaskWrapper, Future<Void>> createTaskAndFuture(
             final ITaskCanceller canceller, final Runnable task)
     {
-        ISettableFuture<Object> future = new SingleFuture<Object>(canceller);
+        ISettableFuture<Void> future = new SingleFuture<Void>(canceller);
         ITaskWrapper wrapper = new RunnableTaskWrapper(task, future);
-        return Pair.<ITaskWrapper, Future<Object>> with(wrapper, future);
+        return Pair.<ITaskWrapper, Future<Void>> with(wrapper, future);
     }
 
     /**
@@ -86,12 +86,12 @@ public final class Futures
      * @param task
      * @return Tuple of task wrapper and future
      */
-    public static Pair<ITaskWrapper, Future<Object>> createTaskAndFuture(
+    public static Pair<ITaskWrapper, Future<Void>> createTaskAndFuture(
             final ITaskCanceller canceller, final Runnable task, final int repetitions)
     {
-        ISettableFuture<Object> future = new RepeatingFuture<Object>(canceller, repetitions);
+        ISettableFuture<Void> future = new RepeatingFuture<Void>(canceller, repetitions);
         ITaskWrapper wrapper = new RunnableTaskWrapper(task, future);
-        return Pair.<ITaskWrapper, Future<Object>> with(wrapper, future);
+        return Pair.<ITaskWrapper, Future<Void>> with(wrapper, future);
     }
 
     /**
@@ -122,11 +122,11 @@ public final class Futures
      * @param task
      * @return Tuple of task wrapper and future
      */
-    public static Pair<ITaskWrapper, Future<Object>> createTaskAndUnboundedFuture(
+    public static Pair<ITaskWrapper, Future<Void>> createTaskAndUnboundedFuture(
             final ITaskCanceller canceller, final Runnable task)
     {
-        ISettableFuture<Object> future = new UnboundedFuture(canceller);
+        ISettableFuture<Void> future = new UnboundedFuture(canceller);
         ITaskWrapper wrapper = new RunnableTaskWrapper(task, future);
-        return Pair.<ITaskWrapper, Future<Object>> with(wrapper, future);
+        return Pair.<ITaskWrapper, Future<Void>> with(wrapper, future);
     }
 }

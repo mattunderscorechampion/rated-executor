@@ -39,14 +39,14 @@ import java.util.concurrent.Future;
 public final class RunnableTaskWrapper implements ITaskWrapper
 {
     private final Runnable task;
-    private final ISettableFuture<Object> future;
+    private final ISettableFuture<Void> future;
 
     /**
      * Create a task wrapper from a Runnable task.
      * @param task The Runnable task
      * @param future The Future to pass the result to
      */
-    /*package*/ RunnableTaskWrapper(final Runnable task, final ISettableFuture<Object> future)
+    /*package*/ RunnableTaskWrapper(final Runnable task, final ISettableFuture<Void> future)
     {
         this.task = task;
         this.future = future;
