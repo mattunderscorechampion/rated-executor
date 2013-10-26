@@ -46,7 +46,7 @@ public final class RunnableTaskWrapper implements ITaskWrapper
      * @param task The Runnable task
      * @param future The Future to pass the result to
      */
-    public RunnableTaskWrapper(final Runnable task, final ISettableFuture<Object> future)
+    /*package*/ RunnableTaskWrapper(final Runnable task, final ISettableFuture<Object> future)
     {
         this.task = task;
         this.future = future;

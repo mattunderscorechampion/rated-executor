@@ -52,8 +52,8 @@ public final class SingleFuture<V> extends BaseFuture<V>
     private final CountDownLatch latch;
     private final ITaskCanceller canceller;
     private ITaskWrapper task;
-    
-    public SingleFuture(final ITaskCanceller canceller)
+
+    /*package*/ SingleFuture(final ITaskCanceller canceller)
     {
         latch = new CountDownLatch(1);
         this.canceller = canceller;

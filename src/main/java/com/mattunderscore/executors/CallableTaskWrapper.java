@@ -48,7 +48,7 @@ public final class CallableTaskWrapper<V> implements ITaskWrapper
      * @param task The Callable task
      * @param future The Future to pass the result to
      */
-    public CallableTaskWrapper(final Callable<V> task, final ISettableFuture<V> future)
+    /*package*/ CallableTaskWrapper(final Callable<V> task, final ISettableFuture<V> future)
     {
         this.task = task;
         this.future = future;
