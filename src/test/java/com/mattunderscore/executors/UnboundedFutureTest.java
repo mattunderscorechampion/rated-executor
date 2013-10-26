@@ -36,7 +36,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 
-import com.mattunderscore.executors.RepeatingFuture;
 import com.mattunderscore.executors.RunnableTaskWrapper;
 import com.mattunderscore.executors.ITaskCanceller;
 import com.mattunderscore.executors.ITaskWrapper;
@@ -116,19 +115,6 @@ public class UnboundedFutureTest
 
     @Test
     public void testIsCancelled4()
-    {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
-                false);
-        final RepeatingFuture<Object> future = new RepeatingFuture<Object>(canceller,REPETITIONS);
-        new RunnableTaskWrapper(new CountingTask(),future);
-        assertFalse(future.isCancelled());
-        boolean cancelled = future.cancel(true);
-        assertFalse(future.isCancelled());
-        assertFalse(cancelled);
-    }
-
-    @Test
-    public void testIsCancelled5()
     {
         when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 true);
