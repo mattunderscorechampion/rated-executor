@@ -59,21 +59,21 @@ import com.mattunderscore.executors.ITaskWrapper;
  * @author Matt Champion
  * @since 0.0.1
  */
-/* package */ final class RatedExecutor implements IRatedExecutor, ITaskCanceller
+/* package */final class RatedExecutor implements IRatedExecutor, ITaskCanceller
 {
     private final ScheduledExecutorService service;
     private final long rate;
     private final TimeUnit unit;
-    private final Queue<ITaskWrapper> taskQueue;
+    private final Queue<ITaskWrapper> taskQueue = new LinkedBlockingQueue<ITaskWrapper>();
     // thisTask is always accessed within a synchronised block
     @GuardedBy(value = "this")
     private ScheduledFuture<?> thisTask;
     // stoppingTask is always accessed within a synchronised block
     @GuardedBy(value = "this")
     private ScheduledFuture<?> stoppingTask;
-    // running is always accessed within a synchronised block, except in the constructor
+    // running is always accessed within a synchronised block
     @GuardedBy(value = "this")
-    private boolean running;
+    private boolean running = false;
     private volatile ITaskWrapper executingTask;
 
     /**
@@ -89,8 +89,6 @@ import com.mattunderscore.executors.ITaskWrapper;
         this.service = Executors.newSingleThreadScheduledExecutor();
         this.rate = rate;
         this.unit = unit;
-        this.taskQueue = new LinkedBlockingQueue<ITaskWrapper>();
-        this.running = false;
     }
 
     /**
@@ -110,8 +108,6 @@ import com.mattunderscore.executors.ITaskWrapper;
         this.service = Executors.newSingleThreadScheduledExecutor(threadFactory);
         this.rate = period;
         this.unit = unit;
-        this.taskQueue = new LinkedBlockingQueue<ITaskWrapper>();
-        this.running = false;
     }
 
     /**
@@ -247,8 +243,8 @@ import com.mattunderscore.executors.ITaskWrapper;
     }
 
     /**
-     * Begin trying to consume tasks from the queue.
-     * This method is only invoked within a synchronised block.s
+     * Begin trying to consume tasks from the queue. This method is only invoked within a
+     * synchronised block.s
      */
     private void start()
     {
