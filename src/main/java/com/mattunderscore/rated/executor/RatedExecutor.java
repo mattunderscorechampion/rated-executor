@@ -39,6 +39,7 @@ import net.jcip.annotations.GuardedBy;
 
 import org.javatuples.Pair;
 
+import com.mattunderscore.executors.Futures;
 import com.mattunderscore.executors.IRepeatingFuture;
 import com.mattunderscore.executors.RunnableTaskWrapper;
 import com.mattunderscore.executors.SingleFuture;
@@ -148,7 +149,7 @@ import com.mattunderscore.executors.ITaskWrapper;
     @Override
     public <V> Future<V> submit(final Callable<V> task)
     {
-        final Pair<ITaskWrapper, Future<V>> tuple = RatedExecutors.createTaskAndFuture(this, task);
+        final Pair<ITaskWrapper, Future<V>> tuple = Futures.createTaskAndFuture(this, task);
         final Future<V> future = tuple.getValue1();
         final ITaskWrapper wrapper = tuple.getValue0();
         synchronized (this)
@@ -172,8 +173,8 @@ import com.mattunderscore.executors.ITaskWrapper;
     @Override
     public Future<?> schedule(final Runnable task)
     {
-        final Pair<ITaskWrapper, Future<Object>> tuple = RatedExecutors
-                .createTaskAndUnboundedFuture(this, task);
+        final Pair<ITaskWrapper, Future<Object>> tuple = Futures.createTaskAndUnboundedFuture(this,
+                task);
         final Future<Object> future = tuple.getValue1();
         final ITaskWrapper wrapper = tuple.getValue0();
         synchronized (this)
@@ -197,8 +198,8 @@ import com.mattunderscore.executors.ITaskWrapper;
     @Override
     public Future<?> schedule(final Runnable task, final int repetitions)
     {
-        final Pair<ITaskWrapper, Future<Object>> tuple = RatedExecutors.createTaskAndFuture(this,
-                task, repetitions);
+        final Pair<ITaskWrapper, Future<Object>> tuple = Futures.createTaskAndFuture(this, task,
+                repetitions);
         final Future<Object> future = tuple.getValue1();
         final ITaskWrapper wrapper = tuple.getValue0();
         synchronized (this)
@@ -223,8 +224,8 @@ import com.mattunderscore.executors.ITaskWrapper;
     @Override
     public <V> IRepeatingFuture<V> schedule(final Callable<V> task, final int repetitions)
     {
-        final Pair<ITaskWrapper, IRepeatingFuture<V>> tuple = RatedExecutors.createTaskAndFuture(
-                this, task, repetitions);
+        final Pair<ITaskWrapper, IRepeatingFuture<V>> tuple = Futures.createTaskAndFuture(this,
+                task, repetitions);
         final IRepeatingFuture<V> future = tuple.getValue1();
         final ITaskWrapper wrapper = tuple.getValue0();
         synchronized (this)

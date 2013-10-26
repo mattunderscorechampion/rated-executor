@@ -25,22 +25,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.rated.executor;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import org.javatuples.Pair;
-
-import com.mattunderscore.executors.CallableTaskWrapper;
-import com.mattunderscore.executors.IRepeatingFuture;
-import com.mattunderscore.executors.ISettableFuture;
-import com.mattunderscore.executors.RepeatingFuture;
-import com.mattunderscore.executors.RunnableTaskWrapper;
-import com.mattunderscore.executors.SingleFuture;
-import com.mattunderscore.executors.ITaskCanceller;
-import com.mattunderscore.executors.ITaskWrapper;
-import com.mattunderscore.executors.UnboundedFuture;
 
 /**
  * Utility class that allows the construction of {@link RatedExecutor} objects.
@@ -92,95 +79,5 @@ public final class RatedExecutors
             final ThreadFactory factory)
     {
         return new RatedExecutor(rate, unit, factory);
-    }
-
-    /**
-     * Provides a constructor for a task wrapper and future.
-     * <P>
-     * This allows the task wrapper and future to be created as a pair. This is desirable as they
-     * cannot be completely decoupled but they do have separate responsibilities.
-     * 
-     * @param canceller
-     * @param task
-     * @return Tuple of task wrapper and future
-     */
-    /* package */static Pair<ITaskWrapper, Future<Object>> createTaskAndFuture(
-            final ITaskCanceller canceller, final Runnable task)
-    {
-        ISettableFuture<Object> future = new SingleFuture<Object>(canceller);
-        ITaskWrapper wrapper = new RunnableTaskWrapper(task, future);
-        return Pair.<ITaskWrapper, Future<Object>> with(wrapper, future);
-    }
-
-    /**
-     * Provides a constructor for a task wrapper and future.
-     * <P>
-     * This allows the task wrapper and future to be created as a pair. This is desirable as they
-     * cannot be completely decoupled but they do have separate responsibilities.
-     * 
-     * @param canceller
-     * @param task
-     * @return Tuple of task wrapper and future
-     */
-    /* package */static <V> Pair<ITaskWrapper, Future<V>> createTaskAndFuture(
-            final ITaskCanceller canceller, final Callable<V> task)
-    {
-        ISettableFuture<V> future = new SingleFuture<V>(canceller);
-        ITaskWrapper wrapper = new CallableTaskWrapper<V>(task, future);
-        return Pair.<ITaskWrapper, Future<V>> with(wrapper, future);
-    }
-
-    /**
-     * Provides a constructor for a task wrapper and future.
-     * <P>
-     * This allows the task wrapper and future to be created as a pair. This is desirable as they
-     * cannot be completely decoupled but they do have separate responsibilities.
-     * 
-     * @param canceller
-     * @param task
-     * @return Tuple of task wrapper and future
-     */
-    /* package */static Pair<ITaskWrapper, Future<Object>> createTaskAndFuture(
-            final ITaskCanceller canceller, final Runnable task, final int repetitions)
-    {
-        ISettableFuture<Object> future = new RepeatingFuture<Object>(canceller, repetitions);
-        ITaskWrapper wrapper = new RunnableTaskWrapper(task, future);
-        return Pair.<ITaskWrapper, Future<Object>> with(wrapper, future);
-    }
-
-    /**
-     * Provides a constructor for a task wrapper and future.
-     * <P>
-     * This allows the task wrapper and future to be created as a pair. This is desirable as they
-     * cannot be completely decoupled but they do have separate responsibilities.
-     * 
-     * @param canceller
-     * @param task
-     * @return Tuple of task wrapper and future
-     */
-    /* package */static <V> Pair<ITaskWrapper, IRepeatingFuture<V>> createTaskAndFuture(
-            final ITaskCanceller canceller, final Callable<V> task, final int repetitions)
-    {
-        RepeatingFuture<V> future = new RepeatingFuture<V>(canceller, repetitions);
-        ITaskWrapper wrapper = new CallableTaskWrapper<V>(task, future);
-        return Pair.<ITaskWrapper, IRepeatingFuture<V>> with(wrapper, future);
-    }
-
-    /**
-     * Provides a constructor for a task wrapper and future.
-     * <P>
-     * This allows the task wrapper and future to be created as a pair. This is desirable as they
-     * cannot be completely decoupled but they do have separate responsibilities.
-     * 
-     * @param canceller
-     * @param task
-     * @return Tuple of task wrapper and future
-     */
-    /* package */static Pair<ITaskWrapper, Future<Object>> createTaskAndUnboundedFuture(
-            final ITaskCanceller canceller, final Runnable task)
-    {
-        ISettableFuture<Object> future = new UnboundedFuture(canceller);
-        ITaskWrapper wrapper = new RunnableTaskWrapper(task, future);
-        return Pair.<ITaskWrapper, Future<Object>> with(wrapper, future);
     }
 }
