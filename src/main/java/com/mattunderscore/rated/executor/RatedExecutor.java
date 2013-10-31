@@ -195,11 +195,11 @@ import com.mattunderscore.executors.ITaskWrapper;
      * @see com.mattunderscore.rated.executor.IRatedExecutor#schedule(java.lang.Runnable, int)
      */
     @Override
-    public Future<?> schedule(final Runnable task, final int repetitions)
+    public IRepeatingFuture<?> schedule(final Runnable task, final int repetitions)
     {
-        final Pair<ITaskWrapper, Future<Void>> tuple = Futures.createTaskAndFuture(this, task,
+        final Pair<ITaskWrapper, IRepeatingFuture<Void>> tuple = Futures.createTaskAndFuture(this, task,
                 repetitions);
-        final Future<Void> future = tuple.getValue1();
+        final IRepeatingFuture<Void> future = tuple.getValue1();
         final ITaskWrapper wrapper = tuple.getValue0();
         synchronized (this)
         {

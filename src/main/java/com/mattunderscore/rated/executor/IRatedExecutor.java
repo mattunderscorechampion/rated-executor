@@ -104,7 +104,7 @@ public interface IRatedExecutor extends Executor
      * @return Future that allows the task to be cancelled and monitored
      * @since 0.1.0
      */
-    public Future<?> schedule(Runnable task, int repetitions);
+    public IRepeatingFuture<?> schedule(Runnable task, int repetitions);
     
     /**
      * Submit a task to be executed repeatedly.

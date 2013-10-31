@@ -86,12 +86,12 @@ public final class Futures
      * @param task
      * @return Tuple of task wrapper and future
      */
-    public static Pair<ITaskWrapper, Future<Void>> createTaskAndFuture(
+    public static Pair<ITaskWrapper, IRepeatingFuture<Void>> createTaskAndFuture(
             final ITaskCanceller canceller, final Runnable task, final int repetitions)
     {
-        ISettableFuture<Void> future = new RepeatingFuture<Void>(canceller, repetitions);
+        RepeatingFuture<Void> future = new RepeatingFuture<Void>(canceller, repetitions);
         ITaskWrapper wrapper = new RunnableTaskWrapper(task, future);
-        return Pair.<ITaskWrapper, Future<Void>> with(wrapper, future);
+        return Pair.<ITaskWrapper, IRepeatingFuture<Void>> with(wrapper, future);
     }
 
     /**
