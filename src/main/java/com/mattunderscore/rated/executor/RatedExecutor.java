@@ -25,17 +25,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.rated.executor;
 
-import java.util.Queue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-
-import net.jcip.annotations.GuardedBy;
 
 import org.javatuples.Pair;
 
@@ -61,10 +52,7 @@ import com.mattunderscore.executors.ITaskWrapper;
 /* package */final class RatedExecutor implements IRatedExecutor, ITaskCanceller
 {
     private final PollingExecutor executor;
-    private final long rate;
-    private final TimeUnit unit;
-    private final Queue<ITaskWrapper> taskQueue = new LinkedBlockingQueue<ITaskWrapper>();
-    private volatile ITaskWrapper executingTask;
+    private final TaskQueue taskQueue;
 
     /**
      * Create a new RatedExecutor that will execute tasks at a fixed rate.
@@ -74,30 +62,10 @@ import com.mattunderscore.executors.ITaskWrapper;
      * @param unit
      *            The rate units
      */
-    public RatedExecutor(final long rate, final TimeUnit unit)
+    public RatedExecutor(final TaskQueue taskQueue, final PollingExecutor executor)
     {
-        this.executor = new ScheduledPollingExecutor();
-        this.rate = rate;
-        this.unit = unit;
-    }
-
-    /**
-     * Create a new RatedExecutor that will execute tasks at a fixed rate.
-     * <P>
-     * The thread will be constructed with the thread factory.
-     * 
-     * @param period
-     *            The rate value
-     * @param unit
-     *            The rate units
-     * @param threadFactory
-     *            A thread factory to construct the executor thread
-     */
-    public RatedExecutor(final long period, final TimeUnit unit, final ThreadFactory threadFactory)
-    {
-        this.executor = new ScheduledPollingExecutor(threadFactory);
-        this.rate = period;
-        this.unit = unit;
+        this.taskQueue = taskQueue;
+        this.executor = executor;
     }
 
     /**
@@ -178,53 +146,10 @@ import com.mattunderscore.executors.ITaskWrapper;
         return future;
     }
 
-    /**
-     * Runnable that consumes tasks from the queue and runs them.
-     * 
-     * @author Matt Champion
-     */
-    private class ExecutingTask implements Runnable
-    {
-        @Override
-        public void run()
-        {
-            final ITaskWrapper taskWrapper = taskQueue.poll();
-            if (taskWrapper == null)
-            {
-                return;
-            }
-            executingTask = taskWrapper;
-            taskWrapper.execute();
-            executingTask = null;
-            if (!taskWrapper.getFuture().isDone())
-            {
-                executor.submit(taskWrapper);
-            }
-            else
-            {
-                executor.requestStop();
-            }
-        }
-    }
-
-    /**
-     * Runnable that halts the scheduled task that consumes rated tasks.
-     * 
-     * @author Matt Champion
-     */
-    private class StoppingTask implements Runnable
-    {
-        @Override
-        public void run()
-        {
-            executor.stop();
-        }
-    }
-
     @Override
     public boolean cancelTask(final ITaskWrapper wrapper, final boolean mayInterruptIfRunning)
     {
-        if (executingTask == wrapper)
+        if (taskQueue.isCurrentTask(wrapper))
         {
             if (mayInterruptIfRunning)
             {
@@ -238,114 +163,5 @@ import com.mattunderscore.executors.ITaskWrapper;
         }
         taskQueue.remove(wrapper);
         return true;
-    }
-
-    /**
-     * The polling executor executes tasks no faster than a fixed rate.
-     * <P>
-     * It is not responsible for constructing futures, cancelling tasks or determining when to put
-     * tasks on the queue. It is solely responsible for the timing of the execution of tasks.
-     * 
-     * @author Matt Champion
-     * @since 0.1.1
-     */
-    private interface PollingExecutor
-    {
-        /**
-         * Submit a task to the polling executor.
-         * 
-         * @param wrapper
-         *            The task to execute
-         */
-        public void submit(ITaskWrapper wrapper);
-
-        /**
-         * Stop the polling executor if it has no tasks to execute within its period. Any activity
-         * within its period should prevent the stopping of the executor. The polling executor must
-         * stop no sooner that the period of the task execution.
-         */
-        public void requestStop();
-
-        /**
-         * Stop the polling executor running. Calling this will prevent the polling executor from
-         * trying to remove tasks from the queue. queue.
-         */
-        public void stop();
-    }
-
-    /**
-     * {@link PollingExecutor} implementation based on the {@link ScheduledExecutorService}.
-     * 
-     * @author Matt Champion
-     * @since 0.1.1
-     */
-    private final class ScheduledPollingExecutor implements PollingExecutor
-    {
-        private final ScheduledExecutorService service;
-        // thisTask is always accessed within a synchronised block
-        @GuardedBy(value = "this")
-        private ScheduledFuture<?> thisTask;
-        // stoppingTask is always accessed within a synchronised block
-        @GuardedBy(value = "this")
-        private ScheduledFuture<?> stoppingTask;
-        // running is always accessed within a synchronised block
-        @GuardedBy(value = "this")
-        private boolean running = false;
-
-        private ScheduledPollingExecutor()
-        {
-            this.service = Executors.newSingleThreadScheduledExecutor();
-        }
-
-        private ScheduledPollingExecutor(ThreadFactory threadFactory)
-        {
-            this.service = Executors.newSingleThreadScheduledExecutor(threadFactory);
-        }
-
-        @Override
-        public synchronized void submit(ITaskWrapper wrapper)
-        {
-            if (stoppingTask != null)
-            {
-                stoppingTask.cancel(false);
-            }
-            taskQueue.add(wrapper);
-            if (!running)
-            {
-                start();
-            }
-        }
-
-        private void start()
-        {
-            if (running)
-            {
-                return;
-            }
-            else
-            {
-                thisTask = service.scheduleAtFixedRate(new ExecutingTask(), 0, rate, unit);
-                running = true;
-            }
-        }
-
-        @Override
-        public synchronized void requestStop()
-        {
-            if (taskQueue.isEmpty())
-            {
-                stoppingTask = service.schedule(new StoppingTask(), rate, unit);
-            }
-        }
-
-        @Override
-        public synchronized void stop()
-        {
-            if (running)
-            {
-                thisTask.cancel(false);
-                running = false;
-            }
-        }
     }
 }

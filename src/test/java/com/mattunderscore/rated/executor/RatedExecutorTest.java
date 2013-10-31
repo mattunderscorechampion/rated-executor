@@ -72,7 +72,7 @@ public class RatedExecutorTest
     @Intermittent(repetition = REPETITIONS)
     public void testExecution0() throws InterruptedException
     {
-        IRatedExecutor executor = new RatedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = RatedExecutors.ratedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
         CountingTask task = new CountingTask();
         executor.execute(task);
         TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
@@ -91,7 +91,7 @@ public class RatedExecutorTest
     @Intermittent(repetition = REPETITIONS)
     public void testExecution1() throws InterruptedException, ExecutionException, TimeoutException
     {
-        IRatedExecutor executor = new RatedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = RatedExecutors.ratedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
         CountingTask task = new CountingTask();
         Future<?> future = executor.submit(task);
         TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
@@ -114,7 +114,7 @@ public class RatedExecutorTest
     @Intermittent(repetition = REPETITIONS)
     public void testRateLimit0() throws InterruptedException, ExecutionException, TimeoutException
     {
-        IRatedExecutor executor = new RatedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = RatedExecutors.ratedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
         CountingTask delayingTask = new CountingTask();
         CountingTask task = new CountingTask();
 
@@ -144,7 +144,7 @@ public class RatedExecutorTest
     @Intermittent(repetition = REPETITIONS)
     public void testRateLimit1() throws InterruptedException
     {
-        IRatedExecutor executor = new RatedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = RatedExecutors.ratedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
         CountingTask task0 = new CountingTask();
         CountingTask task1 = new CountingTask();
 
@@ -171,7 +171,7 @@ public class RatedExecutorTest
     @Intermittent(repetition = REPETITIONS)
     public void testPromptness() throws InterruptedException
     {
-        IRatedExecutor executor = new RatedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = RatedExecutors.ratedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
         CountingTask task0 = new CountingTask();
         CountingTask task1 = new CountingTask();
 
@@ -197,7 +197,7 @@ public class RatedExecutorTest
     @Intermittent(repetition = REPETITIONS)
     public void testExecutionResult0() throws InterruptedException, ExecutionException
     {
-        IRatedExecutor executor = new RatedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = RatedExecutors.ratedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
         CountingTask task0 = new CountingTask();
 
         Future<?> future0 = executor.submit(task0);
@@ -217,7 +217,7 @@ public class RatedExecutorTest
     @Intermittent(repetition = REPETITIONS)
     public void testExecutionResult1() throws InterruptedException, ExecutionException
     {
-        IRatedExecutor executor = new RatedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = RatedExecutors.ratedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
         NumberCallable task0 = new NumberCallable(5);
 
         Future<Integer> future0 = executor.submit(task0);
@@ -237,7 +237,7 @@ public class RatedExecutorTest
     @Intermittent(repetition = REPETITIONS)
     public void testExecutionResult2() throws InterruptedException, ExecutionException
     {
-        IRatedExecutor executor = new RatedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = RatedExecutors.ratedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
         NumberCallable task0 = new NumberCallable(5);
 
         Future<Integer> future0 = executor.submit(task0);
@@ -254,7 +254,7 @@ public class RatedExecutorTest
     @Intermittent(repetition = REPETITIONS)
     public void testExecutionException0() throws Throwable
     {
-        IRatedExecutor executor = new RatedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = RatedExecutors.ratedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
         ExceptionTask task0 = new ExceptionTask();
 
         Future<?> future0 = executor.submit(task0);
@@ -277,7 +277,7 @@ public class RatedExecutorTest
     @Intermittent(repetition = REPETITIONS)
     public void testExecutionException1() throws Throwable
     {
-        IRatedExecutor executor = new RatedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = RatedExecutors.ratedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
         ExceptionCallable task0 = new ExceptionCallable();
 
         Future<Object> future0 = executor.submit(task0);
@@ -300,7 +300,7 @@ public class RatedExecutorTest
     @Intermittent(repetition = REPETITIONS)
     public void testRepeatingExecution0() throws InterruptedException
     {
-        IRatedExecutor executor = new RatedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = RatedExecutors.ratedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
         CountingTask task = new CountingTask();
         Future<?> future = executor.schedule(task);
         TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
@@ -326,7 +326,7 @@ public class RatedExecutorTest
     public void testRepeatingExecution1() throws InterruptedException
     {
         int repetitions = 5;
-        IRatedExecutor executor = new RatedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = RatedExecutors.ratedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
         CountingTask task0 = new CountingTask();
 
         Future<?> future0 = executor.schedule(task0, repetitions);
@@ -346,7 +346,7 @@ public class RatedExecutorTest
     @Intermittent(repetition = REPETITIONS)
     public void testCancel0() throws InterruptedException, ExecutionException
     {
-        IRatedExecutor executor = new RatedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = RatedExecutors.ratedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
         CountingTask delayingTask = new CountingTask();
         CountingTask task = new CountingTask();
         executor.submit(delayingTask);
@@ -370,7 +370,7 @@ public class RatedExecutorTest
     @Intermittent(repetition = REPETITIONS)
     public void testCancel1() throws InterruptedException, ExecutionException
     {
-        IRatedExecutor executor = new RatedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = RatedExecutors.ratedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
         CountingTask delayingTask = new CountingTask();
         NumberCallable task = new NumberCallable(5);
 
@@ -394,7 +394,7 @@ public class RatedExecutorTest
     @Intermittent(repetition = REPETITIONS)
     public void testCancel2() throws InterruptedException, ExecutionException
     {
-        IRatedExecutor executor = new RatedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = RatedExecutors.ratedExecutor(STD_RATE, TimeUnit.MILLISECONDS);
         CountingTask delayingTask = new CountingTask();
         CountingTask task = new CountingTask();
         executor.submit(delayingTask);
@@ -416,7 +416,7 @@ public class RatedExecutorTest
     @Test
     public void testAccuracy() throws InterruptedException
     {
-        IRatedExecutor executor = new RatedExecutor(ACCURACY_RATE, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = RatedExecutors.ratedExecutor(ACCURACY_RATE, TimeUnit.MILLISECONDS);
         CountingTask task = new CountingTask();
         long start = System.currentTimeMillis();
         Future<?> future = executor.schedule(task);

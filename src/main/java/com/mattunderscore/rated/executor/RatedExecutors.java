@@ -28,7 +28,6 @@ package com.mattunderscore.rated.executor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-
 /**
  * Utility class that allows the construction of {@link RatedExecutor} objects.
  * 
@@ -58,7 +57,9 @@ public final class RatedExecutors
      */
     public static IRatedExecutor ratedExecutor(final long rate, final TimeUnit unit)
     {
-        return new RatedExecutor(rate, unit);
+        final TaskQueue queue = new TaskQueue();
+        final PollingExecutor executor = new ScheduledPollingExecutor(queue, rate, unit);
+        return new RatedExecutor(queue, executor);
     }
 
     /**
@@ -78,6 +79,8 @@ public final class RatedExecutors
     public static IRatedExecutor ratedExecutor(final long rate, final TimeUnit unit,
             final ThreadFactory factory)
     {
-        return new RatedExecutor(rate, unit, factory);
+        final TaskQueue queue = new TaskQueue();
+        final PollingExecutor executor = new ScheduledPollingExecutor(queue, rate, unit, factory);
+        return new RatedExecutor(queue, executor);
     }
 }
