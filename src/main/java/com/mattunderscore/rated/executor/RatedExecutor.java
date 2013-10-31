@@ -60,19 +60,10 @@ import com.mattunderscore.executors.ITaskWrapper;
  */
 /* package */final class RatedExecutor implements IRatedExecutor, ITaskCanceller
 {
-    private final ScheduledExecutorService service;
+    private final PollingExecutor executor;
     private final long rate;
     private final TimeUnit unit;
     private final Queue<ITaskWrapper> taskQueue = new LinkedBlockingQueue<ITaskWrapper>();
-    // thisTask is always accessed within a synchronised block
-    @GuardedBy(value = "this")
-    private ScheduledFuture<?> thisTask;
-    // stoppingTask is always accessed within a synchronised block
-    @GuardedBy(value = "this")
-    private ScheduledFuture<?> stoppingTask;
-    // running is always accessed within a synchronised block
-    @GuardedBy(value = "this")
-    private boolean running = false;
     private volatile ITaskWrapper executingTask;
 
     /**
@@ -85,7 +76,7 @@ import com.mattunderscore.executors.ITaskWrapper;
      */
     public RatedExecutor(final long rate, final TimeUnit unit)
     {
-        this.service = Executors.newSingleThreadScheduledExecutor();
+        this.executor = new ScheduledPollingExecutor();
         this.rate = rate;
         this.unit = unit;
     }
@@ -104,7 +95,7 @@ import com.mattunderscore.executors.ITaskWrapper;
      */
     public RatedExecutor(final long period, final TimeUnit unit, final ThreadFactory threadFactory)
     {
-        this.service = Executors.newSingleThreadScheduledExecutor(threadFactory);
+        this.executor = new ScheduledPollingExecutor(threadFactory);
         this.rate = period;
         this.unit = unit;
     }
@@ -127,18 +118,7 @@ import com.mattunderscore.executors.ITaskWrapper;
         final Pair<ITaskWrapper, Future<Void>> tuple = Futures.createTaskAndFuture(this, task);
         final Future<Void> future = tuple.getValue1();
         final ITaskWrapper wrapper = tuple.getValue0();
-        synchronized (this)
-        {
-            if (stoppingTask != null)
-            {
-                stoppingTask.cancel(false);
-            }
-            taskQueue.add(wrapper);
-            if (!running)
-            {
-                start();
-            }
-        }
+        executor.submit(wrapper);
         return future;
     }
 
@@ -151,18 +131,7 @@ import com.mattunderscore.executors.ITaskWrapper;
         final Pair<ITaskWrapper, Future<V>> tuple = Futures.createTaskAndFuture(this, task);
         final Future<V> future = tuple.getValue1();
         final ITaskWrapper wrapper = tuple.getValue0();
-        synchronized (this)
-        {
-            if (stoppingTask != null)
-            {
-                stoppingTask.cancel(false);
-            }
-            taskQueue.add(wrapper);
-            if (!running)
-            {
-                start();
-            }
-        }
+        executor.submit(wrapper);
         return future;
     }
 
@@ -176,18 +145,7 @@ import com.mattunderscore.executors.ITaskWrapper;
                 task);
         final Future<Void> future = tuple.getValue1();
         final ITaskWrapper wrapper = tuple.getValue0();
-        synchronized (this)
-        {
-            if (stoppingTask != null)
-            {
-                stoppingTask.cancel(false);
-            }
-            taskQueue.add(wrapper);
-            if (!running)
-            {
-                start();
-            }
-        }
+        executor.submit(wrapper);
         return future;
     }
 
@@ -197,22 +155,11 @@ import com.mattunderscore.executors.ITaskWrapper;
     @Override
     public IRepeatingFuture<?> schedule(final Runnable task, final int repetitions)
     {
-        final Pair<ITaskWrapper, IRepeatingFuture<Void>> tuple = Futures.createTaskAndFuture(this, task,
-                repetitions);
+        final Pair<ITaskWrapper, IRepeatingFuture<Void>> tuple = Futures.createTaskAndFuture(this,
+                task, repetitions);
         final IRepeatingFuture<Void> future = tuple.getValue1();
         final ITaskWrapper wrapper = tuple.getValue0();
-        synchronized (this)
-        {
-            if (stoppingTask != null)
-            {
-                stoppingTask.cancel(false);
-            }
-            taskQueue.add(wrapper);
-            if (!running)
-            {
-                start();
-            }
-        }
+        executor.submit(wrapper);
         return future;
     }
 
@@ -227,36 +174,8 @@ import com.mattunderscore.executors.ITaskWrapper;
                 task, repetitions);
         final IRepeatingFuture<V> future = tuple.getValue1();
         final ITaskWrapper wrapper = tuple.getValue0();
-        synchronized (this)
-        {
-            if (stoppingTask != null)
-            {
-                stoppingTask.cancel(false);
-            }
-            taskQueue.add(wrapper);
-            if (!running)
-            {
-                start();
-            }
-        }
+        executor.submit(wrapper);
         return future;
-    }
-
-    /**
-     * Begin trying to consume tasks from the queue. This method is only invoked within a
-     * synchronised block.s
-     */
-    private void start()
-    {
-        if (running)
-        {
-            return;
-        }
-        else
-        {
-            thisTask = service.scheduleAtFixedRate(new ExecutingTask(), 0, rate, unit);
-            running = true;
-        }
     }
 
     /**
@@ -279,17 +198,11 @@ import com.mattunderscore.executors.ITaskWrapper;
             executingTask = null;
             if (!taskWrapper.getFuture().isDone())
             {
-                taskQueue.add(taskWrapper);
+                executor.submit(taskWrapper);
             }
             else
             {
-                synchronized (RatedExecutor.this)
-                {
-                    if (taskQueue.isEmpty())
-                    {
-                        stoppingTask = service.schedule(new StoppingTask(), rate, unit);
-                    }
-                }
+                executor.requestStop();
             }
         }
     }
@@ -304,14 +217,7 @@ import com.mattunderscore.executors.ITaskWrapper;
         @Override
         public void run()
         {
-            synchronized (RatedExecutor.this)
-            {
-                if (running)
-                {
-                    thisTask.cancel(false);
-                    running = false;
-                }
-            }
+            executor.stop();
         }
     }
 
@@ -332,5 +238,114 @@ import com.mattunderscore.executors.ITaskWrapper;
         }
         taskQueue.remove(wrapper);
         return true;
+    }
+
+    /**
+     * The polling executor executes tasks no faster than a fixed rate.
+     * <P>
+     * It is not responsible for constructing futures, cancelling tasks or determining when to put
+     * tasks on the queue. It is solely responsible for the timing of the execution of tasks.
+     * 
+     * @author Matt Champion
+     * @since 0.1.1
+     */
+    private interface PollingExecutor
+    {
+        /**
+         * Submit a task to the polling executor.
+         * 
+         * @param wrapper
+         *            The task to execute
+         */
+        public void submit(ITaskWrapper wrapper);
+
+        /**
+         * Stop the polling executor if it has no tasks to execute within its period. Any activity
+         * within its period should prevent the stopping of the executor. The polling executor must
+         * stop no sooner that the period of the task execution.
+         */
+        public void requestStop();
+
+        /**
+         * Stop the polling executor running. Calling this will prevent the polling executor from
+         * trying to remove tasks from the queue. queue.
+         */
+        public void stop();
+    }
+
+    /**
+     * {@link PollingExecutor} implementation based on the {@link ScheduledExecutorService}.
+     * 
+     * @author Matt Champion
+     * @since 0.1.1
+     */
+    private final class ScheduledPollingExecutor implements PollingExecutor
+    {
+        private final ScheduledExecutorService service;
+        // thisTask is always accessed within a synchronised block
+        @GuardedBy(value = "this")
+        private ScheduledFuture<?> thisTask;
+        // stoppingTask is always accessed within a synchronised block
+        @GuardedBy(value = "this")
+        private ScheduledFuture<?> stoppingTask;
+        // running is always accessed within a synchronised block
+        @GuardedBy(value = "this")
+        private boolean running = false;
+
+        private ScheduledPollingExecutor()
+        {
+            this.service = Executors.newSingleThreadScheduledExecutor();
+        }
+
+        private ScheduledPollingExecutor(ThreadFactory threadFactory)
+        {
+            this.service = Executors.newSingleThreadScheduledExecutor(threadFactory);
+        }
+
+        @Override
+        public synchronized void submit(ITaskWrapper wrapper)
+        {
+            if (stoppingTask != null)
+            {
+                stoppingTask.cancel(false);
+            }
+            taskQueue.add(wrapper);
+            if (!running)
+            {
+                start();
+            }
+        }
+
+        private void start()
+        {
+            if (running)
+            {
+                return;
+            }
+            else
+            {
+                thisTask = service.scheduleAtFixedRate(new ExecutingTask(), 0, rate, unit);
+                running = true;
+            }
+        }
+
+        @Override
+        public synchronized void requestStop()
+        {
+            if (taskQueue.isEmpty())
+            {
+                stoppingTask = service.schedule(new StoppingTask(), rate, unit);
+            }
+        }
+
+        @Override
+        public synchronized void stop()
+        {
+            if (running)
+            {
+                thisTask.cancel(false);
+                running = false;
+            }
+        }
     }
 }
