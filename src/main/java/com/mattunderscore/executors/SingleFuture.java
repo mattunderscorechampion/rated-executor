@@ -26,6 +26,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 package com.mattunderscore.executors;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,7 +52,6 @@ public final class SingleFuture<V> extends BaseFuture<V>
      */
     private final CountDownLatch latch;
     private final ITaskCanceller canceller;
-    private ITaskWrapper task;
 
     /*package*/ SingleFuture(final ITaskCanceller canceller)
     {
@@ -70,7 +70,7 @@ public final class SingleFuture<V> extends BaseFuture<V>
     @Override
     protected boolean processCancellation(boolean mayInterruptIfRunning)
     {
-        final boolean cancelled = canceller.cancelTask(task, mayInterruptIfRunning);
+        final boolean cancelled = canceller.cancelTask(this, mayInterruptIfRunning);
         latch.countDown();
         return cancelled;
     }
@@ -97,11 +97,5 @@ public final class SingleFuture<V> extends BaseFuture<V>
     protected TaskExecutionResult<V> getResult()
     {
         return result;
-    }
-
-    @Override
-    public void setTask(ITaskWrapper wrapper)
-    {
-        task = wrapper;
     }
 }

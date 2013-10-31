@@ -26,9 +26,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 package com.mattunderscore.executors;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-
-import org.javatuples.Pair;
+import java.util.concurrent.RunnableFuture;
 
 /**
  * Utility class for the construction of Future and ITaskWrapper object pairs.
@@ -50,12 +48,12 @@ public final class Futures
      * @param task
      * @return Tuple of task wrapper and future
      */
-    public static Pair<ITaskWrapper, Future<Void>> createTaskAndFuture(
+    public static RunnableFuture<Void> createTaskAndFuture(
             final ITaskCanceller canceller, final Runnable task)
     {
-        ISettableFuture<Void> future = new SingleFuture<Void>(canceller);
-        ITaskWrapper wrapper = new RunnableTaskWrapper(task, future);
-        return Pair.<ITaskWrapper, Future<Void>> with(wrapper, future);
+        final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
+        new RunnableTaskWrapper(task, future);
+        return future;
     }
 
     /**
@@ -68,12 +66,12 @@ public final class Futures
      * @param task
      * @return Tuple of task wrapper and future
      */
-    public static <V> Pair<ITaskWrapper, Future<V>> createTaskAndFuture(
+    public static <V> RunnableFuture<V> createTaskAndFuture(
             final ITaskCanceller canceller, final Callable<V> task)
     {
-        ISettableFuture<V> future = new SingleFuture<V>(canceller);
-        ITaskWrapper wrapper = new CallableTaskWrapper<V>(task, future);
-        return Pair.<ITaskWrapper, Future<V>> with(wrapper, future);
+        final SingleFuture<V> future = new SingleFuture<V>(canceller);
+        new CallableTaskWrapper<V>(task, future);
+        return future;
     }
 
     /**
@@ -86,12 +84,12 @@ public final class Futures
      * @param task
      * @return Tuple of task wrapper and future
      */
-    public static Pair<ITaskWrapper, IRepeatingFuture<Void>> createTaskAndFuture(
+    public static IRunnableRepeatingFuture<Void> createTaskAndFuture(
             final ITaskCanceller canceller, final Runnable task, final int repetitions)
     {
-        RepeatingFuture<Void> future = new RepeatingFuture<Void>(canceller, repetitions);
-        ITaskWrapper wrapper = new RunnableTaskWrapper(task, future);
-        return Pair.<ITaskWrapper, IRepeatingFuture<Void>> with(wrapper, future);
+        final IRunnableRepeatingFuture<Void> future = new RepeatingFuture<Void>(canceller, repetitions);
+        new RunnableTaskWrapper(task, future);
+        return future;
     }
 
     /**
@@ -104,12 +102,12 @@ public final class Futures
      * @param task
      * @return Tuple of task wrapper and future
      */
-    public static <V> Pair<ITaskWrapper, IRepeatingFuture<V>> createTaskAndFuture(
+    public static <V> IRunnableRepeatingFuture<V> createTaskAndFuture(
             final ITaskCanceller canceller, final Callable<V> task, final int repetitions)
     {
-        RepeatingFuture<V> future = new RepeatingFuture<V>(canceller, repetitions);
-        ITaskWrapper wrapper = new CallableTaskWrapper<V>(task, future);
-        return Pair.<ITaskWrapper, IRepeatingFuture<V>> with(wrapper, future);
+        final RepeatingFuture<V> future = new RepeatingFuture<V>(canceller, repetitions);
+        new CallableTaskWrapper<V>(task, future);
+        return future;
     }
 
     /**
@@ -122,11 +120,11 @@ public final class Futures
      * @param task
      * @return Tuple of task wrapper and future
      */
-    public static Pair<ITaskWrapper, Future<Void>> createTaskAndUnboundedFuture(
+    public static RunnableFuture<Void> createTaskAndUnboundedFuture(
             final ITaskCanceller canceller, final Runnable task)
     {
-        ISettableFuture<Void> future = new UnboundedFuture(canceller);
-        ITaskWrapper wrapper = new RunnableTaskWrapper(task, future);
-        return Pair.<ITaskWrapper, Future<Void>> with(wrapper, future);
+        final UnboundedFuture future = new UnboundedFuture(canceller);
+        new RunnableTaskWrapper(task, future);
+        return future;
     }
 }

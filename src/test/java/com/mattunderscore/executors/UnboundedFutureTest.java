@@ -77,7 +77,7 @@ public class UnboundedFutureTest
     @Test
     public void testIsCancelled1()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(Runnable.class), Matchers.eq(false))).thenReturn(
                 true);
         final UnboundedFuture future = new UnboundedFuture(canceller);
         new RunnableTaskWrapper(new CountingTask(),future);
@@ -90,7 +90,7 @@ public class UnboundedFutureTest
     @Test
     public void testIsCancelled2()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(Runnable.class), Matchers.eq(false))).thenReturn(
                 false);
         final UnboundedFuture future = new UnboundedFuture(canceller);
         new RunnableTaskWrapper(new CountingTask(),future);
@@ -103,7 +103,7 @@ public class UnboundedFutureTest
     @Test
     public void testIsCancelled3()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(Runnable.class), Matchers.eq(true))).thenReturn(
                 true);
         final UnboundedFuture future = new UnboundedFuture(canceller);
         new RunnableTaskWrapper(new CountingTask(),future);
@@ -116,7 +116,7 @@ public class UnboundedFutureTest
     @Test
     public void testIsCancelled4()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(Runnable.class), Matchers.eq(true))).thenReturn(
                 true);
         final UnboundedFuture future = new UnboundedFuture(canceller);
         new RunnableTaskWrapper(new CountingTask(),future);
@@ -166,7 +166,7 @@ public class UnboundedFutureTest
     @Test(expected = CancellationException.class)
     public void testGet1() throws CancellationException, InterruptedException, ExecutionException
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(Runnable.class), Matchers.eq(false))).thenReturn(
                 true);
         final UnboundedFuture future = new UnboundedFuture(canceller);
         new RunnableTaskWrapper(new CountingTask(),future);

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -46,13 +47,12 @@ import java.util.concurrent.TimeoutException;
  *            The type of object returned by {@link #get()}
  * @since 0.1.0
  */
-public final class RepeatingFuture<V> extends BaseFuture<V> implements IRepeatingFuture<V>
+public final class RepeatingFuture<V> extends BaseFuture<V> implements IRunnableRepeatingFuture<V>
 {
     private final List<TaskExecutionResult<V>> results = new ArrayList<TaskExecutionResult<V>>();
     private final int repetitions;
     private final CountDownLatch[] latches;
     private final ITaskCanceller canceller;
-    private ITaskWrapper task;
     private int cancellationPoint = -1;
 
     /**
@@ -133,7 +133,7 @@ public final class RepeatingFuture<V> extends BaseFuture<V> implements IRepeatin
         {
             latches[i].countDown();
         }
-        final boolean cancelled = canceller.cancelTask(task, mayInterruptIfRunning);
+        final boolean cancelled = canceller.cancelTask(this, mayInterruptIfRunning);
         return cancelled;
     }
 
@@ -171,11 +171,5 @@ public final class RepeatingFuture<V> extends BaseFuture<V> implements IRepeatin
     protected TaskExecutionResult<V> getStoredResult(final int index)
     {
         return results.get(index);
-    }
-
-    @Override
-    public void setTask(ITaskWrapper wrapper)
-    {
-        this.task = wrapper;
     }
 }

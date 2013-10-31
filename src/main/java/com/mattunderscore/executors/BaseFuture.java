@@ -27,6 +27,7 @@ package com.mattunderscore.executors;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -50,12 +51,13 @@ import java.util.concurrent.TimeoutException;
  *            Type of the value returned by {{@link #get()}.
  * @since 0.1.0
  */
-/* package */ abstract class BaseFuture<V> implements ISettableFuture<V>
+/* package */ abstract class BaseFuture<V> implements ISettableFuture<V>, RunnableFuture<V>
 {
     /**
      * Has the cancelled task been cancelled.
      */
     private volatile boolean cancelled = false;
+    private ITaskWrapper task;
 
     @Override
     public boolean cancel(boolean mayInterruptIfRunning)
@@ -154,6 +156,35 @@ import java.util.concurrent.TimeoutException;
     public void setException(Throwable result)
     {
         processResult(new TaskExecutionResult<V>(result));
+    }
+
+    @Override
+    public void setTask(ITaskWrapper wrapper)
+    {
+        task = wrapper;
+    }
+
+    @Override
+    public void run()
+    {
+        task.execute();
+    }
+
+    protected ITaskWrapper getTask()
+    {
+        return task;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return task.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object object)
+    {
+        return this == object;
     }
 
     /**

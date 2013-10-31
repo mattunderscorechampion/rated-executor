@@ -30,6 +30,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
@@ -37,10 +38,9 @@ import java.util.concurrent.TimeUnit;
 
 import net.jcip.annotations.GuardedBy;
 
-import org.javatuples.Pair;
-
 import com.mattunderscore.executors.Futures;
 import com.mattunderscore.executors.IRepeatingFuture;
+import com.mattunderscore.executors.IRunnableRepeatingFuture;
 import com.mattunderscore.executors.ITaskCanceller;
 import com.mattunderscore.executors.ITaskWrapper;
 
@@ -63,7 +63,7 @@ import com.mattunderscore.executors.ITaskWrapper;
     private final ScheduledExecutorService service;
     private final long rate;
     private final TimeUnit unit;
-    private final Queue<ITaskWrapper> taskQueue = new LinkedBlockingQueue<ITaskWrapper>();
+    private final Queue<RunnableFuture<?>> taskQueue = new LinkedBlockingQueue<RunnableFuture<?>>();
     // thisTask is always accessed within a synchronised block
     @GuardedBy(value = "this")
     private ScheduledFuture<?> thisTask;
@@ -73,7 +73,7 @@ import com.mattunderscore.executors.ITaskWrapper;
     // running is always accessed within a synchronised block
     @GuardedBy(value = "this")
     private boolean running = false;
-    private volatile ITaskWrapper executingTask;
+    private volatile RunnableFuture<?> executingTask;
 
     /**
      * Create a new RatedExecutor that will execute tasks at a fixed rate.
@@ -124,16 +124,14 @@ import com.mattunderscore.executors.ITaskWrapper;
     @Override
     public Future<?> submit(final Runnable task)
     {
-        final Pair<ITaskWrapper, Future<Void>> tuple = Futures.createTaskAndFuture(this, task);
-        final Future<Void> future = tuple.getValue1();
-        final ITaskWrapper wrapper = tuple.getValue0();
+        final RunnableFuture<Void> future = Futures.createTaskAndFuture(this, task);
         synchronized (this)
         {
             if (stoppingTask != null)
             {
                 stoppingTask.cancel(false);
             }
-            taskQueue.add(wrapper);
+            taskQueue.add(future);
             if (!running)
             {
                 start();
@@ -148,16 +146,14 @@ import com.mattunderscore.executors.ITaskWrapper;
     @Override
     public <V> Future<V> submit(final Callable<V> task)
     {
-        final Pair<ITaskWrapper, Future<V>> tuple = Futures.createTaskAndFuture(this, task);
-        final Future<V> future = tuple.getValue1();
-        final ITaskWrapper wrapper = tuple.getValue0();
+        final RunnableFuture<V> future = Futures.createTaskAndFuture(this, task);
         synchronized (this)
         {
             if (stoppingTask != null)
             {
                 stoppingTask.cancel(false);
             }
-            taskQueue.add(wrapper);
+            taskQueue.add(future);
             if (!running)
             {
                 start();
@@ -172,17 +168,14 @@ import com.mattunderscore.executors.ITaskWrapper;
     @Override
     public Future<?> schedule(final Runnable task)
     {
-        final Pair<ITaskWrapper, Future<Void>> tuple = Futures.createTaskAndUnboundedFuture(this,
-                task);
-        final Future<Void> future = tuple.getValue1();
-        final ITaskWrapper wrapper = tuple.getValue0();
+        final RunnableFuture<Void> future = Futures.createTaskAndUnboundedFuture(this,task);
         synchronized (this)
         {
             if (stoppingTask != null)
             {
                 stoppingTask.cancel(false);
             }
-            taskQueue.add(wrapper);
+            taskQueue.add(future);
             if (!running)
             {
                 start();
@@ -197,17 +190,14 @@ import com.mattunderscore.executors.ITaskWrapper;
     @Override
     public IRepeatingFuture<?> schedule(final Runnable task, final int repetitions)
     {
-        final Pair<ITaskWrapper, IRepeatingFuture<Void>> tuple = Futures.createTaskAndFuture(this, task,
-                repetitions);
-        final IRepeatingFuture<Void> future = tuple.getValue1();
-        final ITaskWrapper wrapper = tuple.getValue0();
+        final IRunnableRepeatingFuture<Void> future = Futures.createTaskAndFuture(this, task, repetitions);
         synchronized (this)
         {
             if (stoppingTask != null)
             {
                 stoppingTask.cancel(false);
             }
-            taskQueue.add(wrapper);
+            taskQueue.add(future);
             if (!running)
             {
                 start();
@@ -223,17 +213,14 @@ import com.mattunderscore.executors.ITaskWrapper;
     @Override
     public <V> IRepeatingFuture<V> schedule(final Callable<V> task, final int repetitions)
     {
-        final Pair<ITaskWrapper, IRepeatingFuture<V>> tuple = Futures.createTaskAndFuture(this,
-                task, repetitions);
-        final IRepeatingFuture<V> future = tuple.getValue1();
-        final ITaskWrapper wrapper = tuple.getValue0();
+        final IRunnableRepeatingFuture<V> future = Futures.createTaskAndFuture(this,task, repetitions);
         synchronized (this)
         {
             if (stoppingTask != null)
             {
                 stoppingTask.cancel(false);
             }
-            taskQueue.add(wrapper);
+            taskQueue.add(future);
             if (!running)
             {
                 start();
@@ -269,15 +256,15 @@ import com.mattunderscore.executors.ITaskWrapper;
         @Override
         public void run()
         {
-            final ITaskWrapper taskWrapper = taskQueue.poll();
+            final RunnableFuture<?> taskWrapper = taskQueue.poll();
             if (taskWrapper == null)
             {
                 return;
             }
             executingTask = taskWrapper;
-            taskWrapper.execute();
+            taskWrapper.run();
             executingTask = null;
-            if (!taskWrapper.getFuture().isDone())
+            if (!taskWrapper.isDone())
             {
                 taskQueue.add(taskWrapper);
             }
@@ -316,7 +303,7 @@ import com.mattunderscore.executors.ITaskWrapper;
     }
 
     @Override
-    public boolean cancelTask(final ITaskWrapper wrapper, final boolean mayInterruptIfRunning)
+    public boolean cancelTask(final Runnable wrapper, final boolean mayInterruptIfRunning)
     {
         if (executingTask == wrapper)
         {

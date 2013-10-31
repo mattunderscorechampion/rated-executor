@@ -25,6 +25,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.executors;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 /**

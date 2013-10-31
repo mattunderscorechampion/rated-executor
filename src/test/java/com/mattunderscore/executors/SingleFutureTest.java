@@ -88,7 +88,7 @@ public final class SingleFutureTest
     @Test
     public void testIsCancelled1()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(Runnable.class), Matchers.eq(false))).thenReturn(
                 true);
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
         new RunnableTaskWrapper(new CountingTask(), future);
@@ -101,7 +101,7 @@ public final class SingleFutureTest
     @Test
     public void testIsCancelled2()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(Runnable.class), Matchers.eq(false))).thenReturn(
                 false);
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
         new RunnableTaskWrapper(new CountingTask(), future);
@@ -114,7 +114,7 @@ public final class SingleFutureTest
     @Test
     public void testIsCancelled3()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(Runnable.class), Matchers.eq(true))).thenReturn(
                 true);
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
         new RunnableTaskWrapper(new CountingTask(), future);
@@ -127,7 +127,7 @@ public final class SingleFutureTest
     @Test
     public void testIsCancelled4()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(Runnable.class), Matchers.eq(true))).thenReturn(
                 false);
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
         new RunnableTaskWrapper(new CountingTask(), future);
@@ -140,7 +140,7 @@ public final class SingleFutureTest
     @Test
     public void testIsCancelled5()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(Runnable.class), Matchers.eq(true))).thenReturn(
                 true);
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
         new RunnableTaskWrapper(new CountingTask(), future);
@@ -164,7 +164,7 @@ public final class SingleFutureTest
     @Test
     public void testIsCancelled7()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(Runnable.class), Matchers.eq(false))).thenReturn(
                 true);
         final SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
         new CallableTaskWrapper<Integer>(new NumberCallable(5), future);
@@ -177,7 +177,7 @@ public final class SingleFutureTest
     @Test
     public void testIsCancelled9()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(Runnable.class), Matchers.eq(false))).thenReturn(
                 false);
         SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
         new CallableTaskWrapper<Integer>(new NumberCallable(5), future);
@@ -190,7 +190,7 @@ public final class SingleFutureTest
     @Test
     public void testIsCancelled10()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(Runnable.class), Matchers.eq(true))).thenReturn(
                 true);
         final SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
         new CallableTaskWrapper<Integer>(new NumberCallable(5), future);
@@ -203,7 +203,7 @@ public final class SingleFutureTest
     @Test
     public void testIsCancelled11()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(Runnable.class), Matchers.eq(true))).thenReturn(
                 false);
         final SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
         new CallableTaskWrapper<Integer>(new NumberCallable(5), future);
@@ -216,7 +216,7 @@ public final class SingleFutureTest
     @Test
     public void testIsCancelled12()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(Runnable.class), Matchers.eq(true))).thenReturn(
                 true);
         final SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
         new CallableTaskWrapper<Integer>(new NumberCallable(5), future);
@@ -297,7 +297,7 @@ public final class SingleFutureTest
     @Test(expected = CancellationException.class)
     public void testGet1() throws CancellationException, InterruptedException, ExecutionException
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(Runnable.class), Matchers.eq(false))).thenReturn(
                 true);
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
         new RunnableTaskWrapper(new CountingTask(), future);
@@ -326,7 +326,7 @@ public final class SingleFutureTest
     @Test(expected = CancellationException.class)
     public void testGet4() throws CancellationException, InterruptedException, ExecutionException
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
+        when(canceller.cancelTask(Matchers.any(Runnable.class), Matchers.eq(false))).thenReturn(
                 true);
         final SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
         new CallableTaskWrapper<Integer>(new NumberCallable(5), future);

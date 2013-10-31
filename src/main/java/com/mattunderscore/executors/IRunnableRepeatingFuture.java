@@ -25,26 +25,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.executors;
 
+import java.util.concurrent.RunnableFuture;
+
 /**
- * Implementors of this interface allow tasks to be cancelled.
+ * A repeating, settable, runnable future.
  * <P>
- * It is intended to be implemented by the implementation of the Executor so that they can be used
- * with Future implementations. This allows the Future implementations to be used with any Executor
- * that implements this interface.
+ * This is provided for returning convenient objects that can be used to implement {@link Future}
+ * and {@link Executor} objects.
  * 
  * @author Matt Champion
+ * @param <V>
+ *            The type of object returned by the task
  * @since 0.1.0
  */
-public interface ITaskCanceller
+public interface IRunnableRepeatingFuture<V> extends IRepeatingFuture<V>, RunnableFuture<V>,
+        ISettableFuture<V>
 {
-    /**
-     * Cancel the task passed in.
-     *
-     * @param wrapper
-     *            The task as a runnable future
-     * @param mayInterruptIfRunning
-     *            Interrupt the thread if running
-     * @return Was the task cancelled
-     */
-    public boolean cancelTask(Runnable wrapper, boolean mayInterruptIfRunning);
 }
