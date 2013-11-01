@@ -28,7 +28,7 @@ package com.mattunderscore.rated.executor;
 import com.mattunderscore.executors.ITaskWrapper;
 
 /**
- * The polling executor executes tasks no faster than a fixed rate.
+ * The internal executor executes tasks no faster than a fixed rate.
  * <P>
  * It is not responsible for constructing futures, cancelling tasks or determining when to put
  * tasks on the queue. It is solely responsible for the timing of the execution of tasks.
@@ -36,10 +36,10 @@ import com.mattunderscore.executors.ITaskWrapper;
  * @author Matt Champion
  * @since 0.1.1
  */
-/*package*/ interface PollingExecutor
+/*package*/ interface InternalExecutor
 {
     /**
-     * Submit a task to the polling executor.
+     * Submit a task to the internal executor.
      * 
      * @param wrapper
      *            The task to execute
@@ -47,14 +47,14 @@ import com.mattunderscore.executors.ITaskWrapper;
     public void submit(ITaskWrapper wrapper);
 
     /**
-     * Stop the polling executor if it has no tasks to execute within its period. Any activity
-     * within its period should prevent the stopping of the executor. The polling executor must
+     * Stop the internal executor if it has no tasks to execute within its period. Any activity
+     * within its period should prevent the stopping of the executor. The internal executor must
      * stop no sooner that the period of the task execution.
      */
     public void requestStop();
 
     /**
-     * Stop the polling executor running. Calling this will prevent the polling executor from
+     * Stop the internal executor running. Calling this will prevent the internal executor from
      * trying to remove tasks from the queue. queue.
      */
     public void stop();

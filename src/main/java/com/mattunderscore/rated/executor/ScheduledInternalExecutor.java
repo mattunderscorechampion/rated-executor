@@ -36,12 +36,12 @@ import net.jcip.annotations.GuardedBy;
 import com.mattunderscore.executors.ITaskWrapper;
 
 /**
- * {@link PollingExecutor} implementation based on the {@link ScheduledExecutorService}.
+ * {@link InternalExecutor} implementation based on the {@link ScheduledExecutorService}.
  * 
  * @author Matt Champion
  * @since 0.1.1
  */
-/*package*/ final class ScheduledPollingExecutor implements PollingExecutor
+/*package*/ final class ScheduledInternalExecutor implements InternalExecutor
 {
     private final long rate;
     private final TimeUnit unit;
@@ -57,7 +57,7 @@ import com.mattunderscore.executors.ITaskWrapper;
     @GuardedBy(value = "this")
     private boolean running = false;
 
-    /*package*/ ScheduledPollingExecutor(final TaskQueue taskQueue, final long rate, final TimeUnit unit)
+    /*package*/ ScheduledInternalExecutor(final TaskQueue taskQueue, final long rate, final TimeUnit unit)
     {
         this.service = Executors.newSingleThreadScheduledExecutor();
         this.taskQueue = taskQueue;
@@ -65,7 +65,7 @@ import com.mattunderscore.executors.ITaskWrapper;
         this.unit = unit;
     }
 
-    /*package*/ ScheduledPollingExecutor(final TaskQueue taskQueue, final long rate, final TimeUnit unit,
+    /*package*/ ScheduledInternalExecutor(final TaskQueue taskQueue, final long rate, final TimeUnit unit,
             final ThreadFactory threadFactory)
     {
         this.service = Executors.newSingleThreadScheduledExecutor(threadFactory);

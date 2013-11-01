@@ -51,7 +51,7 @@ import com.mattunderscore.executors.ITaskWrapper;
  */
 /* package */final class RatedExecutor implements IRatedExecutor, ITaskCanceller
 {
-    private final PollingExecutor executor;
+    private final InternalExecutor executor;
     private final TaskQueue taskQueue;
 
     /**
@@ -62,7 +62,7 @@ import com.mattunderscore.executors.ITaskWrapper;
      * @param unit
      *            The rate units
      */
-    public RatedExecutor(final TaskQueue taskQueue, final PollingExecutor executor)
+    public RatedExecutor(final TaskQueue taskQueue, final InternalExecutor executor)
     {
         this.taskQueue = taskQueue;
         this.executor = executor;
