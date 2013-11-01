@@ -46,7 +46,7 @@ public final class UnboundedFuture extends BaseFuture<Void>
     private volatile TaskExecutionResult<Void> result;
     private ITaskWrapper task;
 
-    /*package*/ UnboundedFuture(final ITaskCanceller canceller)
+    public UnboundedFuture(final ITaskCanceller canceller)
     {
         this.canceller = canceller;
     }

@@ -61,7 +61,7 @@ public final class RepeatingFuture<V> extends BaseFuture<V> implements IRepeatin
      * @param repetitions
      *            The number of times it is to repeat
      */
-    /*package*/ RepeatingFuture(final ITaskCanceller canceller, final int repetitions)
+    public RepeatingFuture(final ITaskCanceller canceller, final int repetitions)
     {
         this.canceller = canceller;
         this.repetitions = repetitions;

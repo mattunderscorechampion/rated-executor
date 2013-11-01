@@ -416,7 +416,8 @@ public class RatedExecutorTest
     @Test
     public void testAccuracy() throws InterruptedException
     {
-        IRatedExecutor executor = RatedExecutors.ratedExecutor(ACCURACY_RATE, TimeUnit.MILLISECONDS);
+        IRatedExecutor executor = RatedExecutors
+                .ratedExecutor(ACCURACY_RATE, TimeUnit.MILLISECONDS);
         CountingTask task = new CountingTask();
         long start = System.currentTimeMillis();
         Future<?> future = executor.schedule(task);

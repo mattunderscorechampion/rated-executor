@@ -3,12 +3,12 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
+    * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
+    * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
- * Neither the name of mattunderscore.com nor the
+    * Neither the name of mattunderscore.com nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -23,67 +23,47 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.mattunderscore.executors;
+package com.mattunderscore.rated.executor;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
+import com.mattunderscore.executors.ISettableFuture;
+import com.mattunderscore.executors.ITaskWrapper;
+import com.mattunderscore.executors.TaskResultProcessor;
 
-/**
- * TaskWrapper for Callable tasks.
- * <P>
- * The value returned by the call method will be passed to the future as the result. If any
- * Throwable is caught it will be passed to the Future as the exception.
- * 
- * @author Matt Champion
- * @param <V> Type of the value returned by the task
- * @since 0.1.0
- */
-public final class CallableTaskWrapper<V> implements ITaskWrapper
+public class RatedExecutorTaskResultProcessor<V> implements TaskResultProcessor<V>
 {
-    private final Callable<V> task;
     private final ISettableFuture<V> future;
+    private final InternalExecutor executor;
 
-    /**
-     * Create a task wrapper from a Callable task.
-     * @param task The Callable task
-     * @param future The Future to pass the result to
-     */
-    /*package*/ CallableTaskWrapper(final Callable<V> task, final ISettableFuture<V> future)
+    public RatedExecutorTaskResultProcessor(final ISettableFuture<V> future, final InternalExecutor executor)
     {
-        this.task = task;
         this.future = future;
-        this.future.setTask(this);
+        this.executor = executor;
     }
-
     @Override
-    public void execute()
+    public void onThrowable(ITaskWrapper task, Throwable t)
     {
-        try
+        future.setException(t);
+        if (!future.isDone())
         {
-            V result = task.call();
-            future.setResult(result);
+            executor.submit(task);
         }
-        catch (Throwable t)
+        else
         {
-            future.setException(t);
+            executor.requestStop();
         }
     }
 
     @Override
-    public int hashCode()
+    public void onResult(ITaskWrapper task, V result)
     {
-        return task.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object object)
-    {
-        return this == object;
-    }
-
-    @Override
-    public Future<?> getFuture()
-    {
-        return future;
+        future.setResult(result);
+        if (!future.isDone())
+        {
+            executor.submit(task);
+        }
+        else
+        {
+            executor.requestStop();
+        }
     }
 }

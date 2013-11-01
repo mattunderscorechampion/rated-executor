@@ -40,8 +40,6 @@ import org.mockito.Matchers;
 
 import com.google.code.tempusfugit.concurrency.IntermittentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Intermittent;
-import com.mattunderscore.executors.CallableTaskWrapper;
-import com.mattunderscore.executors.RunnableTaskWrapper;
 import com.mattunderscore.executors.SingleFuture;
 import com.mattunderscore.executors.ITaskCanceller;
 import com.mattunderscore.executors.ITaskWrapper;
@@ -81,17 +79,21 @@ public final class SingleFutureTest
     public void testIsCancelled0()
     {
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
-        new RunnableTaskWrapper(new CountingTask(), future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        new TaskWrapper<Void>(taskwrapper, processor);
         assertFalse(future.isCancelled());
     }
 
     @Test
     public void testIsCancelled1()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
-                true);
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false)))
+                .thenReturn(true);
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
-        new RunnableTaskWrapper(new CountingTask(), future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        new TaskWrapper<Void>(taskwrapper, processor);
         assertFalse(future.isCancelled());
         final boolean cancelled = future.cancel(false);
         assertTrue(future.isCancelled());
@@ -101,10 +103,12 @@ public final class SingleFutureTest
     @Test
     public void testIsCancelled2()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
-                false);
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false)))
+                .thenReturn(false);
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
-        new RunnableTaskWrapper(new CountingTask(), future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        new TaskWrapper<Void>(taskwrapper, processor);
         assertFalse(future.isCancelled());
         final boolean cancelled = future.cancel(false);
         assertFalse(future.isCancelled());
@@ -117,7 +121,9 @@ public final class SingleFutureTest
         when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 true);
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
-        new RunnableTaskWrapper(new CountingTask(), future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        new TaskWrapper<Void>(taskwrapper, processor);
         assertFalse(future.isCancelled());
         boolean cancelled = future.cancel(true);
         assertTrue(future.isCancelled());
@@ -130,7 +136,9 @@ public final class SingleFutureTest
         when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 false);
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
-        new RunnableTaskWrapper(new CountingTask(), future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        new TaskWrapper<Void>(taskwrapper, processor);
         assertFalse(future.isCancelled());
         final boolean cancelled = future.cancel(true);
         assertFalse(future.isCancelled());
@@ -143,7 +151,9 @@ public final class SingleFutureTest
         when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 true);
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
-        new RunnableTaskWrapper(new CountingTask(), future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        new TaskWrapper<Void>(taskwrapper, processor);
         assertFalse(future.isCancelled());
         final boolean cancelled0 = future.cancel(true);
         assertTrue(future.isCancelled());
@@ -157,17 +167,19 @@ public final class SingleFutureTest
     public void testIsCancelled6()
     {
         final SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
-        new CallableTaskWrapper<Integer>(new NumberCallable(5), future);
+        final FutureSetResult<Integer> processor = new FutureSetResult<Integer>(future);
+        new TaskWrapper<Integer>(new NumberCallable(5), processor);
         assertFalse(future.isCancelled());
     }
 
     @Test
     public void testIsCancelled7()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
-                true);
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false)))
+                .thenReturn(true);
         final SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
-        new CallableTaskWrapper<Integer>(new NumberCallable(5), future);
+        final FutureSetResult<Integer> processor = new FutureSetResult<Integer>(future);
+        new TaskWrapper<Integer>(new NumberCallable(5), processor);
         assertFalse(future.isCancelled());
         final boolean cancelled = future.cancel(false);
         assertTrue(future.isCancelled());
@@ -177,10 +189,11 @@ public final class SingleFutureTest
     @Test
     public void testIsCancelled9()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
-                false);
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false)))
+                .thenReturn(false);
         SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
-        new CallableTaskWrapper<Integer>(new NumberCallable(5), future);
+        final FutureSetResult<Integer> processor = new FutureSetResult<Integer>(future);
+        new TaskWrapper<Integer>(new NumberCallable(5), processor);
         assertFalse(future.isCancelled());
         final boolean cancelled = future.cancel(false);
         assertFalse(future.isCancelled());
@@ -193,7 +206,8 @@ public final class SingleFutureTest
         when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 true);
         final SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
-        new CallableTaskWrapper<Integer>(new NumberCallable(5), future);
+        final FutureSetResult<Integer> processor = new FutureSetResult<Integer>(future);
+        new TaskWrapper<Integer>(new NumberCallable(5), processor);
         assertFalse(future.isCancelled());
         final boolean cancelled = future.cancel(true);
         assertTrue(future.isCancelled());
@@ -206,7 +220,8 @@ public final class SingleFutureTest
         when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 false);
         final SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
-        new CallableTaskWrapper<Integer>(new NumberCallable(5), future);
+        final FutureSetResult<Integer> processor = new FutureSetResult<Integer>(future);
+        new TaskWrapper<Integer>(new NumberCallable(5), processor);
         assertFalse(future.isCancelled());
         final boolean cancelled = future.cancel(true);
         assertFalse(future.isCancelled());
@@ -219,7 +234,8 @@ public final class SingleFutureTest
         when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 true);
         final SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
-        new CallableTaskWrapper<Integer>(new NumberCallable(5), future);
+        final FutureSetResult<Integer> processor = new FutureSetResult<Integer>(future);
+        new TaskWrapper<Integer>(new NumberCallable(5), processor);
         assertFalse(future.isCancelled());
         final boolean cancelled0 = future.cancel(true);
         assertTrue(future.isCancelled());
@@ -235,7 +251,9 @@ public final class SingleFutureTest
     public void testIsDone0()
     {
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
-        new RunnableTaskWrapper(new CountingTask(), future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        new TaskWrapper<Void>(taskwrapper, processor);
         assertFalse(future.isDone());
     }
 
@@ -243,7 +261,9 @@ public final class SingleFutureTest
     public void testIsDone1()
     {
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
-        new RunnableTaskWrapper(new CountingTask(), future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        new TaskWrapper<Void>(taskwrapper, processor);
         future.setResult(null);
         assertTrue(future.isDone());
     }
@@ -252,8 +272,10 @@ public final class SingleFutureTest
     public void testIsDone2()
     {
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
-        final ITaskWrapper task = new RunnableTaskWrapper(new CountingTask(), future);
-        task.execute();
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        final ITaskWrapper wrapper = new TaskWrapper<Void>(taskwrapper, processor);
+        wrapper.execute();
         assertTrue(future.isDone());
     }
 
@@ -261,7 +283,8 @@ public final class SingleFutureTest
     public void testIsDone3()
     {
         final SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
-        new CallableTaskWrapper<Integer>(new NumberCallable(5), future);
+        final FutureSetResult<Integer> processor = new FutureSetResult<Integer>(future);
+        new TaskWrapper<Integer>(new NumberCallable(5), processor);
         assertFalse(future.isDone());
     }
 
@@ -269,7 +292,8 @@ public final class SingleFutureTest
     public void testIsDone4()
     {
         final SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
-        new CallableTaskWrapper<Integer>(new NumberCallable(5), future);
+        final FutureSetResult<Integer> processor = new FutureSetResult<Integer>(future);
+        new TaskWrapper<Integer>(new NumberCallable(5), processor);
         future.setResult(null);
         assertTrue(future.isDone());
     }
@@ -278,8 +302,9 @@ public final class SingleFutureTest
     public void testIsDone5()
     {
         final SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
-        final ITaskWrapper task = new CallableTaskWrapper<Integer>(new NumberCallable(5), future);
-        task.execute();
+        final FutureSetResult<Integer> processor = new FutureSetResult<Integer>(future);
+        final ITaskWrapper wrapper = new TaskWrapper<Integer>(new NumberCallable(5), processor);
+        wrapper.execute();
         assertTrue(future.isDone());
     }
 
@@ -289,18 +314,22 @@ public final class SingleFutureTest
     public void testGet0() throws CancellationException, InterruptedException, ExecutionException
     {
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
-        final ITaskWrapper task = new RunnableTaskWrapper(new CountingTask(), future);
-        task.execute();
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        final ITaskWrapper wrapper = new TaskWrapper<Void>(taskwrapper, processor);
+        wrapper.execute();
         assertTrue(future.get() == null);
     }
 
     @Test(expected = CancellationException.class)
     public void testGet1() throws CancellationException, InterruptedException, ExecutionException
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
-                true);
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false)))
+                .thenReturn(true);
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
-        new RunnableTaskWrapper(new CountingTask(), future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        new TaskWrapper<Void>(taskwrapper, processor);
         future.cancel(false);
         future.get();
     }
@@ -309,8 +338,10 @@ public final class SingleFutureTest
     public void testGet2() throws CancellationException, InterruptedException, ExecutionException
     {
         final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
-        final ITaskWrapper task = new RunnableTaskWrapper(new ExceptionTask(), future);
-        task.execute();
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new ExceptionTask());
+        final ITaskWrapper wrapper = new TaskWrapper<Void>(taskwrapper, processor);
+        wrapper.execute();
         future.get();
     }
 
@@ -318,18 +349,20 @@ public final class SingleFutureTest
     public void testGet3() throws CancellationException, InterruptedException, ExecutionException
     {
         final SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
-        final ITaskWrapper task = new CallableTaskWrapper<Integer>(new NumberCallable(5), future);
-        task.execute();
+        final FutureSetResult<Integer> processor = new FutureSetResult<Integer>(future);
+        final ITaskWrapper wrapper = new TaskWrapper<Integer>(new NumberCallable(5), processor);
+        wrapper.execute();
         assertEquals(Integer.valueOf(5), future.get());
     }
 
     @Test(expected = CancellationException.class)
     public void testGet4() throws CancellationException, InterruptedException, ExecutionException
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
-                true);
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false)))
+                .thenReturn(true);
         final SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
-        new CallableTaskWrapper<Integer>(new NumberCallable(5), future);
+        final FutureSetResult<Integer> processor = new FutureSetResult<Integer>(future);
+        new TaskWrapper<Integer>(new NumberCallable(5), processor);
         future.cancel(false);
         future.get();
     }
@@ -338,8 +371,9 @@ public final class SingleFutureTest
     public void testGet5() throws CancellationException, InterruptedException, ExecutionException
     {
         final SingleFuture<Object> future = new SingleFuture<Object>(canceller);
-        final ITaskWrapper task = new CallableTaskWrapper<Object>(new ExceptionCallable(), future);
-        task.execute();
+        final FutureSetResult<Object> processor = new FutureSetResult<Object>(future);
+        final ITaskWrapper wrapper = new TaskWrapper<Object>(new ExceptionCallable(), processor);
+        wrapper.execute();
         future.get();
     }
 
@@ -351,7 +385,9 @@ public final class SingleFutureTest
         try
         {
             final SingleFuture<Void> future = new SingleFuture<Void>(canceller);
-            new RunnableTaskWrapper(new CountingTask(), future);
+            final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+            final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+            new TaskWrapper<Void>(taskwrapper, processor);
             start = System.nanoTime();
             future.get(TIMEOUT, TimeUnit.MILLISECONDS);
         }
@@ -374,7 +410,8 @@ public final class SingleFutureTest
         try
         {
             final SingleFuture<Integer> future = new SingleFuture<Integer>(canceller);
-            new CallableTaskWrapper<Integer>(new NumberCallable(5), future);
+            final FutureSetResult<Integer> processor = new FutureSetResult<Integer>(future);
+            new TaskWrapper<Integer>(new NumberCallable(5), processor);
             start = System.nanoTime();
             future.get(TIMEOUT, TimeUnit.MILLISECONDS);
         }

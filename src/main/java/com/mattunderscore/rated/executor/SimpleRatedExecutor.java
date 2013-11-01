@@ -23,65 +23,36 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.mattunderscore.executors;
+package com.mattunderscore.rated.executor;
 
-import java.util.concurrent.Future;
+import java.util.concurrent.Callable;
 
-/**
- * TaskWrapper for Runnable tasks.
- * <P>
- * If any Throwable is caught it will be passed to the Future as the exception. If no exception is
- * caught the result will be set to the null reference.
- * 
- * @author Matt Champion
- * @since 0.1.0
- */
-public final class RunnableTaskWrapper implements ITaskWrapper
+import com.mattunderscore.executors.DiscardResult;
+import com.mattunderscore.executors.RunnableWrapper;
+import com.mattunderscore.executors.TaskWrapper;
+import com.mattunderscore.executors.UniversalExecutor;
+
+public class SimpleRatedExecutor implements UniversalExecutor
 {
-    private final Runnable task;
-    private final ISettableFuture<Void> future;
+    private final InternalExecutor executor;
 
-    /**
-     * Create a task wrapper from a Runnable task.
-     * @param task The Runnable task
-     * @param future The Future to pass the result to
-     */
-    /*package*/ RunnableTaskWrapper(final Runnable task, final ISettableFuture<Void> future)
+    public SimpleRatedExecutor(final InternalExecutor executor)
     {
-        this.task = task;
-        this.future = future;
-        this.future.setTask(this);
+        this.executor = executor;
     }
 
     @Override
-    public void execute()
+    public void execute(Runnable task)
     {
-        try
-        {
-            task.run();
-            future.setResult(null);
-        }
-        catch (Throwable t)
-        {
-            future.setException(t);
-        }
+        final Callable<Void> wrappedTask = new RunnableWrapper(task);
+        final TaskWrapper<Void> thing = new TaskWrapper<Void>(wrappedTask, DiscardResult.voidDiscarder);
+        executor.submit(thing);
     }
 
-    @Override
-    public int hashCode()
+    public <V> void execute(Callable<V> task)
     {
-        return task.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object object)
-    {
-        return this == object;
-    }
-
-    @Override
-    public Future<?> getFuture()
-    {
-        return future;
+        final DiscardResult<V> processor = new DiscardResult<V>();
+        final TaskWrapper<V> thing = new TaskWrapper<V>(task, processor);
+        executor.submit(thing);
     }
 }

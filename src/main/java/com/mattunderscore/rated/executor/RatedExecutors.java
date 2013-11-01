@@ -25,8 +25,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.rated.executor;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+
 
 /**
  * Utility class that allows the construction of {@link RatedExecutor} objects.
@@ -82,5 +84,20 @@ public final class RatedExecutors
         final TaskQueue queue = new TaskQueue();
         final InternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit, factory);
         return new RatedExecutor(queue, executor);
+    }
+
+    public static Executor simpleRatedExecutor(final long rate, final TimeUnit unit)
+    {
+        final TaskQueue queue = new TaskQueue();
+        final InternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit);
+        return new SimpleRatedExecutor(executor);
+    }
+
+    public static Executor simpleRatedExecutor(final long rate, final TimeUnit unit,
+            final ThreadFactory factory)
+    {
+        final TaskQueue queue = new TaskQueue();
+        final InternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit, factory);
+        return new SimpleRatedExecutor(executor);
     }
 }

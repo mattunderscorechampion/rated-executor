@@ -111,6 +111,10 @@ import com.mattunderscore.executors.ITaskWrapper;
      */
     public boolean isCurrentTask(final ITaskWrapper task)
     {
+        if (task == null)
+        {
+            throw new NullPointerException();
+        }
         return currentTask == task;
     }
 }

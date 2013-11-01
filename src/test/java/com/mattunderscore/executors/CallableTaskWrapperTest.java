@@ -3,12 +3,12 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
+ * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
+ * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of mattunderscore.com nor the
+ * Neither the name of mattunderscore.com nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -34,7 +34,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import com.mattunderscore.executors.CallableTaskWrapper;
 import com.mattunderscore.executors.ISettableFuture;
 import com.mattunderscore.task.stubs.CountingCallable;
 import com.mattunderscore.task.stubs.ExceptionCallable;
@@ -58,38 +57,37 @@ public class CallableTaskWrapperTest
     public void setUp()
     {
         integerFuture = mock(ISettableFuture.class);
-        objectFuture =  mock(ISettableFuture.class);
+        objectFuture = mock(ISettableFuture.class);
     }
 
     @Test
     public void testCountingTask()
     {
         final CountingCallable task = new CountingCallable();
-        final CallableTaskWrapper<Integer> wrapper = new CallableTaskWrapper<Integer>(task, integerFuture);
+        final FutureSetResult<Integer> processor = new FutureSetResult<Integer>(integerFuture);
+        final ITaskWrapper wrapper = new TaskWrapper<Integer>(task, processor);
         assertEquals(task.count, 0);
         wrapper.execute();
         assertEquals(task.count, 1);
-        ArgumentCaptor<Integer> captor0 = ArgumentCaptor
-                .forClass(Integer.class);
+        ArgumentCaptor<Integer> captor0 = ArgumentCaptor.forClass(Integer.class);
         verify(integerFuture, times(1)).setResult(captor0.capture());
-        assertEquals(Integer.valueOf(1),captor0.getValue());
+        assertEquals(Integer.valueOf(1), captor0.getValue());
         wrapper.execute();
         assertEquals(task.count, 2);
-        ArgumentCaptor<Integer> captor1 = ArgumentCaptor
-                .forClass(Integer.class);
+        ArgumentCaptor<Integer> captor1 = ArgumentCaptor.forClass(Integer.class);
         verify(integerFuture, times(2)).setResult(captor1.capture());
-        assertEquals(Integer.valueOf(2),captor1.getValue());
+        assertEquals(Integer.valueOf(2), captor1.getValue());
     }
 
     @Test
     public void testExceptionTask()
     {
         final ExceptionCallable task = new ExceptionCallable();
-        final CallableTaskWrapper<Object> wrapper = new CallableTaskWrapper<Object>(task, objectFuture);
+        final FutureSetResult<Object> processor = new FutureSetResult<Object>(objectFuture);
+        final ITaskWrapper wrapper = new TaskWrapper<Object>(task, processor);
         wrapper.execute();
-        ArgumentCaptor<Throwable> captor = ArgumentCaptor
-                .forClass(Throwable.class);
+        ArgumentCaptor<Throwable> captor = ArgumentCaptor.forClass(Throwable.class);
         verify(objectFuture, times(1)).setException(captor.capture());
-        assertEquals(TestException.class,captor.getValue().getClass());
+        assertEquals(TestException.class, captor.getValue().getClass());
     }
 }

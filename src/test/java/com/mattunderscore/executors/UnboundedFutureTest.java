@@ -3,12 +3,12 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
+ * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
+ * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of mattunderscore.com nor the
+ * Neither the name of mattunderscore.com nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -36,7 +36,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 
-import com.mattunderscore.executors.RunnableTaskWrapper;
 import com.mattunderscore.executors.ITaskCanceller;
 import com.mattunderscore.executors.ITaskWrapper;
 import com.mattunderscore.executors.UnboundedFuture;
@@ -70,17 +69,21 @@ public class UnboundedFutureTest
     public void testIsCancelled0()
     {
         final UnboundedFuture future = new UnboundedFuture(canceller);
-        new RunnableTaskWrapper(new CountingTask(),future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        new TaskWrapper<Void>(taskwrapper, processor);
         assertFalse(future.isCancelled());
     }
 
     @Test
     public void testIsCancelled1()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
-                true);
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false)))
+                .thenReturn(true);
         final UnboundedFuture future = new UnboundedFuture(canceller);
-        new RunnableTaskWrapper(new CountingTask(),future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        new TaskWrapper<Void>(taskwrapper, processor);
         assertFalse(future.isCancelled());
         boolean cancelled = future.cancel(false);
         assertTrue(future.isCancelled());
@@ -90,10 +93,12 @@ public class UnboundedFutureTest
     @Test
     public void testIsCancelled2()
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
-                false);
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false)))
+                .thenReturn(false);
         final UnboundedFuture future = new UnboundedFuture(canceller);
-        new RunnableTaskWrapper(new CountingTask(),future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        new TaskWrapper<Void>(taskwrapper, processor);
         assertFalse(future.isCancelled());
         boolean cancelled = future.cancel(false);
         assertFalse(future.isCancelled());
@@ -106,7 +111,9 @@ public class UnboundedFutureTest
         when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 true);
         final UnboundedFuture future = new UnboundedFuture(canceller);
-        new RunnableTaskWrapper(new CountingTask(),future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        new TaskWrapper<Void>(taskwrapper, processor);
         assertFalse(future.isCancelled());
         boolean cancelled = future.cancel(true);
         assertTrue(future.isCancelled());
@@ -119,7 +126,9 @@ public class UnboundedFutureTest
         when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(true))).thenReturn(
                 true);
         final UnboundedFuture future = new UnboundedFuture(canceller);
-        new RunnableTaskWrapper(new CountingTask(),future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        new TaskWrapper<Void>(taskwrapper, processor);
         assertFalse(future.isCancelled());
         boolean cancelled0 = future.cancel(true);
         assertTrue(future.isCancelled());
@@ -135,7 +144,9 @@ public class UnboundedFutureTest
     public void testIsDone0()
     {
         final UnboundedFuture future = new UnboundedFuture(canceller);
-        new RunnableTaskWrapper(new CountingTask(),future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        new TaskWrapper<Void>(taskwrapper, processor);
         assertFalse(future.isDone());
     }
 
@@ -143,11 +154,13 @@ public class UnboundedFutureTest
     public void testIsDone1()
     {
         final UnboundedFuture future = new UnboundedFuture(canceller);
-        final ITaskWrapper task = new RunnableTaskWrapper(new CountingTask(),future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        final ITaskWrapper wrapper = new TaskWrapper<Void>(taskwrapper, processor);
         for (int i = 0; i < REPETITIONS; i++)
         {
             assertFalse(future.isDone());
-            task.execute();
+            wrapper.execute();
         }
         assertFalse(future.isDone());
     }
@@ -158,18 +171,22 @@ public class UnboundedFutureTest
     public void testGet0() throws CancellationException, InterruptedException, ExecutionException
     {
         final UnboundedFuture future = new UnboundedFuture(canceller);
-        final ITaskWrapper task = new RunnableTaskWrapper(new CountingTask(),future);
-        task.execute();
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        final ITaskWrapper wrapper = new TaskWrapper<Void>(taskwrapper, processor);
+        wrapper.execute();
         assertTrue(future.get() == null);
     }
 
     @Test(expected = CancellationException.class)
     public void testGet1() throws CancellationException, InterruptedException, ExecutionException
     {
-        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false))).thenReturn(
-                true);
+        when(canceller.cancelTask(Matchers.any(ITaskWrapper.class), Matchers.eq(false)))
+                .thenReturn(true);
         final UnboundedFuture future = new UnboundedFuture(canceller);
-        new RunnableTaskWrapper(new CountingTask(),future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        new TaskWrapper<Void>(taskwrapper, processor);
         future.cancel(false);
         future.get();
     }
@@ -178,8 +195,10 @@ public class UnboundedFutureTest
     public void testGet2() throws CancellationException, InterruptedException, ExecutionException
     {
         final UnboundedFuture future = new UnboundedFuture(canceller);
-        final ITaskWrapper task = new RunnableTaskWrapper(new ExceptionTask(),future);
-        task.execute();
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new ExceptionTask());
+        final ITaskWrapper wrapper = new TaskWrapper<Void>(taskwrapper, processor);
+        wrapper.execute();
         future.get();
     }
 }

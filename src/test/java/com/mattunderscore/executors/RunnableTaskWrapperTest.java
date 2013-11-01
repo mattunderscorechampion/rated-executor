@@ -33,7 +33,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import com.mattunderscore.executors.ISettableFuture;
-import com.mattunderscore.executors.RunnableTaskWrapper;
 import com.mattunderscore.task.stubs.CountingTask;
 import com.mattunderscore.task.stubs.ExceptionTask;
 import com.mattunderscore.task.stubs.TestException;
@@ -53,7 +52,9 @@ public class RunnableTaskWrapperTest
     public void testCountingTask()
     {
         final CountingTask task = new CountingTask();
-        final RunnableTaskWrapper wrapper = new RunnableTaskWrapper(task, future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(task);
+        final ITaskWrapper wrapper = new TaskWrapper<Void>(taskwrapper, processor);
         assertEquals(task.count, 0);
         wrapper.execute();
         assertEquals(task.count, 1);
@@ -67,7 +68,9 @@ public class RunnableTaskWrapperTest
     public void testExceptionTask()
     {
         final ExceptionTask task = new ExceptionTask();
-        final RunnableTaskWrapper wrapper = new RunnableTaskWrapper(task, future);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(task);
+        final ITaskWrapper wrapper = new TaskWrapper<Void>(taskwrapper, processor);
         wrapper.execute();
         ArgumentCaptor<Throwable> captor = ArgumentCaptor
                 .forClass(Throwable.class);

@@ -26,20 +26,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 package com.mattunderscore.executors;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.lang.Runnable;
+import java.util.concurrent.Executor;
 
-/**
- * Provides a single interface for both {@link Runnable} and {@link Callable}.
- * <P>
- * The result of the executed method should be passed to a {@link Future}.
- * @author Matt Champion
- * @since 0.1.0
- */
-public interface ITaskWrapper
+public interface UniversalExecutor extends Executor
 {
-    /**
-     * Execute the task and set the result of the future.
-     */
-    public void execute();
+    public <V> void execute(Callable<V> task);
 }

@@ -53,13 +53,5 @@ class ExecutingTask implements Runnable
         }
         taskWrapper.execute();
         taskQueue.clearCurrentTask();
-        if (!taskWrapper.getFuture().isDone())
-        {
-            executor.submit(taskWrapper);
-        }
-        else
-        {
-            executor.requestStop();
-        }
     }
 }

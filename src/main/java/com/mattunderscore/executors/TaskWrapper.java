@@ -1,4 +1,4 @@
-/* Copyright © 2013 Matthew Champion
+/* Copyright © 2013 Matthew ChaObjectmpion
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,39 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 package com.mattunderscore.executors;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.lang.Runnable;
 
-/**
- * Provides a single interface for both {@link Runnable} and {@link Callable}.
- * <P>
- * The result of the executed method should be passed to a {@link Future}.
- * @author Matt Champion
- * @since 0.1.0
- */
-public interface ITaskWrapper
+public class TaskWrapper<V> implements ITaskWrapper
 {
-    /**
-     * Execute the task and set the result of the future.
-     */
-    public void execute();
+    private final Callable<V> task;
+    private final TaskResultProcessor<V> processor;
+    
+    public TaskWrapper(final Callable<V> task, final TaskResultProcessor<V> processor)
+    {
+        this.task = task;
+        this.processor = processor;
+    }
+
+    @Override
+    public void execute()
+    {
+        try
+        {
+            final V result = task.call();
+            processor.onResult(this,result);
+        }
+        catch(Throwable t)
+        {
+            processor.onThrowable(this,t);
+        }
+    }
+    
+    public int hashCode()
+    {
+        return task.hashCode();
+    }
+    
+    public boolean equals(Object o)
+    {
+        return this == o;
+    }
 }

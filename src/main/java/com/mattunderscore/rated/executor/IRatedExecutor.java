@@ -26,10 +26,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 package com.mattunderscore.rated.executor;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
 import com.mattunderscore.executors.IRepeatingFuture;
+import com.mattunderscore.executors.UniversalExecutor;
 
 /**
  * Interface for rated executors, it will execute tasks at a fixed rate.
@@ -48,7 +48,7 @@ import com.mattunderscore.executors.IRepeatingFuture;
  * @author Matt Champion
  * @since 0.0.1
  */
-public interface IRatedExecutor extends Executor
+public interface IRatedExecutor extends UniversalExecutor
 {
     /**
      * Submit a task to be executed once.
