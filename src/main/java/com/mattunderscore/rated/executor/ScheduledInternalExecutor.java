@@ -41,7 +41,7 @@ import com.mattunderscore.executors.ITaskWrapper;
  * @author Matt Champion
  * @since 0.1.1
  */
-/*package*/ final class ScheduledInternalExecutor implements InternalExecutor
+/* package */final class ScheduledInternalExecutor implements InternalExecutor
 {
     private final long rate;
     private final TimeUnit unit;
@@ -57,7 +57,8 @@ import com.mattunderscore.executors.ITaskWrapper;
     @GuardedBy(value = "this")
     private boolean running = false;
 
-    /*package*/ ScheduledInternalExecutor(final TaskQueue taskQueue, final long rate, final TimeUnit unit)
+    /* package */ScheduledInternalExecutor(final TaskQueue taskQueue, final long rate,
+            final TimeUnit unit)
     {
         this.service = Executors.newSingleThreadScheduledExecutor();
         this.taskQueue = taskQueue;
@@ -65,8 +66,8 @@ import com.mattunderscore.executors.ITaskWrapper;
         this.unit = unit;
     }
 
-    /*package*/ ScheduledInternalExecutor(final TaskQueue taskQueue, final long rate, final TimeUnit unit,
-            final ThreadFactory threadFactory)
+    /* package */ScheduledInternalExecutor(final TaskQueue taskQueue, final long rate,
+            final TimeUnit unit, final ThreadFactory threadFactory)
     {
         this.service = Executors.newSingleThreadScheduledExecutor(threadFactory);
         this.taskQueue = taskQueue;
@@ -99,8 +100,7 @@ import com.mattunderscore.executors.ITaskWrapper;
         }
         else
         {
-            thisTask = service.scheduleAtFixedRate(new ExecutingTask(taskQueue, this), 0, rate,
-                    unit);
+            thisTask = service.scheduleAtFixedRate(new ExecutingTask(taskQueue), 0, rate, unit);
             running = true;
         }
     }

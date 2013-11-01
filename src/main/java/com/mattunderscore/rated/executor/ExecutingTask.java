@@ -35,12 +35,10 @@ import com.mattunderscore.executors.ITaskWrapper;
 class ExecutingTask implements Runnable
 {
     private final TaskQueue taskQueue;
-    private final InternalExecutor executor;
 
-    public ExecutingTask(final TaskQueue taskQueue, final InternalExecutor executor)
+    public ExecutingTask(final TaskQueue taskQueue)
     {
         this.taskQueue = taskQueue;
-        this.executor = executor;
     }
 
     @Override
