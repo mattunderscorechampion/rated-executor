@@ -58,4 +58,10 @@ import com.mattunderscore.executors.ITaskWrapper;
      * trying to remove tasks from the queue. queue.
      */
     public void stop();
+
+    /**
+     * Attempt to interrupt the executing task.
+     * @return True if the thread was interrupted
+     */
+    public boolean interrupt();
 }

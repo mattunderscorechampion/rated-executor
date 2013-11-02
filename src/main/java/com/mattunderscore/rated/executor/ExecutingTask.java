@@ -32,7 +32,7 @@ import com.mattunderscore.executors.ITaskWrapper;
  * 
  * @author Matt Champion
  */
-class ExecutingTask implements Runnable
+/*package*/ class ExecutingTask implements Runnable
 {
     private final TaskQueue taskQueue;
 

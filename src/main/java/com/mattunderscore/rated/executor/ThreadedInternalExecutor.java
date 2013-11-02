@@ -25,64 +25,47 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.rated.executor;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import net.jcip.annotations.GuardedBy;
-
 import com.mattunderscore.executors.ITaskWrapper;
 
-/**
- * {@link IInternalExecutor} implementation based on the {@link ScheduledExecutorService}.
- * 
- * @author Matt Champion
- * @since 0.1.1
- */
-/* package */final class ScheduledInternalExecutor implements IInternalExecutor
+/*package*/class ThreadedInternalExecutor implements IInternalExecutor
 {
     private final long rate;
     private final TimeUnit unit;
     private final TaskQueue taskQueue;
-    private final ScheduledExecutorService service;
-    // thisTask is always accessed within a synchronised block
-    @GuardedBy(value = "this")
-    private ScheduledFuture<?> thisTask;
-    // stoppingTask is always accessed within a synchronised block
-    @GuardedBy(value = "this")
-    private ScheduledFuture<?> stoppingTask;
-    // running is always accessed within a synchronised block
-    @GuardedBy(value = "this")
+    private final LoopingTask thisTask;
+    private Thread thread;
     private boolean running = false;
+    private boolean stopping = false;
+    private boolean interruptable;
 
-    /* package */ScheduledInternalExecutor(final TaskQueue taskQueue, final long rate,
+    /* package */ThreadedInternalExecutor(final TaskQueue taskQueue, final long rate,
             final TimeUnit unit)
     {
-        this.service = Executors.newSingleThreadScheduledExecutor();
+        this.thisTask = new LoopingTask();
+        //this.thread = new Thread(thisTask);
         this.taskQueue = taskQueue;
         this.rate = rate;
         this.unit = unit;
     }
 
-    /* package */ScheduledInternalExecutor(final TaskQueue taskQueue, final long rate,
-            final TimeUnit unit, final ThreadFactory threadFactory)
+    /* package */ThreadedInternalExecutor(final TaskQueue taskQueue, final long rate,
+            final TimeUnit unit, final ThreadFactory factory)
     {
-        this.service = Executors.newSingleThreadScheduledExecutor(threadFactory);
+        this.thisTask = new LoopingTask();
+        //this.thread = factory.newThread(thisTask);
         this.taskQueue = taskQueue;
         this.rate = rate;
         this.unit = unit;
     }
 
     @Override
-    public synchronized void submit(final ITaskWrapper wrapper)
+    public void submit(ITaskWrapper wrapper)
     {
-        if (stoppingTask != null)
-        {
-            stoppingTask.cancel(false);
-        }
         taskQueue.add(wrapper);
+        stopping = false;
         if (!running)
         {
             start();
@@ -100,47 +83,78 @@ import com.mattunderscore.executors.ITaskWrapper;
         }
         else
         {
-            thisTask = service.scheduleAtFixedRate(new ExecutingTask(taskQueue), 0, rate, unit);
             running = true;
+            this.thread = new Thread(thisTask);
+            this.thread.start();
         }
     }
 
     @Override
-    public synchronized void requestStop()
+    public void requestStop()
     {
         if (taskQueue.isEmpty())
         {
-            stoppingTask = service.schedule(new StoppingTask(), rate, unit);
+            stopping = true;
         }
     }
 
     @Override
-    public synchronized void stop()
+    public void stop()
     {
         if (running)
         {
-            thisTask.cancel(false);
             running = false;
-        }
-    }
-
-    /**
-     * Runnable that halts the scheduled task that consumes rated tasks.
-     * 
-     * @author Matt Champion
-     */
-    private class StoppingTask implements Runnable
-    {
-        @Override
-        public void run()
-        {
-            stop();
         }
     }
 
     @Override
     public boolean interrupt()
     {
-        return false;
+        if (interruptable)
+        {
+            thread.interrupt();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private final class LoopingTask implements Runnable
+    {
+        public void run()
+        {
+            while (running)
+            {
+                final ITaskWrapper task = taskQueue.poll();
+                if (task != null)
+                {
+                    interruptable = true;
+                    task.execute();
+                    interruptable = false;
+                }
+                long targetTime = System.currentTimeMillis()
+                        + TimeUnit.MILLISECONDS.convert(rate, unit);
+                while (true)
+                {
+                    try
+                    {
+                        unit.sleep(rate);
+                    }
+                    catch (InterruptedException e)
+                    {
+                    }
+                    if (System.currentTimeMillis() >= targetTime)
+                    {
+                        break;
+                    }
+                }
+                if (stopping)
+                {
+                    stop();
+                }
+            }
+        }
     }
 }
