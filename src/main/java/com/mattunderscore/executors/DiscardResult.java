@@ -25,8 +25,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.executors;
 
-public class DiscardResult<V> implements TaskResultProcessor<V>
+import net.jcip.annotations.Immutable;
+
+/**
+ * Handle the result of a task by discarding it.
+ * @author Matt Champion
+ * @param <V>
+ * @since 0.1.1
+ */
+@Immutable
+public final class DiscardResult<V> implements TaskResultProcessor<V>
 {
+    /**
+     * Void implementation can be used with runnable tasks.
+     */
     public final static DiscardResult<Void> voidDiscarder = new DiscardResult<Void>();
 
     @Override

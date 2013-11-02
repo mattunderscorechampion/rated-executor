@@ -32,6 +32,11 @@ import com.mattunderscore.executors.RunnableWrapper;
 import com.mattunderscore.executors.TaskWrapper;
 import com.mattunderscore.executors.UniversalExecutor;
 
+/**
+ * A simple rated executor that returns no {@link Future}s.
+ * @author Matt Champion
+ * @since 0.1.1
+ */
 public class SimpleRatedExecutor implements UniversalExecutor
 {
     private final InternalExecutor executor;

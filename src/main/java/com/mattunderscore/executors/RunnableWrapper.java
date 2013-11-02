@@ -27,10 +27,22 @@ package com.mattunderscore.executors;
 
 import java.util.concurrent.Callable;
 
+/**
+ * Construct a {@link Callable} task from a {@link Runnable} task.
+ * <P>
+ * This allows the same logic to be used to handle both types of task.
+ * 
+ * @author Matt Champion
+ * @since 0.1.1
+ */
 public class RunnableWrapper implements Callable<Void>
 {
-    public final Runnable task;
+    private final Runnable task;
 
+    /**
+     * Construct the task
+     * @param task
+     */
     public RunnableWrapper(final Runnable task)
     {
         this.task = task;
@@ -43,11 +55,13 @@ public class RunnableWrapper implements Callable<Void>
         return null;
     }
 
+    @Override
     public int hashCode()
     {
         return task.hashCode();
     }
-    
+
+    @Override
     public boolean equals(Object o)
     {
         return this == o;

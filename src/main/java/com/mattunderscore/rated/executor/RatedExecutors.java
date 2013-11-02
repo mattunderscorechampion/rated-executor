@@ -25,10 +25,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.rated.executor;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import com.mattunderscore.executors.UniversalExecutor;
 
 /**
  * Utility class that allows the construction of {@link RatedExecutor} objects.
@@ -86,14 +86,42 @@ public final class RatedExecutors
         return new RatedExecutor(queue, executor);
     }
 
-    public static Executor simpleRatedExecutor(final long rate, final TimeUnit unit)
+    /**
+     * Creates a new rated executor.
+     * <P>
+     * This provides a simple interface that allows tasks to be executed but does not return a
+     * Future. This executor is single threaded, if a task takes longer than the executor rate it
+     * will delay scheduled tasks.
+     * 
+     * @param rate
+     *            The rate of the executor
+     * @param unit
+     *            The time unit of the rate
+     * @return The executor
+     */
+    public static UniversalExecutor simpleRatedExecutor(final long rate, final TimeUnit unit)
     {
         final TaskQueue queue = new TaskQueue();
         final InternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit);
         return new SimpleRatedExecutor(executor);
     }
 
-    public static Executor simpleRatedExecutor(final long rate, final TimeUnit unit,
+    /**
+     * Creates a new rated executor.
+     * <P>
+     * This provides a simple interface that allows tasks to be executed but does not return a
+     * Future. This executor is single threaded, if a task takes longer than the executor rate it
+     * will delay scheduled tasks.
+     * 
+     * @param rate
+     *            The rate of the executor
+     * @param unit
+     *            The time unit of the rate
+     * @param factory
+     *            The thread factory used to create the thread
+     * @return The executor
+     */
+    public static UniversalExecutor simpleRatedExecutor(final long rate, final TimeUnit unit,
             final ThreadFactory factory)
     {
         final TaskQueue queue = new TaskQueue();

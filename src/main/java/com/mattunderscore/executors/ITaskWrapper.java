@@ -32,7 +32,7 @@ import java.lang.Runnable;
 /**
  * Provides a single interface for both {@link Runnable} and {@link Callable}.
  * <P>
- * The result of the executed method should be passed to a {@link Future}.
+ * The result of the executed method may be passed to a {@link Future}.
  * @author Matt Champion
  * @since 0.1.0
  */

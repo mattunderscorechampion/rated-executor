@@ -3,12 +3,12 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
+ * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
+ * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of mattunderscore.com nor the
+ * Neither the name of mattunderscore.com nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -27,11 +27,24 @@ package com.mattunderscore.executors;
 
 import java.util.concurrent.Callable;
 
-public class TaskWrapper<V> implements ITaskWrapper
+/**
+ * A task wrapper for {@link Callable} tasks.
+ * <P>
+ * The handling of the result of the task is provided by the {@link TaskResultProcessor}.
+ * @author Matt Champion
+ * @param <V>
+ * @since 0.1.1
+ */
+public final class TaskWrapper<V> implements ITaskWrapper
 {
     private final Callable<V> task;
     private final TaskResultProcessor<V> processor;
-    
+
+    /**
+     * Create the task wrapper
+     * @param task The task
+     * @param processor How to handle the result
+     */
     public TaskWrapper(final Callable<V> task, final TaskResultProcessor<V> processor)
     {
         this.task = task;
@@ -44,19 +57,21 @@ public class TaskWrapper<V> implements ITaskWrapper
         try
         {
             final V result = task.call();
-            processor.onResult(this,result);
+            processor.onResult(this, result);
         }
-        catch(Throwable t)
+        catch (Throwable t)
         {
-            processor.onThrowable(this,t);
+            processor.onThrowable(this, t);
         }
     }
-    
+
+    @Override
     public int hashCode()
     {
         return task.hashCode();
     }
-    
+
+    @Override
     public boolean equals(Object o)
     {
         return this == o;

@@ -25,7 +25,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.executors;
 
-public class FutureSetResult<V> implements TaskResultProcessor<V>
+/**
+ * Pass the result of the task to a settable future.
+ * @author Matt Champion
+ * @param <V>
+ * @since 0.1.1
+ */
+public final class FutureSetResult<V> implements TaskResultProcessor<V>
 {
     private final ISettableFuture<V> future;
 

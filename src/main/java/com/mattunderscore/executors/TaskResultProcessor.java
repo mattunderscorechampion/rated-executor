@@ -25,9 +25,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.executors;
 
+/**
+ * Process the results of the execution of a task.
+ * @author Matt Champion
+ *
+ * @param <V>
+ * @since 0.1.1
+ */
 public interface TaskResultProcessor<V>
 {
+    /**
+     * Action to take if the task throws an exception.
+     * @param task The task executed
+     * @param t The result
+     */
     void onThrowable(ITaskWrapper task, Throwable t);
 
+    /**
+     * Action to take if the task returns a result.
+     * @param task The task executed
+     * @param result The result
+     */
     void onResult(ITaskWrapper task, V result);
 }
