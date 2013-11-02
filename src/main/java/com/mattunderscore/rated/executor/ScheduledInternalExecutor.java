@@ -36,12 +36,12 @@ import net.jcip.annotations.GuardedBy;
 import com.mattunderscore.executors.ITaskWrapper;
 
 /**
- * {@link InternalExecutor} implementation based on the {@link ScheduledExecutorService}.
+ * {@link IInternalExecutor} implementation based on the {@link ScheduledExecutorService}.
  * 
  * @author Matt Champion
  * @since 0.1.1
  */
-/* package */final class ScheduledInternalExecutor implements InternalExecutor
+/* package */final class ScheduledInternalExecutor implements IInternalExecutor
 {
     private final long rate;
     private final TimeUnit unit;

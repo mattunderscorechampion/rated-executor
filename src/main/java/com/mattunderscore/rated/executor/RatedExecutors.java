@@ -28,7 +28,7 @@ package com.mattunderscore.rated.executor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import com.mattunderscore.executors.UniversalExecutor;
+import com.mattunderscore.executors.IUniversalExecutor;
 
 /**
  * Utility class that allows the construction of {@link RatedExecutor} objects.
@@ -60,7 +60,7 @@ public final class RatedExecutors
     public static IRatedExecutor ratedExecutor(final long rate, final TimeUnit unit)
     {
         final TaskQueue queue = new TaskQueue();
-        final InternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit);
+        final IInternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit);
         return new RatedExecutor(queue, executor);
     }
 
@@ -82,7 +82,7 @@ public final class RatedExecutors
             final ThreadFactory factory)
     {
         final TaskQueue queue = new TaskQueue();
-        final InternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit, factory);
+        final IInternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit, factory);
         return new RatedExecutor(queue, executor);
     }
 
@@ -99,10 +99,10 @@ public final class RatedExecutors
      *            The time unit of the rate
      * @return The executor
      */
-    public static UniversalExecutor simpleRatedExecutor(final long rate, final TimeUnit unit)
+    public static IUniversalExecutor simpleRatedExecutor(final long rate, final TimeUnit unit)
     {
         final TaskQueue queue = new TaskQueue();
-        final InternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit);
+        final IInternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit);
         return new SimpleRatedExecutor(executor);
     }
 
@@ -121,11 +121,11 @@ public final class RatedExecutors
      *            The thread factory used to create the thread
      * @return The executor
      */
-    public static UniversalExecutor simpleRatedExecutor(final long rate, final TimeUnit unit,
+    public static IUniversalExecutor simpleRatedExecutor(final long rate, final TimeUnit unit,
             final ThreadFactory factory)
     {
         final TaskQueue queue = new TaskQueue();
-        final InternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit, factory);
+        final IInternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit, factory);
         return new SimpleRatedExecutor(executor);
     }
 }

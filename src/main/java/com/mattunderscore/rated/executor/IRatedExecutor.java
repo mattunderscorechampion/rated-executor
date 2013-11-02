@@ -29,7 +29,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import com.mattunderscore.executors.IRepeatingFuture;
-import com.mattunderscore.executors.UniversalExecutor;
+import com.mattunderscore.executors.IUniversalExecutor;
 
 /**
  * Interface for rated executors, it will execute tasks at a fixed rate.
@@ -48,7 +48,7 @@ import com.mattunderscore.executors.UniversalExecutor;
  * @author Matt Champion
  * @since 0.0.1
  */
-public interface IRatedExecutor extends UniversalExecutor
+public interface IRatedExecutor extends IUniversalExecutor
 {
     /**
      * Submit a task to be executed once.

@@ -55,7 +55,7 @@ import com.mattunderscore.executors.UnboundedFuture;
  */
 /* package */final class RatedExecutor implements IRatedExecutor, ITaskCanceller
 {
-    private final InternalExecutor executor;
+    private final IInternalExecutor executor;
     private final TaskQueue taskQueue;
 
     /**
@@ -66,7 +66,7 @@ import com.mattunderscore.executors.UnboundedFuture;
      * @param unit
      *            The rate units
      */
-    public RatedExecutor(final TaskQueue taskQueue, final InternalExecutor executor)
+    public RatedExecutor(final TaskQueue taskQueue, final IInternalExecutor executor)
     {
         this.taskQueue = taskQueue;
         this.executor = executor;

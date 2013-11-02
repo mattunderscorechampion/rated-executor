@@ -35,7 +35,7 @@ import java.util.concurrent.Callable;
  * @author Matt Champion
  * @since 0.1.1
  */
-public class RunnableWrapper implements Callable<Void>
+public final class RunnableWrapper implements Callable<Void>
 {
     private final Runnable task;
 

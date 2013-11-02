@@ -30,18 +30,18 @@ import java.util.concurrent.Callable;
 import com.mattunderscore.executors.DiscardResult;
 import com.mattunderscore.executors.RunnableWrapper;
 import com.mattunderscore.executors.TaskWrapper;
-import com.mattunderscore.executors.UniversalExecutor;
+import com.mattunderscore.executors.IUniversalExecutor;
 
 /**
  * A simple rated executor that returns no {@link Future}s.
  * @author Matt Champion
  * @since 0.1.1
  */
-public class SimpleRatedExecutor implements UniversalExecutor
+/*package*/ class SimpleRatedExecutor implements IUniversalExecutor
 {
-    private final InternalExecutor executor;
+    private final IInternalExecutor executor;
 
-    public SimpleRatedExecutor(final InternalExecutor executor)
+    public SimpleRatedExecutor(final IInternalExecutor executor)
     {
         this.executor = executor;
     }

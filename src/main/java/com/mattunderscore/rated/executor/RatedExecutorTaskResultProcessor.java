@@ -3,12 +3,12 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
+ * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
+ * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of mattunderscore.com nor the
+ * Neither the name of mattunderscore.com nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -27,18 +27,28 @@ package com.mattunderscore.rated.executor;
 
 import com.mattunderscore.executors.ISettableFuture;
 import com.mattunderscore.executors.ITaskWrapper;
-import com.mattunderscore.executors.TaskResultProcessor;
+import com.mattunderscore.executors.ITaskResultProcessor;
 
-public class RatedExecutorTaskResultProcessor<V> implements TaskResultProcessor<V>
+/**
+ * The task processor for the RatedExecutor sets the results on a {@link Future} and if it is not
+ * done submits it back to the executor.
+ * 
+ * @author Matt Champion
+ * @param <V> The type of the result of the task
+ * @since 0.1.1
+ */
+/* package */final class RatedExecutorTaskResultProcessor<V> implements ITaskResultProcessor<V>
 {
     private final ISettableFuture<V> future;
-    private final InternalExecutor executor;
+    private final IInternalExecutor executor;
 
-    public RatedExecutorTaskResultProcessor(final ISettableFuture<V> future, final InternalExecutor executor)
+    public RatedExecutorTaskResultProcessor(final ISettableFuture<V> future,
+            final IInternalExecutor executor)
     {
         this.future = future;
         this.executor = executor;
     }
+
     @Override
     public void onThrowable(ITaskWrapper task, Throwable t)
     {

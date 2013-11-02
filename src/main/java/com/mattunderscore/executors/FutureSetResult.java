@@ -31,7 +31,7 @@ package com.mattunderscore.executors;
  * @param <V>
  * @since 0.1.1
  */
-public final class FutureSetResult<V> implements TaskResultProcessor<V>
+public final class FutureSetResult<V> implements ITaskResultProcessor<V>
 {
     private final ISettableFuture<V> future;
 

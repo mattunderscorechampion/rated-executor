@@ -1,4 +1,4 @@
-/* Copyright © 2013 Matthew ChaObjectmpion
+/* Copyright © 2013 Matthew Champion
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,22 +30,22 @@ import java.util.concurrent.Callable;
 /**
  * A task wrapper for {@link Callable} tasks.
  * <P>
- * The handling of the result of the task is provided by the {@link TaskResultProcessor}.
+ * The handling of the result of the task is provided by the {@link ITaskResultProcessor}.
  * @author Matt Champion
- * @param <V>
+ * @param <V> The type returned by the task
  * @since 0.1.1
  */
 public final class TaskWrapper<V> implements ITaskWrapper
 {
     private final Callable<V> task;
-    private final TaskResultProcessor<V> processor;
+    private final ITaskResultProcessor<V> processor;
 
     /**
      * Create the task wrapper
      * @param task The task
      * @param processor How to handle the result
      */
-    public TaskWrapper(final Callable<V> task, final TaskResultProcessor<V> processor)
+    public TaskWrapper(final Callable<V> task, final ITaskResultProcessor<V> processor)
     {
         this.task = task;
         this.processor = processor;

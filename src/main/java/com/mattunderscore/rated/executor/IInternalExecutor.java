@@ -36,7 +36,7 @@ import com.mattunderscore.executors.ITaskWrapper;
  * @author Matt Champion
  * @since 0.1.1
  */
-/*package*/ interface InternalExecutor
+/*package*/ interface IInternalExecutor
 {
     /**
      * Submit a task to the internal executor.

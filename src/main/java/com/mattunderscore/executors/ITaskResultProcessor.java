@@ -25,21 +25,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.executors;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
-
 /**
- * A simple executor interface that can be used to execute {@link Callable} tasks as well as
- * {@link Runnable} tasks.
- * 
+ * Process the results of the execution of a task.
  * @author Matt Champion
+ *
+ * @param <V>
  * @since 0.1.1
  */
-public interface UniversalExecutor extends Executor
+public interface ITaskResultProcessor<V>
 {
     /**
-     * Execute {@link Callable} tasks at some point in the future
-     * @param task The task to execute
+     * Action to take if the task throws an exception.
+     * @param task The task executed
+     * @param t The result
      */
-    public <V> void execute(Callable<V> task);
+    void onThrowable(ITaskWrapper task, Throwable t);
+
+    /**
+     * Action to take if the task returns a result.
+     * @param task The task executed
+     * @param result The result
+     */
+    void onResult(ITaskWrapper task, V result);
 }

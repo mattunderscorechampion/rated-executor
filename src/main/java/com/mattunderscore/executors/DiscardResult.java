@@ -34,7 +34,7 @@ import net.jcip.annotations.Immutable;
  * @since 0.1.1
  */
 @Immutable
-public final class DiscardResult<V> implements TaskResultProcessor<V>
+public final class DiscardResult<V> implements ITaskResultProcessor<V>
 {
     /**
      * Void implementation can be used with runnable tasks.
