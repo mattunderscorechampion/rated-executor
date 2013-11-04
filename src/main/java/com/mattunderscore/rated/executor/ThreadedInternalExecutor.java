@@ -125,8 +125,12 @@ import com.mattunderscore.executors.ITaskWrapper;
     {
         public void run()
         {
+            final long rateInNanos = TimeUnit.NANOSECONDS.convert(rate, unit);
             while (running)
             {
+                // Time of next execution
+                final long targetTime = System.nanoTime() + rateInNanos;
+                // Execute next task
                 final ITaskWrapper task = taskQueue.poll();
                 if (task != null)
                 {
@@ -134,22 +138,20 @@ import com.mattunderscore.executors.ITaskWrapper;
                     task.execute();
                     interruptable = false;
                 }
-                long targetTime = System.currentTimeMillis()
-                        + TimeUnit.MILLISECONDS.convert(rate, unit);
+                // Sleep until the next execution
                 while (true)
                 {
+                    final long sleepFor = targetTime - System.nanoTime();
                     try
                     {
-                        unit.sleep(rate);
+                        TimeUnit.NANOSECONDS.sleep(sleepFor);
+                        break;
                     }
                     catch (InterruptedException e)
                     {
                     }
-                    if (System.currentTimeMillis() >= targetTime)
-                    {
-                        break;
-                    }
                 }
+                // Stop if needed
                 if (stopping)
                 {
                     stop();
