@@ -27,6 +27,7 @@ package com.mattunderscore.rated.executor;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 import com.mattunderscore.executors.ITaskWrapper;
 
@@ -40,6 +41,7 @@ import com.mattunderscore.executors.ITaskWrapper;
     private boolean running = false;
     private boolean stopping = false;
     private boolean interruptable;
+    private int starts = 0;
 
     /* package */ThreadedInternalExecutor(final TaskQueue taskQueue, final long rate,
             final TimeUnit unit)
@@ -84,8 +86,10 @@ import com.mattunderscore.executors.ITaskWrapper;
         else
         {
             running = true;
-            this.thread = new Thread(thisTask);
-            this.thread.start();
+            thread = new Thread(thisTask);
+            thread.setName("RatedExecutor-" + starts);
+            thread.start();
+            starts++;
         }
     }
 
@@ -141,14 +145,15 @@ import com.mattunderscore.executors.ITaskWrapper;
                 // Sleep until the next execution
                 while (true)
                 {
+                    // Time until target
                     final long sleepFor = targetTime - System.nanoTime();
-                    try
+                    if (sleepFor > 0)
                     {
-                        TimeUnit.NANOSECONDS.sleep(sleepFor);
-                        break;
+                        LockSupport.parkNanos(sleepFor);
                     }
-                    catch (InterruptedException e)
+                    else
                     {
+                        break;
                     }
                 }
                 // Stop if needed
