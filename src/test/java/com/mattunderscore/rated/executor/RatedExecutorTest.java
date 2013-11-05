@@ -419,11 +419,11 @@ public class RatedExecutorTest
         final IRatedExecutor executor = RatedExecutors
                 .ratedExecutor(ACCURACY_RATE, TimeUnit.MILLISECONDS);
         final CountingTask task = new CountingTask();
-        final long start = System.nanoTime();
         final Future<?> future = executor.schedule(task);
+        final long start = System.nanoTime();
         TimeUnit.MILLISECONDS.sleep(ACCURACY_RUN);
-        future.cancel(false);
         final long end = System.nanoTime();
+        future.cancel(false);
         final long timeSpent = end - start;
         final long expectedNumber = (millisFromNanos(timeSpent) / ACCURACY_RATE) + 1;
         System.out.println("Expected: " + expectedNumber);
