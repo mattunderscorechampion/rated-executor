@@ -49,7 +49,8 @@ public final class RatedExecutors
      * Creates a new rated executor.
      * <P>
      * This executor is single threaded, if a task takes longer than the executor rate it will delay
-     * scheduled tasks.
+     * scheduled tasks. The {@link Future}s returned by this executor do not support throwing
+     * {@link InterruptedException}s when cancelling running tasks.
      * 
      * @param rate
      *            The rate of the executor
@@ -69,7 +70,8 @@ public final class RatedExecutors
      * Creates a new rated executor.
      * <P>
      * This executor is single threaded, if a task takes longer than the executor rate it will delay
-     * scheduled tasks.
+     * scheduled tasks. The {@link Future}s returned by this executor do not support throwing
+     * {@link InterruptedException}s when cancelling running tasks.
      * 
      * @param rate
      *            The rate of the executor
@@ -80,6 +82,50 @@ public final class RatedExecutors
      * @return The executor
      */
     public static IRatedExecutor ratedExecutor(final long rate, final TimeUnit unit,
+            final ThreadFactory factory)
+    {
+        final TaskQueue queue = new TaskQueue();
+        final IInternalExecutor executor = new ThreadedInternalExecutor(queue, rate, unit, factory);
+        return new RatedExecutor(queue, executor);
+    }
+
+    /**
+     * Creates a new rated executor.
+     * <P>
+     * This executor is single threaded, if a task takes longer than the executor rate it will delay
+     * scheduled tasks. The {@link Future}s returned by this executor support throwing
+     * {@link InterruptedException}s when cancelling running tasks. 
+     * 
+     * @param rate
+     *            The rate of the executor
+     * @param unit
+     *            The time unit of the rate
+     * @return The executor
+     */
+    public static IRatedExecutor interruptableRatedExecutor(final long rate, final TimeUnit unit)
+    {
+        final TaskQueue queue = new TaskQueue();
+        final ThreadFactory factory = new RatedExecutorThreadFactory();
+        final IInternalExecutor executor = new ThreadedInternalExecutor(queue, rate, unit, factory);
+        return new RatedExecutor(queue, executor);
+    }
+
+    /**
+     * Creates a new rated executor.
+     * <P>
+     * This executor is single threaded, if a task takes longer than the executor rate it will delay
+     * scheduled tasks. The {@link Future}s returned by this executor support throwing
+     * {@link InterruptedException}s when cancelling running tasks.
+     * 
+     * @param rate
+     *            The rate of the executor
+     * @param unit
+     *            The time unit of the rate
+     * @param factory
+     *            The thread factory used to create the thread
+     * @return The executor
+     */
+    public static IRatedExecutor interruptableRatedExecutor(final long rate, final TimeUnit unit,
             final ThreadFactory factory)
     {
         final TaskQueue queue = new TaskQueue();
@@ -104,7 +150,7 @@ public final class RatedExecutors
     {
         final TaskQueue queue = new TaskQueue();
         final ThreadFactory factory = new RatedExecutorThreadFactory();
-        final IInternalExecutor executor = new ThreadedInternalExecutor(queue, rate, unit, factory);
+        final IInternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit, factory);
         return new SimpleRatedExecutor(executor);
     }
 
@@ -127,7 +173,7 @@ public final class RatedExecutors
             final ThreadFactory factory)
     {
         final TaskQueue queue = new TaskQueue();
-        final IInternalExecutor executor = new ThreadedInternalExecutor(queue, rate, unit, factory);
+        final IInternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit, factory);
         return new SimpleRatedExecutor(executor);
     }
 }
