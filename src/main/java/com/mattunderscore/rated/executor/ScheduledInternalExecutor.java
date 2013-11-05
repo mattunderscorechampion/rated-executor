@@ -58,15 +58,6 @@ import com.mattunderscore.executors.ITaskWrapper;
     private boolean running = false;
 
     /* package */ScheduledInternalExecutor(final TaskQueue taskQueue, final long rate,
-            final TimeUnit unit)
-    {
-        this.service = Executors.newSingleThreadScheduledExecutor();
-        this.taskQueue = taskQueue;
-        this.rate = rate;
-        this.unit = unit;
-    }
-
-    /* package */ScheduledInternalExecutor(final TaskQueue taskQueue, final long rate,
             final TimeUnit unit, final ThreadFactory threadFactory)
     {
         this.service = Executors.newSingleThreadScheduledExecutor(threadFactory);

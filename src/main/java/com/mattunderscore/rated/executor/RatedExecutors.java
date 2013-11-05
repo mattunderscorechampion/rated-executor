@@ -60,7 +60,8 @@ public final class RatedExecutors
     public static IRatedExecutor ratedExecutor(final long rate, final TimeUnit unit)
     {
         final TaskQueue queue = new TaskQueue();
-        final IInternalExecutor executor = new ThreadedInternalExecutor(queue, rate, unit);
+        final ThreadFactory factory = new RatedExecutorThreadFactory();
+        final IInternalExecutor executor = new ThreadedInternalExecutor(queue, rate, unit, factory);
         return new RatedExecutor(queue, executor);
     }
 
@@ -102,7 +103,8 @@ public final class RatedExecutors
     public static IUniversalExecutor simpleRatedExecutor(final long rate, final TimeUnit unit)
     {
         final TaskQueue queue = new TaskQueue();
-        final IInternalExecutor executor = new ThreadedInternalExecutor(queue, rate, unit);
+        final ThreadFactory factory = new RatedExecutorThreadFactory();
+        final IInternalExecutor executor = new ThreadedInternalExecutor(queue, rate, unit, factory);
         return new SimpleRatedExecutor(executor);
     }
 

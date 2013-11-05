@@ -44,16 +44,6 @@ import com.mattunderscore.executors.ITaskWrapper;
     private volatile boolean interruptable;
 
     /* package */ThreadedInternalExecutor(final TaskQueue taskQueue, final long rate,
-            final TimeUnit unit)
-    {
-        this.thisTask = new LoopingTask();
-        this.factory = new ThreadedRatedExecutorThreadFactory();
-        this.taskQueue = taskQueue;
-        this.rate = rate;
-        this.unit = unit;
-    }
-
-    /* package */ThreadedInternalExecutor(final TaskQueue taskQueue, final long rate,
             final TimeUnit unit, final ThreadFactory factory)
     {
         this.thisTask = new LoopingTask();
@@ -164,23 +154,6 @@ import com.mattunderscore.executors.ITaskWrapper;
                 // the time it actually ran
                 targetTime = targetTime + rateInNanos;
             }
-        }
-    }
-
-    private static final class ThreadedRatedExecutorThreadFactory implements ThreadFactory
-    {
-        private int threads = 0;
-
-        @Override
-        public Thread newThread(Runnable r)
-        {
-            final Thread thread = new Thread(r);
-            synchronized (this)
-            {
-                thread.setName("RatedExecutor-" + threads);
-                threads++;
-            }
-            return thread;
         }
     }
 }
