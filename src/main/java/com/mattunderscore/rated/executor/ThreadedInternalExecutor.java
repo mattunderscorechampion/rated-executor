@@ -37,17 +37,17 @@ import com.mattunderscore.executors.ITaskWrapper;
     private final TimeUnit unit;
     private final TaskQueue taskQueue;
     private final LoopingTask thisTask;
+    private final ThreadFactory factory;
     private Thread thread;
-    private boolean running = false;
+    private volatile boolean running = false;
     private boolean stopping = false;
-    private boolean interruptable;
-    private int starts = 0;
+    private volatile boolean interruptable;
 
     /* package */ThreadedInternalExecutor(final TaskQueue taskQueue, final long rate,
             final TimeUnit unit)
     {
         this.thisTask = new LoopingTask();
-        //this.thread = new Thread(thisTask);
+        this.factory = new ThreadedRatedExecutorThreadFactory();
         this.taskQueue = taskQueue;
         this.rate = rate;
         this.unit = unit;
@@ -57,7 +57,7 @@ import com.mattunderscore.executors.ITaskWrapper;
             final TimeUnit unit, final ThreadFactory factory)
     {
         this.thisTask = new LoopingTask();
-        //this.thread = factory.newThread(thisTask);
+        this.factory = factory;
         this.taskQueue = taskQueue;
         this.rate = rate;
         this.unit = unit;
@@ -86,10 +86,8 @@ import com.mattunderscore.executors.ITaskWrapper;
         else
         {
             running = true;
-            thread = new Thread(thisTask);
-            thread.setName("RatedExecutor-" + starts);
+            thread = factory.newThread(thisTask);
             thread.start();
-            starts++;
         }
     }
 
@@ -130,10 +128,10 @@ import com.mattunderscore.executors.ITaskWrapper;
         public void run()
         {
             final long rateInNanos = TimeUnit.NANOSECONDS.convert(rate, unit);
+            long targetTime = System.nanoTime() + rateInNanos;
             while (running)
             {
-                // Time of next execution
-                final long targetTime = System.nanoTime() + rateInNanos;
+
                 // Execute next task
                 final ITaskWrapper task = taskQueue.poll();
                 if (task != null)
@@ -161,7 +159,28 @@ import com.mattunderscore.executors.ITaskWrapper;
                 {
                     stop();
                 }
+                // Calculate the next time to run off the time it was supposed to run last. This
+                // provides more accurate scheduling than calculating the next time to run off
+                // the time it actually ran
+                targetTime = targetTime + rateInNanos;
             }
+        }
+    }
+
+    private static final class ThreadedRatedExecutorThreadFactory implements ThreadFactory
+    {
+        private int threads = 0;
+
+        @Override
+        public Thread newThread(Runnable r)
+        {
+            final Thread thread = new Thread(r);
+            synchronized (this)
+            {
+                thread.setName("RatedExecutor-" + threads);
+                threads++;
+            }
+            return thread;
         }
     }
 }
