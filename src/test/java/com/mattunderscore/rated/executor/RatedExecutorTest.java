@@ -66,46 +66,59 @@ public class RatedExecutorTest
     private final Type type;
     private IRatedExecutor executor;
 
+    /**
+     * 
+     * @param type
+     *            The executor type
+     */
     public RatedExecutorTest(final Type type)
     {
         this.type = type;
     }
-    
+
+    /**
+     * Provide types to the JUnit runner to pass to the constructor.
+     * @return The collection of types
+     */
     @Parameters
     public static Collection<Object[]> data()
     {
         final Object[][] list = {
-            { Type.STANDARD }, // 0
-            { Type.STANDARD }, // 1
-            { Type.STANDARD }, // 2
-            { Type.STANDARD }, // 3
-            { Type.STANDARD }, // 4
-            { Type.STANDARD }, // 5
-            { Type.STANDARD }, // 6
-            { Type.STANDARD }, // 7
-            { Type.STANDARD }, // 8
-            { Type.STANDARD }, // 9
-            { Type.STANDARD }, // 10
-            { Type.INTERRUPTABLE } , // 11
-            { Type.INTERRUPTABLE } , // 12
-            { Type.INTERRUPTABLE } , // 13
-            { Type.INTERRUPTABLE } , // 14
-            { Type.INTERRUPTABLE } , // 15
-            { Type.INTERRUPTABLE } , // 16
-            { Type.INTERRUPTABLE } , // 17
-            { Type.INTERRUPTABLE } , // 18
-            { Type.INTERRUPTABLE } , // 19
-            { Type.INTERRUPTABLE } // 20
+            {Type.STANDARD}, // 0
+            {Type.STANDARD}, // 1
+            {Type.STANDARD}, // 2
+            {Type.STANDARD}, // 3
+            {Type.STANDARD}, // 4
+            {Type.STANDARD}, // 5
+            {Type.STANDARD}, // 6
+            {Type.STANDARD}, // 7
+            {Type.STANDARD}, // 8
+            {Type.STANDARD}, // 9
+            {Type.INTERRUPTABLE}, // 10
+            {Type.INTERRUPTABLE}, // 11
+            {Type.INTERRUPTABLE}, // 12
+            {Type.INTERRUPTABLE}, // 13
+            {Type.INTERRUPTABLE}, // 14
+            {Type.INTERRUPTABLE}, // 15
+            {Type.INTERRUPTABLE}, // 16
+            {Type.INTERRUPTABLE}, // 17
+            {Type.INTERRUPTABLE}, // 18
+            {Type.INTERRUPTABLE}, // 19
+            {Type.INTERRUPTABLE} // 20
         };
         return Arrays.asList(list);
     }
 
+    /**
+     * Creates an executor of the type provided to the constructor by the Paramaterized JUnit
+     * runner.
+     */
     @Before
-    public void setup()
+    public void setUp()
     {
         executor = type.getExecutor(STD_RATE, TimeUnit.MILLISECONDS);
     }
-    
+
     /**
      * Test tasks are executed.
      * 
@@ -422,22 +435,38 @@ public class RatedExecutorTest
         assertEquals(0, task.count);
         future.get();
     }
-    
+
+    /**
+     * Allow the setup method to create some type of {@link IRatedExecutor}.
+     * 
+     * @author Matt Champion
+     * @since 0.1.1
+     */
     private static enum Type
     {
-        STANDARD {
+        STANDARD
+        {
+            @Override
             public IRatedExecutor getExecutor(final long duration, final TimeUnit unit)
             {
                 return RatedExecutors.ratedExecutor(duration, unit);
             }
         },
-        INTERRUPTABLE {
+        INTERRUPTABLE
+        {
+            @Override
             public IRatedExecutor getExecutor(final long duration, final TimeUnit unit)
             {
                 return RatedExecutors.interruptableRatedExecutor(duration, unit);
             }
         };
-        
+
+        /**
+         * Get an executor of the type indicated.
+         * @param duration The duration of the executor rate
+         * @param unit The time unit of the duration
+         * @return The executor
+         */
         public abstract IRatedExecutor getExecutor(final long duration, final TimeUnit unit);
     }
 }
