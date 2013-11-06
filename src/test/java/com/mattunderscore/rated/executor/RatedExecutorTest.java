@@ -43,11 +43,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.mattunderscore.task.stubs.CountingTask;
-import com.mattunderscore.task.stubs.ExceptionCallable;
-import com.mattunderscore.task.stubs.ExceptionTask;
-import com.mattunderscore.task.stubs.NumberCallable;
-import com.mattunderscore.task.stubs.TestException;
+import com.mattunderscore.executor.stubs.CountingTask;
+import com.mattunderscore.executor.stubs.ExceptionCallable;
+import com.mattunderscore.executor.stubs.ExceptionTask;
+import com.mattunderscore.executor.stubs.NumberCallable;
+import com.mattunderscore.executor.stubs.TestException;
+import com.mattunderscore.executor.stubs.TestThreadFactory;
 
 /**
  * Test suite for the Rated Executor.
@@ -87,24 +88,15 @@ public class RatedExecutorTest
             {Type.STANDARD}, // 0
             {Type.STANDARD}, // 1
             {Type.STANDARD}, // 2
-            {Type.STANDARD}, // 3
-            {Type.STANDARD}, // 4
-            {Type.STANDARD}, // 5
-            {Type.STANDARD}, // 6
-            {Type.STANDARD}, // 7
-            {Type.STANDARD}, // 8
-            {Type.STANDARD}, // 9
-            {Type.INTERRUPTABLE}, // 10
-            {Type.INTERRUPTABLE}, // 11
-            {Type.INTERRUPTABLE}, // 12
-            {Type.INTERRUPTABLE}, // 13
-            {Type.INTERRUPTABLE}, // 14
-            {Type.INTERRUPTABLE}, // 15
-            {Type.INTERRUPTABLE}, // 16
-            {Type.INTERRUPTABLE}, // 17
-            {Type.INTERRUPTABLE}, // 18
-            {Type.INTERRUPTABLE}, // 19
-            {Type.INTERRUPTABLE} // 20
+            {Type.INTERRUPTABLE}, // 3
+            {Type.INTERRUPTABLE}, // 4
+            {Type.INTERRUPTABLE}, // 5
+            {Type.STANDARD_WITH_THREAD_FACTORY}, // 6
+            {Type.STANDARD_WITH_THREAD_FACTORY}, // 7
+            {Type.STANDARD_WITH_THREAD_FACTORY}, // 8
+            {Type.INTERRUPTABLE_WITH_THREAD_FACTORY}, // 9
+            {Type.INTERRUPTABLE_WITH_THREAD_FACTORY}, // 10
+            {Type.INTERRUPTABLE_WITH_THREAD_FACTORY} // 11
         };
         return Arrays.asList(list);
     }
@@ -458,6 +450,22 @@ public class RatedExecutorTest
             public IRatedExecutor getExecutor(final long duration, final TimeUnit unit)
             {
                 return RatedExecutors.interruptableRatedExecutor(duration, unit);
+            }
+        },
+        STANDARD_WITH_THREAD_FACTORY
+        {
+            @Override
+            public IRatedExecutor getExecutor(final long duration, final TimeUnit unit)
+            {
+                return RatedExecutors.ratedExecutor(duration, unit, new TestThreadFactory());
+            }
+        },
+        INTERRUPTABLE_WITH_THREAD_FACTORY
+        {
+            @Override
+            public IRatedExecutor getExecutor(final long duration, final TimeUnit unit)
+            {
+                return RatedExecutors.interruptableRatedExecutor(duration, unit, new TestThreadFactory());
             }
         };
 

@@ -36,14 +36,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 
+import com.mattunderscore.executor.stubs.CountingCallable;
+import com.mattunderscore.executor.stubs.CountingTask;
+import com.mattunderscore.executor.stubs.ExceptionCallable;
+import com.mattunderscore.executor.stubs.ExceptionTask;
+import com.mattunderscore.executor.stubs.NumberCallable;
 import com.mattunderscore.executors.RepeatingFuture;
 import com.mattunderscore.executors.ITaskCanceller;
 import com.mattunderscore.executors.ITaskWrapper;
-import com.mattunderscore.task.stubs.CountingCallable;
-import com.mattunderscore.task.stubs.CountingTask;
-import com.mattunderscore.task.stubs.ExceptionCallable;
-import com.mattunderscore.task.stubs.ExceptionTask;
-import com.mattunderscore.task.stubs.NumberCallable;
 
 /**
  * Test suite for the {@link RepeatingFuture} class.

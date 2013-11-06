@@ -23,21 +23,17 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.mattunderscore.task.stubs;
+package com.mattunderscore.executor.stubs;
 
-/**
- * Simple runnable task to execute. Increments a counter.
- * 
- * @author Matt Champion
- * @since 0.0.1
- */
-public final class CountingTask implements Runnable
+import java.util.concurrent.ThreadFactory;
+
+public final class TestThreadFactory implements ThreadFactory
 {
-    public volatile int count = 0;
-
     @Override
-    public void run()
+    public Thread newThread(Runnable r)
     {
-        count++;
+        final Thread thread = new Thread(r);
+        thread.setName("TestThread");
+        return thread;
     }
 }

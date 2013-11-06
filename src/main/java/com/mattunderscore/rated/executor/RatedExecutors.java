@@ -62,7 +62,7 @@ public final class RatedExecutors
     {
         final TaskQueue queue = new TaskQueue();
         final ThreadFactory factory = new RatedExecutorThreadFactory();
-        final IInternalExecutor executor = new ThreadedInternalExecutor(queue, rate, unit, factory);
+        final IInternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit, factory);
         return new RatedExecutor(queue, executor);
     }
 
@@ -85,7 +85,7 @@ public final class RatedExecutors
             final ThreadFactory factory)
     {
         final TaskQueue queue = new TaskQueue();
-        final IInternalExecutor executor = new ThreadedInternalExecutor(queue, rate, unit, factory);
+        final IInternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit, factory);
         return new RatedExecutor(queue, executor);
     }
 

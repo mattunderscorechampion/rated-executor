@@ -31,16 +31,18 @@ import static org.mockito.Mockito.when;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 
+import com.mattunderscore.executor.stubs.CountingTask;
+import com.mattunderscore.executor.stubs.ExceptionTask;
 import com.mattunderscore.executors.ITaskCanceller;
 import com.mattunderscore.executors.ITaskWrapper;
 import com.mattunderscore.executors.UnboundedFuture;
-import com.mattunderscore.task.stubs.CountingTask;
-import com.mattunderscore.task.stubs.ExceptionTask;
 
 /**
  * Test suite for the {@link UnboundedFuture} class.
@@ -200,5 +202,26 @@ public class UnboundedFutureTest
         final ITaskWrapper wrapper = new TaskWrapper<Void>(taskwrapper, processor);
         wrapper.execute();
         future.get();
+    }
+
+    @Test
+    public void testGet3() throws CancellationException, InterruptedException, ExecutionException, TimeoutException
+    {
+        final UnboundedFuture future = new UnboundedFuture(canceller);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        final ITaskWrapper wrapper = new TaskWrapper<Void>(taskwrapper, processor);
+        wrapper.execute();
+        assertTrue(future.get(10L,TimeUnit.MILLISECONDS) == null);
+    }
+
+    @Test(expected = TimeoutException.class)
+    public void testGet4() throws CancellationException, InterruptedException, ExecutionException, TimeoutException
+    {
+        final UnboundedFuture future = new UnboundedFuture(canceller);
+        final FutureSetResult<Void> processor = new FutureSetResult<Void>(future);
+        final RunnableWrapper taskwrapper = new RunnableWrapper(new CountingTask());
+        new TaskWrapper<Void>(taskwrapper, processor);
+        future.get(10L,TimeUnit.MILLISECONDS);
     }
 }

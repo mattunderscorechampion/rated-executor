@@ -23,21 +23,45 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.mattunderscore.task.stubs;
+package com.mattunderscore.executors;
+
+import static org.junit.Assert.*;
 
 import java.util.concurrent.Callable;
 
-/**
- * Simple callable task to execute. Throws exception.
- * 
- * @author Matt Champion
- * @since 0.0.1
- */
-public final class ExceptionCallable implements Callable<Object>
+import org.junit.Test;
+
+import com.mattunderscore.executor.stubs.CountingTask;
+
+public class RunnableWrapperTest
 {
-    @Override
-    public Object call() throws Exception
+    @Test
+    public void testExecution() throws Exception
     {
-        throw new TestException();
+        final CountingTask runnable = new CountingTask();
+        final Callable<Void> callable = new RunnableWrapper(runnable);
+        Void result = callable.call();
+        assertNull(result);
+        assertEquals(1, runnable.count);
+    }
+
+    @Test
+    public void testEquals0()
+    {
+        final CountingTask runnable0 = new CountingTask();
+        final Callable<Void> callable0 = new RunnableWrapper(runnable0);
+        final CountingTask runnable1 = new CountingTask();
+        final Callable<Void> callable1 = new RunnableWrapper(runnable1);
+        assertNotEquals(callable0, callable1);
+    }
+
+    @Test
+    public void testEquals1()
+    {
+        final CountingTask runnable = new CountingTask();
+        final Callable<Void> callable = new RunnableWrapper(runnable);
+        assertEquals(callable, callable);
+        assertEquals(callable.hashCode(),callable.hashCode());
+        assertEquals(callable.hashCode(),runnable.hashCode());
     }
 }

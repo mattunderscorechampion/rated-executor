@@ -37,7 +37,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.mattunderscore.task.stubs.CountingTask;
+import com.mattunderscore.executor.stubs.CountingTask;
 
 @RunWith(Parameterized.class)
 public class RatedExecutorAccuracyTest

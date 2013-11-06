@@ -34,10 +34,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import com.mattunderscore.executor.stubs.CountingCallable;
+import com.mattunderscore.executor.stubs.ExceptionCallable;
+import com.mattunderscore.executor.stubs.TestException;
 import com.mattunderscore.executors.ISettableFuture;
-import com.mattunderscore.task.stubs.CountingCallable;
-import com.mattunderscore.task.stubs.ExceptionCallable;
-import com.mattunderscore.task.stubs.TestException;
 
 /**
  * Test suite for the CallableTaskWrapper.

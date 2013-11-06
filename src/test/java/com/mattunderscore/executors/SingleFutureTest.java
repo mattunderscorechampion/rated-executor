@@ -25,8 +25,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.executors;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -35,18 +38,12 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 
-import com.google.code.tempusfugit.concurrency.IntermittentTestRunner;
-import com.google.code.tempusfugit.concurrency.annotations.Intermittent;
-import com.mattunderscore.executors.SingleFuture;
-import com.mattunderscore.executors.ITaskCanceller;
-import com.mattunderscore.executors.ITaskWrapper;
-import com.mattunderscore.task.stubs.CountingTask;
-import com.mattunderscore.task.stubs.ExceptionCallable;
-import com.mattunderscore.task.stubs.ExceptionTask;
-import com.mattunderscore.task.stubs.NumberCallable;
+import com.mattunderscore.executor.stubs.CountingTask;
+import com.mattunderscore.executor.stubs.ExceptionCallable;
+import com.mattunderscore.executor.stubs.ExceptionTask;
+import com.mattunderscore.executor.stubs.NumberCallable;
 
 /**
  * Test suite for the {@link SingleFuture} class.
@@ -56,10 +53,8 @@ import com.mattunderscore.task.stubs.NumberCallable;
  * @author Matt Champion
  * @since 0.1.0
  */
-@RunWith(IntermittentTestRunner.class)
 public final class SingleFutureTest
 {
-    private static final int REPETITIONS = 50;
     private static final long TIMEOUT = 200L;
     private static final long TIMEOUT_MAX = 204L;
     private static final long M_2_N = 1000L * 1000L;
@@ -378,7 +373,6 @@ public final class SingleFutureTest
     }
 
     @Test(expected = TimeoutException.class)
-    @Intermittent(repetition = REPETITIONS)
     public void testTimeout0() throws Throwable
     {
         long start = System.nanoTime();
@@ -403,7 +397,6 @@ public final class SingleFutureTest
     }
 
     @Test(expected = TimeoutException.class)
-    @Intermittent(repetition = REPETITIONS)
     public void testTimeout1() throws Throwable
     {
         long start = System.nanoTime();

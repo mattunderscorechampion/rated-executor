@@ -32,10 +32,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import com.mattunderscore.executor.stubs.CountingTask;
+import com.mattunderscore.executor.stubs.ExceptionTask;
+import com.mattunderscore.executor.stubs.TestException;
 import com.mattunderscore.executors.ISettableFuture;
-import com.mattunderscore.task.stubs.CountingTask;
-import com.mattunderscore.task.stubs.ExceptionTask;
-import com.mattunderscore.task.stubs.TestException;
 
 public class RunnableTaskWrapperTest
 {
