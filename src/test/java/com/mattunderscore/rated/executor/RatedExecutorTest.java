@@ -27,6 +27,7 @@ package com.mattunderscore.rated.executor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -402,6 +403,56 @@ public class RatedExecutorTest
     }
 
     /**
+     * Test that tests are repeated and the values of futures are correctly set.
+     * 
+     * @throws InterruptedException
+     * @throws ExecutionException 
+     * @throws IndexOutOfBoundsException 
+     * @throws CancellationException 
+     */
+    @Test
+    public void testRepeatingExecution3() throws InterruptedException, CancellationException, IndexOutOfBoundsException, ExecutionException
+    {
+        final CountingTask task = new CountingTask();
+        final IRepeatingFuture<?> future = executor.schedule(task, 4);
+        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+
+        assertEquals(1, task.count);
+        assertEquals("Expected executions", 4, future.getExpectedExecutions());
+        assertEquals("Completed executions", 1, future.getCompletedExecutions());
+        assertFalse("Task should not be done", future.isDone());
+        TimeUnit.MILLISECONDS.sleep(STD_RATE);
+
+        assertNull(future.getResult(2));
+        assertEquals(3, task.count);
+    }
+
+    /**
+     * Test that tests are repeated and the values of futures are correctly set.
+     * 
+     * @throws InterruptedException
+     * @throws ExecutionException 
+     * @throws IndexOutOfBoundsException 
+     * @throws CancellationException 
+     * @throws TimeoutException 
+     */
+    @Test(expected = TimeoutException.class)
+    public void testRepeatingExecution4() throws InterruptedException, CancellationException, IndexOutOfBoundsException, ExecutionException, TimeoutException
+    {
+        final CountingTask task = new CountingTask();
+        final IRepeatingFuture<?> future = executor.schedule(task, 4);
+        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+
+        assertEquals(1, task.count);
+        assertEquals("Expected executions", 4, future.getExpectedExecutions());
+        assertEquals("Completed executions", 1, future.getCompletedExecutions());
+        assertFalse("Task should not be done", future.isDone());
+        TimeUnit.MILLISECONDS.sleep(STD_RATE);
+
+        future.getResult(2, 50L, TimeUnit.MILLISECONDS);
+    }
+
+    /**
      * Test submitted tasks are cancellable.
      * 
      * @throws InterruptedException
@@ -464,6 +515,50 @@ public class RatedExecutorTest
         TimeUnit.MILLISECONDS.sleep(STD_RATE * 3);
 
         assertEquals(0, task.count);
+        future.get();
+    }
+
+    /**
+     * Test repeating tasks are cancellable.
+     * 
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
+    @Test(expected = CancellationException.class)
+    public void testCancel3() throws InterruptedException, ExecutionException
+    {
+        final CountingTask delayingTask = new CountingTask();
+        final CountingTask task = new CountingTask();
+        executor.submit(delayingTask);
+        final IRepeatingFuture<?> future = executor.schedule(task,5);
+        future.cancel(false);
+        assertTrue(future.isCancelled());
+        assertTrue(future.isDone());
+        TimeUnit.MILLISECONDS.sleep(STD_RATE * 3);
+
+        assertEquals(0, task.count);
+        future.get();
+    }
+
+    /**
+     * Test repeating tasks are cancellable.
+     * 
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
+    @Test(expected = CancellationException.class)
+    public void testCancel4() throws InterruptedException, ExecutionException
+    {
+        final CountingTask delayingTask = new CountingTask();
+        final CountingTask task = new CountingTask();
+        executor.submit(delayingTask);
+        final IRepeatingFuture<?> future = executor.schedule(task,5);
+        TimeUnit.MILLISECONDS.sleep(STD_RATE * 3);
+        assertFalse(future.isCancelled());
+        assertFalse(future.isDone());
+        future.cancel(false);
+        assertTrue(future.isCancelled());
+        assertTrue(future.isDone());
         future.get();
     }
 
