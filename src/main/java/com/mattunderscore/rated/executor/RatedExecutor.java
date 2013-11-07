@@ -177,8 +177,7 @@ import com.mattunderscore.executors.UnboundedFuture;
         {
             if (mayInterruptIfRunning)
             {
-                // TODO: interrupt
-                return false;
+                return executor.interrupt();
             }
             else
             {
