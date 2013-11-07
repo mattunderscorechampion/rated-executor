@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 import com.mattunderscore.executors.IUniversalExecutor;
 
 /**
- * Utility class that allows the construction of {@link RatedExecutor} objects.
+ * Utility class that allows the construction of rated executors.
  * 
  * @author Matt Champion
  * @since 0.1.0
