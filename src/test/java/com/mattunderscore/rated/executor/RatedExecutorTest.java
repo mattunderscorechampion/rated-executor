@@ -49,6 +49,7 @@ import com.mattunderscore.executor.stubs.ExceptionTask;
 import com.mattunderscore.executor.stubs.NumberCallable;
 import com.mattunderscore.executor.stubs.TestException;
 import com.mattunderscore.executor.stubs.TestThreadFactory;
+import com.mattunderscore.executors.IRepeatingFuture;
 
 /**
  * Test suite for the Rated Executor.
@@ -340,8 +341,13 @@ public class RatedExecutorTest
         TimeUnit.MILLISECONDS.sleep(STD_RATE);
 
         assertEquals(3, task.count);
-        assertFalse(future.isDone());
-        assertFalse(future.isCancelled());
+        assertFalse("Task should not be done", future.isDone());
+        assertFalse("Task should not be cancelled", future.isCancelled());
+
+        final boolean cancelled = future.cancel(false);
+        assertTrue("Cancel should succeed", cancelled);
+        assertTrue("Task should be cancelled", future.isCancelled());
+        assertTrue("Task should be done", future.isDone());
     }
 
     /**
@@ -355,11 +361,44 @@ public class RatedExecutorTest
         final int repetitions = 5;
         final CountingTask task0 = new CountingTask();
 
-        final Future<?> future0 = executor.schedule(task0, repetitions);
+        final IRepeatingFuture<?> future0 = executor.schedule(task0, repetitions);
         TimeUnit.MILLISECONDS.sleep((STD_RATE + STD_EXTRA) * (repetitions + 3));
 
         assertEquals(repetitions, task0.count);
-        assertTrue(future0.isDone());
+        assertTrue("Task should be done", future0.isDone());
+        assertEquals("Completed executions", 5, future0.getCompletedExecutions());
+        assertEquals("Expected executions", 5, future0.getExpectedExecutions());
+    }
+
+    /**
+     * Test that tests are repeated and the values of futures are correctly set.
+     * 
+     * @throws InterruptedException
+     */
+    @Test
+    public void testRepeatingExecution2() throws InterruptedException
+    {
+        final CountingTask task = new CountingTask();
+        final IRepeatingFuture<?> future = executor.schedule(task, 3);
+        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+
+        assertEquals(1, task.count);
+        assertEquals("Expected executions", 3, future.getExpectedExecutions());
+        assertEquals("Completed executions", 1, future.getCompletedExecutions());
+        assertFalse("Task should not be done", future.isDone());
+        TimeUnit.MILLISECONDS.sleep(STD_RATE);
+
+        assertEquals(2, task.count);
+        assertEquals("Expected executions", 3, future.getExpectedExecutions());
+        assertEquals("Completed executions", 2, future.getCompletedExecutions());
+        assertFalse("Task should not be done", future.isDone());
+        TimeUnit.MILLISECONDS.sleep(STD_RATE);
+
+        assertEquals(3, task.count);
+        assertEquals("Expected executions", 3, future.getExpectedExecutions());
+        assertEquals("Completed executions", 3, future.getCompletedExecutions());
+        assertTrue("Task should have completed", future.isDone());
+        assertFalse("Task should not be cancelled", future.isCancelled());
     }
 
     /**
