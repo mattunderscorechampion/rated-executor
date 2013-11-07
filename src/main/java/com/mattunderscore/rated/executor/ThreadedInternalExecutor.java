@@ -128,6 +128,7 @@ import com.mattunderscore.executors.ITaskWrapper;
                 {
                     interruptable = true;
                     task.execute();
+                    taskQueue.clearCurrentTask();
                     interruptable = false;
                 }
                 // Sleep until the next execution
