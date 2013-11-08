@@ -1,0 +1,57 @@
+
+    -----
+    RatedExecutor
+    -----
+    -----
+    Date
+
+Idea
+
+  A colleague was working on a demo that polled the Twitter API. He had to solve the problem where
+  he needed to ensure that the poll did not exceed the rate limits imposed on polling. This problem
+  can easily be generalised into a generic problem, accessing a resource at no greater than a fixed
+  rate. I didn't know of a generalised solution to the problem so I decided to implement one. A
+  Runnable task executor that executes tasks no faster than a fixed rate but as soon as it can
+  otherwise.
+
+Alternatives
+
+  There is a {{{http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/util/concurrent/RateLimiter.html}RateLimiter}}
+  that is part of the Guava library. Included in the documentation is an example of how to use it
+  to rate limit the tasks passed to an executor. This undermines the value of an executor that is
+  intended to decouple task submission from scheduling as well as execution.
+
+  The {{{http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ScheduledExecutorService.html}ScheduledExecutorService}}
+  can be used to execute individual tasks repeatedly at a fixed rated. It is possible to create a
+  task that can take other tasks off a queue and execute them. This is how my colleague did it and
+  is one of the underlying implementations of my rated executors.
+
+Usage
+
+  The RatedExecutor supports both Runnable and Callable tasks. Tasks can be submitted to be
+  executed once, a fixed number of repetitions or an unbounded number of times. Callable tasks
+  cannot be scheduled for an unbounded number of repetitions as this presents difficulty in
+  storing the results.
+
+  Futures are returned that allow the result of the execution to be retrieved. The futures for
+  tasks scheduled for a fixed number of repetitions allow the result of each repetition to be
+  accessed.
+
+  The execute and submit methods schedule the task to be executed once. The difference between
+  them is that execute does not return a future. The schedule methods can be used to repeatedly
+  execute the same task. The schedule method is overloaded so that it can take an optional integer
+  parameter that specifies the number of times to execute the task.
+
+  RatedExecutors can be constructed by using the static methods in the RatedExecutors class.
+
+Implementation
+
+  There are two executor interfaces that are returned by the methods in the RatedExecutors class.
+  The IRatedExecutor interface returns Futures and allows tasks to scheduled to execute once, a
+  fixed number of times or an unbounded number of times. The IUniversalExecutor is a simple extension
+  of the Executor interface that allows Callable tasks to be executed as well as Runnables but does
+  not return any Futures.
+
+  There are two implementations that underly these interfaces. One based on the
+  ScheduledExecutorService and one that makes use of the Thread class. The thread based internal
+  executor allows the executing tasks to be interrupted when cancelled.

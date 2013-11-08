@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+  <skin>
+    <groupId>org.apache.maven.skins</groupId>
+    <artifactId>maven-stylus-skin</artifactId>
+    <version>1.5</version>
+  </skin>
+  <body>
+    <head>
+      <meta name="author" content="Matthew Champion" />
+      <meta name="language" content="en-GB" />
+      <link rel="foaf:maker" href="http://id.mattunderscore.com/person/mattchampion" />
+      <link rel="dc:rightsHolder" href="http://id.mattunderscore.com/person/mattchampion" />
+    </head>
+    <menu name="Detail">
+      <item name="Introduction" href="introduction.html" />
+    </menu>
+    <menu ref="reports" />
+  </body>
+</project>

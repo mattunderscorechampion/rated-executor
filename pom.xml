@@ -13,7 +13,10 @@
   <packaging>jar</packaging>
 
   <name>Rated Executor</name>
-  <description>Executors that will execute tasks faster than some rate.</description>
+  <description>A library of rate limited executors. The executors in this library will execute
+  tasks no faster than some rate. It also exposes many of the generic components to used to
+  construct these executors.</description>
+  <url>http://www.mattunderscore.com/rated-executor/</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
