@@ -27,6 +27,8 @@ package com.mattunderscore.rated.executor;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Future;
+import java.lang.InterruptedException;
 
 import com.mattunderscore.executors.IUniversalExecutor;
 

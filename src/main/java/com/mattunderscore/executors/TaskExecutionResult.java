@@ -53,19 +53,19 @@ public final class TaskExecutionResult<V>
 
     /**
      * Create a result from an exception.
-     * @param result The execution thrown by the execution
+     * @param throwable The execution thrown by the execution
      */
-    public TaskExecutionResult(Throwable t)
+    public TaskExecutionResult(final Throwable throwable)
     {
         this.result = null;
-        this.exception = new ExecutionException(t);
+        this.exception = new ExecutionException(throwable);
     }
 
     /**
      * Create a result from an object.
      * @param result The result of the execution
      */
-    public TaskExecutionResult(V result)
+    public TaskExecutionResult(final V result)
     {
         this.result = result;
         this.exception = null;
