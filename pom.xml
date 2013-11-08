@@ -119,7 +119,7 @@
               <report>license</report>
               <report>scm</report>
               <report>summary</report>
-              <report>dependency-convergence</report>
+              <report>dependencies</report>
               <report>dependency-info</report>
             </reports>
           </reportSet>
