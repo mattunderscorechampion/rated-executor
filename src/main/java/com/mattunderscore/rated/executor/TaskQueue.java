@@ -33,7 +33,8 @@ import com.mattunderscore.executors.ITaskWrapper;
 /**
  * The task queue for a rated executor.
  * <P>
- * Tracks the order of the execution of tasks and the currently executing task.
+ * Tracks the order of the execution of tasks and the currently executing task. All tasks are
+ * wrapped in {@link ITaskWrapper}.
  * 
  * @author Matt Champion
  * @since 0.1.1
@@ -44,8 +45,8 @@ import com.mattunderscore.executors.ITaskWrapper;
     private volatile ITaskWrapper currentTask;
 
     /**
-     * Get the next task and update the currently executing task.
-     * 
+     * Get the next task set it as the currently executing task.
+     *
      * @return The current task
      * @since 0.1.1
      */
@@ -58,7 +59,7 @@ import com.mattunderscore.executors.ITaskWrapper;
 
     /**
      * Add a task to the end of the queue.
-     * 
+     *
      * @param wrapper
      *            The task to add
      * @since 0.1.1
@@ -70,7 +71,7 @@ import com.mattunderscore.executors.ITaskWrapper;
 
     /**
      * Remove a task from the queue.
-     * 
+     *
      * @param wrapper
      *            The task to remove
      * @since 0.1.1
@@ -81,8 +82,8 @@ import com.mattunderscore.executors.ITaskWrapper;
     }
 
     /**
-     * If the queue currently contain any tasks aside from the executing task.
-     * 
+     * If the queue currently contains any tasks aside from the executing task.
+     *
      * @return True if the queue is empty
      * @since 0.1.1
      */
@@ -92,8 +93,12 @@ import com.mattunderscore.executors.ITaskWrapper;
     }
 
     /**
-     * Remove the currently executing task
-     * 
+     * Clear the currently executing task.
+     * <P>
+     * This should be called after the current tasks has been executed. It may not be executed
+     * immediately after the task has completed as there may be work to execute between
+     * completing and forgetting the task.
+     *
      * @since 0.1.1
      */
     public void clearCurrentTask()
@@ -103,7 +108,7 @@ import com.mattunderscore.executors.ITaskWrapper;
 
     /**
      * Test if a task is the current task.
-     * 
+     *
      * @param task
      *            The task to test
      * @return True if the task is currently executing
