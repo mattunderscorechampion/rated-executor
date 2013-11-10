@@ -14,6 +14,19 @@ Idea
   Runnable task executor that executes tasks no faster than a fixed rate but as soon as it can
   otherwise.
 
+Solution
+
+  The implemented executor is a rate limited executor. It will execute tasks no faster than a fixed
+  rated. Tasks submitted to the executor will be queued until there is an opportunity to execute
+  them. In the current solution only single task will execute at a time. So long as there are tasks
+  queued and the tasks take less time to execute than the rate, the tasks will be executed at that
+  rate. If the queue empties for longer than the rate then the next task submitted will execute
+  immediately.
+
+  The executor is rate limited. It will execute a single task within the rate limit. It differs
+  from a throughput limited executor in that a throughput limited executor may limit the number of
+  tasks within a period but does not impose any constraints on their execution within that period.
+
 Alternatives
 
   There is a {{{http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/util/concurrent/RateLimiter.html}RateLimiter}}
