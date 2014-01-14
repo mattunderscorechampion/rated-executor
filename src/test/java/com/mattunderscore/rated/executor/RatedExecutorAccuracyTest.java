@@ -40,7 +40,7 @@ import org.junit.runners.Parameterized.Parameters;
 import com.mattunderscore.executor.stubs.CountingTask;
 
 @RunWith(Parameterized.class)
-public class RatedExecutorAccuracyTest
+public final class RatedExecutorAccuracyTest
 {
     private static final long RUN = 10000L;
     private static final long RATE = 10L;

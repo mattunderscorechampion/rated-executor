@@ -37,7 +37,7 @@ import com.mattunderscore.executors.IUniversalExecutor;
  * @author Matt Champion
  * @since 0.1.1
  */
-/*package*/ class SimpleRatedExecutor implements IUniversalExecutor
+/*package*/ final class SimpleRatedExecutor implements IUniversalExecutor
 {
     private final IInternalExecutor executor;
 

@@ -37,7 +37,7 @@ import com.mattunderscore.executor.stubs.ExceptionTask;
 import com.mattunderscore.executor.stubs.TestException;
 import com.mattunderscore.executors.ISettableFuture;
 
-public class RunnableTaskWrapperTest
+public final class RunnableTaskWrapperTest
 {
     private ISettableFuture<Void> future;
 

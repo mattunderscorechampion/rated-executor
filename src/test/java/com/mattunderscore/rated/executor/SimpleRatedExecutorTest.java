@@ -53,7 +53,7 @@ import com.mattunderscore.executors.IUniversalExecutor;
  * @since 0.1.1
  */
 @RunWith(Parameterized.class)
-public class SimpleRatedExecutorTest
+public final class SimpleRatedExecutorTest
 {
     private static final long RATE = 100L;
     private static final long EXTRA = 15L;

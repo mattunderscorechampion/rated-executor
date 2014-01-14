@@ -52,7 +52,7 @@ import com.mattunderscore.executors.UnboundedFuture;
  * @author Matt Champion
  * @since 0.1.0
  */
-public class UnboundedFutureTest
+public final class UnboundedFutureTest
 {
     private static final int REPETITIONS = 5;
 

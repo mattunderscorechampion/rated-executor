@@ -47,7 +47,7 @@ import com.mattunderscore.executors.ISettableFuture;
  * @author Matt Champion
  * @since 0.1.0
  */
-public class CallableTaskWrapperTest
+public final class CallableTaskWrapperTest
 {
     private ISettableFuture<Integer> integerFuture;
     private ISettableFuture<Object> objectFuture;

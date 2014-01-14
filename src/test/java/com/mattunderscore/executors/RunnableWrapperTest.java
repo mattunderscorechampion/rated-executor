@@ -33,7 +33,7 @@ import org.junit.Test;
 
 import com.mattunderscore.executor.stubs.CountingTask;
 
-public class RunnableWrapperTest
+public final class RunnableWrapperTest
 {
     @Test
     public void testExecution() throws Exception

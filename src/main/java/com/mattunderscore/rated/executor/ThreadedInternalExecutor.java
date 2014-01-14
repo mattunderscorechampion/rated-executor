@@ -31,7 +31,7 @@ import java.util.concurrent.locks.LockSupport;
 
 import com.mattunderscore.executors.ITaskWrapper;
 
-/*package*/class ThreadedInternalExecutor implements IInternalExecutor
+/*package*/ final class ThreadedInternalExecutor implements IInternalExecutor
 {
     private final long rate;
     private final TimeUnit unit;
