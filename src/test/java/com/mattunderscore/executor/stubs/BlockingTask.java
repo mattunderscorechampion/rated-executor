@@ -27,6 +27,11 @@ package com.mattunderscore.executor.stubs;
 
 import java.util.concurrent.CountDownLatch;
 
+/**
+ * Added a task that waits and blocks at certain key points.
+ * @author Matt Champion
+ * @since 0.1.2
+ */
 public final class BlockingTask implements Runnable
 {
     private final CountDownLatch blockingLatch;
@@ -35,6 +40,12 @@ public final class BlockingTask implements Runnable
     private volatile boolean ran;
     private volatile boolean interrupted;
 
+    /**
+     * Constructor for BlockingTask.
+     * @param blockingLatch The latch is released when the task has begun execution.
+     * @param waitingLatch This latch is waited on inside the task and must be counted down on outside of it.
+     * @param completedLatch This latch is released when the task has finished (in a finally block).
+     */
     public BlockingTask(final CountDownLatch blockingLatch, final CountDownLatch waitingLatch, final CountDownLatch completedLatch)
     {
         this.blockingLatch = blockingLatch;

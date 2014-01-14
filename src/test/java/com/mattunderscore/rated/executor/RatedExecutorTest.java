@@ -66,7 +66,7 @@ import com.mattunderscore.executors.IRepeatingFuture;
  * @since 0.0.1
  */
 @RunWith(Parameterized.class)
-public class RatedExecutorTest
+public final class RatedExecutorTest
 {
     private static final long STD_RATE = 100L;
     private static final long STD_EXTRA = 15L;
@@ -346,7 +346,7 @@ public class RatedExecutorTest
     }
 
     /**
-     * Test that tests are repeated and the values of futures are correctly set.
+     * Test that tasks are repeated and the values of futures are correctly set.
      * 
      * @throws InterruptedException
      */
@@ -394,7 +394,7 @@ public class RatedExecutorTest
     }
 
     /**
-     * Test that tests are repeated and the values of futures are correctly set.
+     * Test that tasks are repeated and the values of futures are correctly set.
      * 
      * @throws InterruptedException
      */
@@ -425,7 +425,7 @@ public class RatedExecutorTest
     }
 
     /**
-     * Test that tests are repeated and the values of futures are correctly set.
+     * Test that tasks are repeated and the values of futures are correctly set.
      * 
      * @throws InterruptedException
      * @throws ExecutionException 
@@ -450,7 +450,7 @@ public class RatedExecutorTest
     }
 
     /**
-     * Test that tests are repeated and the values of futures are correctly set.
+     * Test that tasks are repeated and the values of futures are correctly set.
      * 
      * @throws InterruptedException
      * @throws ExecutionException 
