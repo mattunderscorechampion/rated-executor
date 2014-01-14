@@ -27,6 +27,7 @@ package com.mattunderscore.rated.executor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -44,6 +45,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import com.mattunderscore.executor.stubs.CountingCallable;
 import com.mattunderscore.executor.stubs.CountingTask;
 import com.mattunderscore.executor.stubs.ExceptionCallable;
 import com.mattunderscore.executor.stubs.ExceptionTask;
@@ -148,6 +150,23 @@ public class RatedExecutorTest
         assertFalse(future.isCancelled());
         assertTrue(future.get() == null);
         assertTrue(future.get(STD_EXTRA, TimeUnit.MILLISECONDS) == null);
+        assertEquals(1, task.count);
+    }
+
+    /**
+     * Test callable tasks are executed.
+     * 
+     * @throws InterruptedException
+     * @throws ExecutionException
+     * @throws TimeoutException
+     */
+    @Test
+    public void testExecution2() throws InterruptedException
+    {
+        final CountingCallable task = new CountingCallable();
+        executor.execute(task);
+        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+
         assertEquals(1, task.count);
     }
 
@@ -450,6 +469,32 @@ public class RatedExecutorTest
         TimeUnit.MILLISECONDS.sleep(STD_RATE);
 
         future.getResult(2, 50L, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Test that tasks are repeated and the values of futures are correctly set.
+     *
+     * @throws CancellationException
+     * @throws IndexOutOfBoundsException
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
+    @Test
+    public void testRepeatingExecution5() throws CancellationException, IndexOutOfBoundsException, InterruptedException, ExecutionException
+    {
+        final CountingCallable task = new CountingCallable();
+        final IRepeatingFuture<Integer> future = executor.schedule(task, 4);
+        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+
+        assertEquals(1, task.count);
+        assertEquals("Expected executions", 4, future.getExpectedExecutions());
+        assertEquals("Completed executions", 1, future.getCompletedExecutions());
+        assertFalse("Task should not be done", future.isDone());
+        TimeUnit.MILLISECONDS.sleep(STD_RATE);
+
+        assertNotNull(future.getResult(2));
+        assertEquals(Integer.valueOf(3), future.getResult(2));
+        assertEquals(3, task.count);
     }
 
     /**

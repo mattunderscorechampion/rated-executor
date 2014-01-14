@@ -161,7 +161,7 @@ public class SimpleRatedExecutorTest
         {
             public IUniversalExecutor getExecutor(final long duration, final TimeUnit unit)
             {
-                return RatedExecutors.simpleRatedExecutor(duration, unit, new TestThreadFactory());
+                return RatedExecutors.simpleRatedExecutor(duration, unit);
             }
         },
         SIMPLE_WITH_THREAD_FACTORY
