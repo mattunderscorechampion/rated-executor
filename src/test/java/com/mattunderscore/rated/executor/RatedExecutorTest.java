@@ -433,7 +433,8 @@ public final class RatedExecutorTest
      * @throws CancellationException 
      */
     @Test
-    public void testRepeatingExecution3() throws InterruptedException, CancellationException, IndexOutOfBoundsException, ExecutionException
+    public void testRepeatingExecution3() throws InterruptedException, CancellationException,
+        IndexOutOfBoundsException, ExecutionException
     {
         final CountingTask task = new CountingTask();
         final IRepeatingFuture<?> future = executor.schedule(task, 4);
@@ -459,7 +460,8 @@ public final class RatedExecutorTest
      * @throws TimeoutException 
      */
     @Test(expected = TimeoutException.class)
-    public void testRepeatingExecution4() throws InterruptedException, CancellationException, IndexOutOfBoundsException, ExecutionException, TimeoutException
+    public void testRepeatingExecution4() throws InterruptedException, CancellationException,
+        IndexOutOfBoundsException, ExecutionException, TimeoutException
     {
         final CountingTask task = new CountingTask();
         final IRepeatingFuture<?> future = executor.schedule(task, 4);
@@ -483,7 +485,8 @@ public final class RatedExecutorTest
      * @throws ExecutionException
      */
     @Test
-    public void testRepeatingExecution5() throws CancellationException, IndexOutOfBoundsException, InterruptedException, ExecutionException
+    public void testRepeatingExecution5() throws CancellationException, IndexOutOfBoundsException,
+        InterruptedException, ExecutionException
     {
         final CountingCallable task = new CountingCallable();
         final IRepeatingFuture<Integer> future = executor.schedule(task, 4);
@@ -677,7 +680,8 @@ public final class RatedExecutorTest
             @Override
             public IRatedExecutor getExecutor(final long duration, final TimeUnit unit)
             {
-                return RatedExecutors.interruptableRatedExecutor(duration, unit, new TestThreadFactory());
+                return RatedExecutors.interruptableRatedExecutor(duration, unit,
+                        new TestThreadFactory());
             }
         };
 

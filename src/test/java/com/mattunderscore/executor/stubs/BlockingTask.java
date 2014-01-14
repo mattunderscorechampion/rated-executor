@@ -3,12 +3,12 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
+ * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
+ * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of mattunderscore.com nor the
+ * Neither the name of mattunderscore.com nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -29,6 +29,7 @@ import java.util.concurrent.CountDownLatch;
 
 /**
  * Added a task that waits and blocks at certain key points.
+ *
  * @author Matt Champion
  * @since 0.1.2
  */
@@ -42,11 +43,16 @@ public final class BlockingTask implements Runnable
 
     /**
      * Constructor for BlockingTask.
-     * @param blockingLatch The latch is released when the task has begun execution.
-     * @param waitingLatch This latch is waited on inside the task and must be counted down on outside of it.
-     * @param completedLatch This latch is released when the task has finished (in a finally block).
+     *
+     * @param blockingLatch
+     *            The latch is released when the task has begun execution.
+     * @param waitingLatch
+     *            This latch is waited on inside the task and must be counted down on outside of it.
+     * @param completedLatch
+     *            This latch is released when the task has finished (in a finally block).
      */
-    public BlockingTask(final CountDownLatch blockingLatch, final CountDownLatch waitingLatch, final CountDownLatch completedLatch)
+    public BlockingTask(final CountDownLatch blockingLatch, final CountDownLatch waitingLatch,
+            final CountDownLatch completedLatch)
     {
         this.blockingLatch = blockingLatch;
         this.waitingLatch = waitingLatch;
@@ -74,11 +80,20 @@ public final class BlockingTask implements Runnable
         }
     }
 
+    /**
+     * Used to test if the task started running. Set to true in the first statement of the task.
+     * @return true if the task started running.
+     */
     public boolean hasRun()
     {
         return ran;
     }
 
+    /**
+     * Used to test if the task was interrupted while waiting. Set to true in a catch block for
+     * interrupted exceptions.
+     * @return true if interrupted.
+     */
     public boolean isIterrupted()
     {
         return interrupted;
