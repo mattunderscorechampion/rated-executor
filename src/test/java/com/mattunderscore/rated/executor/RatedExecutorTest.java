@@ -30,10 +30,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -45,6 +47,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import com.mattunderscore.executor.stubs.BlockingTask;
 import com.mattunderscore.executor.stubs.CountingCallable;
 import com.mattunderscore.executor.stubs.CountingTask;
 import com.mattunderscore.executor.stubs.ExceptionCallable;
@@ -604,6 +607,36 @@ public class RatedExecutorTest
         future.cancel(false);
         assertTrue(future.isCancelled());
         assertTrue(future.isDone());
+        future.get();
+    }
+
+    /**
+     * Test running tasks are interrupted for executors that support this.
+     * 
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
+    @Test(expected = CancellationException.class)
+    public void testCancel5() throws InterruptedException, ExecutionException
+    {
+        assumeTrue(type == Type.INTERRUPTABLE || type == Type.INTERRUPTABLE_WITH_THREAD_FACTORY);
+        final CountDownLatch waitinglatch = new CountDownLatch(1);
+        final CountDownLatch blockingLatch = new CountDownLatch(1);
+        final CountDownLatch completedLatch = new CountDownLatch(1);
+        final CountingTask delayingTask = new CountingTask();
+        final BlockingTask task = new BlockingTask(waitinglatch, blockingLatch, completedLatch);
+        executor.submit(delayingTask);
+        final Future<?> future = executor.submit(task);
+        waitinglatch.await();
+        assertFalse(future.isCancelled());
+        assertFalse(future.isDone());
+        final boolean cancelled = future.cancel(true);
+        completedLatch.await();
+        assertTrue(cancelled);
+        assertTrue(future.isCancelled());
+        assertTrue(future.isDone());
+        assertTrue(task.hasRun());
+        assertTrue(task.isIterrupted());
         future.get();
     }
 
