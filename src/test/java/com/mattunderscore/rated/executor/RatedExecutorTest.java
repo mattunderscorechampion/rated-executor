@@ -30,8 +30,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 import static org.junit.Assume.assumeThat;
+import static org.junit.Assume.assumeTrue;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -61,7 +61,6 @@ import com.mattunderscore.executors.IRepeatingFuture;
 import com.mattunderscore.executors.ITaskWrapperFactory;
 import com.mattunderscore.executors.LessThanLong;
 import com.mattunderscore.executors.RateMatcher;
-import com.mattunderscore.executors.TestTaskWrapper;
 import com.mattunderscore.executors.TestTaskWrapperFactory;
 
 /**
