@@ -31,7 +31,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assume.assumeThat;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -235,7 +235,7 @@ public final class RatedExecutorTest
         waitForTask(1, 0);
 
         assertTrue(future1.isDone());
-        assertThat(timeSince(0, 0, 1,0), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
+        assumeThat(timeSince(0, 0, 1,0), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
     }
 
     /**
@@ -261,7 +261,7 @@ public final class RatedExecutorTest
         waitForTask(1, 0);
 
         assertTrue(future1.isDone());
-        assertThat(startTimestamp(1, 0) - beforeSubmit, new LessThanLong(EXTRA_NANOS));
+        assumeThat(startTimestamp(1, 0) - beforeSubmit, new LessThanLong(EXTRA_NANOS));
     }
 
     /**
@@ -371,15 +371,15 @@ public final class RatedExecutorTest
         final Future<?> future = executor.schedule(task);
         waitForTask(0, 0);
 
-        assertThat(startTimestamp(0, 0) - beforeSubmit, new LessThanLong(EXTRA_NANOS));
+        assumeThat(startTimestamp(0, 0) - beforeSubmit, new LessThanLong(EXTRA_NANOS));
         assertEquals(1, task.count);
         waitForTask(0, 1);
 
-        assertThat(timeSince(0, 0, 0, 1), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
+        assumeThat(timeSince(0, 0, 0, 1), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
         assertEquals(2, task.count);
         waitForTask(0, 2);
 
-        assertThat(timeSince(0, 1, 0, 2), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
+        assumeThat(timeSince(0, 1, 0, 2), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
         assertEquals(3, task.count);
         assertFalse("Task should not be done", future.isDone());
         assertFalse("Task should not be cancelled", future.isCancelled());
@@ -433,7 +433,7 @@ public final class RatedExecutorTest
         assertEquals("Expected executions", 3, future.getExpectedExecutions());
         assertEquals("Completed executions", 2, future.getCompletedExecutions());
         assertFalse("Task should not be done", future.isDone());
-        assertThat(timeSince(0, 0, 0, 1), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
+        assumeThat(timeSince(0, 0, 0, 1), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
 
         waitForTask(0, 2);
         assertEquals(3, task.count);
@@ -441,7 +441,7 @@ public final class RatedExecutorTest
         assertEquals("Completed executions", 3, future.getCompletedExecutions());
         assertTrue("Task should have completed", future.isDone());
         assertFalse("Task should not be cancelled", future.isCancelled());
-        assertThat(timeSince(0, 1, 0, 2), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
+        assumeThat(timeSince(0, 1, 0, 2), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
     }
 
     /**
