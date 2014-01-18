@@ -31,7 +31,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A task wrapper factory. That keeps a list of all the test task wrappers.
+ * A task wrapper factory. That keeps a list of all the TestTaskWrappers so they can be accessed
+ * from the tests.
  * @author Matt Champion
  */
 public class TestTaskWrapperFactory implements ITaskWrapperFactory
@@ -63,6 +64,12 @@ public class TestTaskWrapperFactory implements ITaskWrapperFactory
         return add(new RunnableWrapper(task), processor);
     }
 
+    /**
+     * Create the TestTaskWrapper and add to the list of wrappers created.
+     * @param task
+     * @param processor
+     * @return
+     */
     private <V> ITaskWrapper add(final Callable<V> task, final ITaskResultProcessor<V> processor)
     {
         final TestTaskWrapper<V> wrapper = new TestTaskWrapper<V>(task, processor);
@@ -76,13 +83,27 @@ public class TestTaskWrapperFactory implements ITaskWrapperFactory
         return wrappers.get(i);
     }
 
-    public long timeSince(final int firstTask, final int firstExecution, final int secondTask, final int secondExecution)
+    /**
+     * The time between the start of the execution of two tasks. Assumes that both have completed.
+     * @param firstTask The earliest task.
+     * @param firstExecution The earliest execution.
+     * @param secondTask The later task.
+     * @param secondExecution The later execution.
+     * @return The time in nanos.
+     */
+    public long timeBetween(final int firstTask, final int firstExecution, final int secondTask, final int secondExecution)
     {
         final long mostRecent = startTimestamp(secondTask, secondExecution);
         final long leastRecent = startTimestamp(firstTask, firstExecution);
         return mostRecent - leastRecent;
     }
 
+    /**
+     * The starting timestamp of the execution of a task. Assumes that is has completed.
+     * @param task The task.
+     * @param execution The execution.
+     * @return The nano timestamp.
+     */
     public long startTimestamp(final int task, final int execution)
     {
         @SuppressWarnings("rawtypes")
@@ -90,6 +111,12 @@ public class TestTaskWrapperFactory implements ITaskWrapperFactory
         return wrapper.getStartTimestamp(execution);
     }
 
+    /**
+     * Wait for a task to complete.
+     * @param task The task wrapper.
+     * @param execution The number of task executions.
+     * @param maxMilliseconds The maximum timeout.
+     */
     public void waitForTask(final int task, final int execution, final long maxMilliseconds)
     {
         try

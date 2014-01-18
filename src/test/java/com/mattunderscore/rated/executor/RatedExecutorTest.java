@@ -234,7 +234,7 @@ public final class RatedExecutorTest
         factory.waitForTask(1, 0, RATE * 2);
 
         assertTrue(future1.isDone());
-        assumeThat(factory.timeSince(0, 0, 1,0), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
+        assumeThat(factory.timeBetween(0, 0, 1,0), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
     }
 
     /**
@@ -374,11 +374,11 @@ public final class RatedExecutorTest
         assertEquals(1, task.count);
         factory.waitForTask(0, 1, RATE * 2);
 
-        assumeThat(factory.timeSince(0, 0, 0, 1), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
+        assumeThat(factory.timeBetween(0, 0, 0, 1), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
         assertEquals(2, task.count);
         factory.waitForTask(0, 2, RATE * 2);
 
-        assumeThat(factory.timeSince(0, 1, 0, 2), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
+        assumeThat(factory.timeBetween(0, 1, 0, 2), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
         assertEquals(3, task.count);
         assertFalse("Task should not be done", future.isDone());
         assertFalse("Task should not be cancelled", future.isCancelled());
@@ -432,7 +432,7 @@ public final class RatedExecutorTest
         assertEquals("Expected executions", 3, future.getExpectedExecutions());
         assertEquals("Completed executions", 2, future.getCompletedExecutions());
         assertFalse("Task should not be done", future.isDone());
-        assumeThat(factory.timeSince(0, 0, 0, 1), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
+        assumeThat(factory.timeBetween(0, 0, 0, 1), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
 
         factory.waitForTask(0, 2, RATE * 2);
         assertEquals(3, task.count);
@@ -440,7 +440,7 @@ public final class RatedExecutorTest
         assertEquals("Completed executions", 3, future.getCompletedExecutions());
         assertTrue("Task should have completed", future.isDone());
         assertFalse("Task should not be cancelled", future.isCancelled());
-        assumeThat(factory.timeSince(0, 1, 0, 2), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
+        assumeThat(factory.timeBetween(0, 1, 0, 2), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
     }
 
     /**
