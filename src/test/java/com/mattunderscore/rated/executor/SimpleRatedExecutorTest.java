@@ -26,10 +26,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 package com.mattunderscore.rated.executor;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeThat;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -42,7 +44,11 @@ import org.junit.runners.Parameterized.Parameters;
 import com.mattunderscore.executor.stubs.CountingCallable;
 import com.mattunderscore.executor.stubs.CountingTask;
 import com.mattunderscore.executor.stubs.TestThreadFactory;
+import com.mattunderscore.executors.ITaskWrapperFactory;
 import com.mattunderscore.executors.IUniversalExecutor;
+import com.mattunderscore.executors.LessThanLong;
+import com.mattunderscore.executors.RateMatcher;
+import com.mattunderscore.executors.TestTaskWrapperFactory;
 
 /**
  * Test suite for the Simple Rated Executor.
@@ -57,8 +63,10 @@ public final class SimpleRatedExecutorTest
 {
     private static final long RATE = 100L;
     private static final long EXTRA = 15L;
+    private static final long EXTRA_NANOS = TimeUnit.MILLISECONDS.toNanos(EXTRA);
 
     private final Type type;
+    private TestTaskWrapperFactory factory;
     private IUniversalExecutor executor;
 
     /**
@@ -96,7 +104,8 @@ public final class SimpleRatedExecutorTest
     @Before
     public void setUp()
     {
-        executor = type.getExecutor(RATE, TimeUnit.MILLISECONDS);
+        factory = new TestTaskWrapperFactory();
+        executor = type.getExecutor(RATE, TimeUnit.MILLISECONDS, factory);
     }
 
     /**
@@ -110,68 +119,83 @@ public final class SimpleRatedExecutorTest
     public void testExecution0() throws InterruptedException
     {
         final CountingTask task = new CountingTask();
+        final long beforeExecute = System.nanoTime();
         executor.execute(task);
-        TimeUnit.MILLISECONDS.sleep(EXTRA);
+        factory.waitForTask(0, 0, RATE * 2);
 
         assertEquals(1, task.count);
+        assumeThat(factory.startTimestamp(0, 0) - beforeExecute, new LessThanLong(EXTRA_NANOS));
     }
 
     @Test
     public void testExecution1() throws InterruptedException
     {
         final CountingCallable task = new CountingCallable();
+        final long beforeExecute = System.nanoTime();
         executor.execute(task);
-        TimeUnit.MILLISECONDS.sleep(EXTRA);
+        factory.waitForTask(0, 0, RATE * 2);
 
         assertEquals(1, task.count);
+        assumeThat(factory.startTimestamp(0, 0) - beforeExecute, new LessThanLong(EXTRA_NANOS));
     }
 
     @Test
     public void testExecution2() throws InterruptedException
     {
         final CountingTask task = new CountingTask();
+        final long beforeExecute0 = System.nanoTime();
+        executor.execute(task);
+        factory.waitForTask(0, 0, RATE * 2);
+        assertEquals(1, task.count);
+        assumeThat(factory.startTimestamp(0, 0) - beforeExecute0, new LessThanLong(EXTRA_NANOS));
         executor.execute(task);
         TimeUnit.MILLISECONDS.sleep(EXTRA);
         assertEquals(1, task.count);
-        executor.execute(task);
-        TimeUnit.MILLISECONDS.sleep(EXTRA);
-        assertEquals(1, task.count);
-        TimeUnit.MILLISECONDS.sleep(RATE);
+        factory.waitForTask(1, 0, RATE * 2);
         assertEquals(2, task.count);
+        assumeThat(factory.timeBetween(0, 0, 1, 0), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
     }
 
     @Test
     public void testExecution3() throws InterruptedException
     {
         final CountingCallable task = new CountingCallable();
+        final long beforeExecute0 = System.nanoTime();
+        executor.execute(task);
+        factory.waitForTask(0, 0, RATE * 2);
+        assertEquals(1, task.count);
+        assumeThat(factory.startTimestamp(0, 0) - beforeExecute0, new LessThanLong(EXTRA_NANOS));
         executor.execute(task);
         TimeUnit.MILLISECONDS.sleep(EXTRA);
-
         assertEquals(1, task.count);
-        executor.execute(task);
-        TimeUnit.MILLISECONDS.sleep(EXTRA);
-        assertEquals(1, task.count);
-        TimeUnit.MILLISECONDS.sleep(RATE);
+        factory.waitForTask(1, 0, RATE * 2);
         assertEquals(2, task.count);
+        assumeThat(factory.timeBetween(0, 0, 1, 0), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
     }
 
     private static enum Type
     {
         SIMPLE
         {
-            public IUniversalExecutor getExecutor(final long duration, final TimeUnit unit)
+            public IUniversalExecutor getExecutor(final long rate, final TimeUnit unit, final ITaskWrapperFactory wrapperFactory)
             {
-                return RatedExecutors.simpleRatedExecutor(duration, unit);
+                final TaskQueue queue = new TaskQueue();
+                final ThreadFactory factory = new RatedExecutorThreadFactory();
+                final IInternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit, factory);
+                return new SimpleRatedExecutor(executor, wrapperFactory);
             }
         },
         SIMPLE_WITH_THREAD_FACTORY
         {
-            public IUniversalExecutor getExecutor(final long duration, final TimeUnit unit)
+            public IUniversalExecutor getExecutor(final long rate, final TimeUnit unit, final ITaskWrapperFactory wrapperFactory)
             {
-                return RatedExecutors.simpleRatedExecutor(duration, unit, new TestThreadFactory());
+                final TaskQueue queue = new TaskQueue();
+                final ThreadFactory factory = new TestThreadFactory();
+                final IInternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit, factory);
+                return new SimpleRatedExecutor(executor, wrapperFactory);
             }
         };
 
-        public abstract IUniversalExecutor getExecutor(final long duration, final TimeUnit unit);
+        public abstract IUniversalExecutor getExecutor(long duration, TimeUnit unit, ITaskWrapperFactory wrapperFactory);
     }
 }
