@@ -129,12 +129,15 @@ public final class RepeatingFuture<V> extends BaseFuture<V> implements IRepeatin
     @Override
     protected boolean processCancellation(boolean mayInterruptIfRunning)
     {
-        cancellationPoint = results.size();
-        for (int i = cancellationPoint; i < latches.length; i++)
-        {
-            latches[i].countDown();
-        }
         final boolean cancelled = canceller.cancelTask(task, mayInterruptIfRunning);
+        if (cancelled)
+        {
+            cancellationPoint = results.size();
+            for (int i = cancellationPoint; i < latches.length; i++)
+            {
+                latches[i].countDown();
+            }
+        }
         return cancelled;
     }
 

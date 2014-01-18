@@ -72,7 +72,10 @@ public final class SingleFuture<V> extends BaseFuture<V>
     protected boolean processCancellation(boolean mayInterruptIfRunning)
     {
         final boolean cancelled = canceller.cancelTask(task, mayInterruptIfRunning);
-        latch.countDown();
+        if (cancelled)
+        {
+            latch.countDown();
+        }
         return cancelled;
     }
 

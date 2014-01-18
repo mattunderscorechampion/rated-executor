@@ -31,6 +31,7 @@ import java.util.concurrent.Future;
 import java.lang.InterruptedException;
 
 import com.mattunderscore.executors.IUniversalExecutor;
+import com.mattunderscore.executors.TaskWrapperFactory;
 
 /**
  * Utility class that allows the construction of rated executors.
@@ -65,7 +66,7 @@ public final class RatedExecutors
         final TaskQueue queue = new TaskQueue();
         final ThreadFactory factory = new RatedExecutorThreadFactory();
         final IInternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit, factory);
-        return new RatedExecutor(queue, executor);
+        return new RatedExecutor(queue, executor, new TaskWrapperFactory());
     }
 
     /**
@@ -88,7 +89,7 @@ public final class RatedExecutors
     {
         final TaskQueue queue = new TaskQueue();
         final IInternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit, factory);
-        return new RatedExecutor(queue, executor);
+        return new RatedExecutor(queue, executor, new TaskWrapperFactory());
     }
 
     /**
@@ -109,7 +110,7 @@ public final class RatedExecutors
         final TaskQueue queue = new TaskQueue();
         final ThreadFactory factory = new RatedExecutorThreadFactory();
         final IInternalExecutor executor = new ThreadedInternalExecutor(queue, rate, unit, factory);
-        return new RatedExecutor(queue, executor);
+        return new RatedExecutor(queue, executor, new TaskWrapperFactory());
     }
 
     /**
@@ -132,7 +133,7 @@ public final class RatedExecutors
     {
         final TaskQueue queue = new TaskQueue();
         final IInternalExecutor executor = new ThreadedInternalExecutor(queue, rate, unit, factory);
-        return new RatedExecutor(queue, executor);
+        return new RatedExecutor(queue, executor, new TaskWrapperFactory());
     }
 
     /**
@@ -153,7 +154,7 @@ public final class RatedExecutors
         final TaskQueue queue = new TaskQueue();
         final ThreadFactory factory = new RatedExecutorThreadFactory();
         final IInternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit, factory);
-        return new SimpleRatedExecutor(executor);
+        return new SimpleRatedExecutor(executor, new TaskWrapperFactory());
     }
 
     /**
@@ -176,6 +177,6 @@ public final class RatedExecutors
     {
         final TaskQueue queue = new TaskQueue();
         final IInternalExecutor executor = new ScheduledInternalExecutor(queue, rate, unit, factory);
-        return new SimpleRatedExecutor(executor);
+        return new SimpleRatedExecutor(executor, new TaskWrapperFactory());
     }
 }

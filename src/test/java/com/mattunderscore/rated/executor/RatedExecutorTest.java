@@ -31,6 +31,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
+import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,6 +39,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -56,6 +58,11 @@ import com.mattunderscore.executor.stubs.NumberCallable;
 import com.mattunderscore.executor.stubs.TestException;
 import com.mattunderscore.executor.stubs.TestThreadFactory;
 import com.mattunderscore.executors.IRepeatingFuture;
+import com.mattunderscore.executors.ITaskWrapperFactory;
+import com.mattunderscore.executors.LessThanLong;
+import com.mattunderscore.executors.RateMatcher;
+import com.mattunderscore.executors.TestTaskWrapper;
+import com.mattunderscore.executors.TestTaskWrapperFactory;
 
 /**
  * Test suite for the Rated Executor.
@@ -68,10 +75,12 @@ import com.mattunderscore.executors.IRepeatingFuture;
 @RunWith(Parameterized.class)
 public final class RatedExecutorTest
 {
-    private static final long STD_RATE = 100L;
-    private static final long STD_EXTRA = 15L;
+    private static final long RATE = 75L;
+    private static final long EXTRA_MILLS = 15L;
+    private static final long EXTRA_NANOS = TimeUnit.MILLISECONDS.toNanos(EXTRA_MILLS);
 
     private final Type type;
+    private TestTaskWrapperFactory factory;
     private IRatedExecutor executor;
 
     /**
@@ -115,7 +124,8 @@ public final class RatedExecutorTest
     @Before
     public void setUp()
     {
-        executor = type.getExecutor(STD_RATE, TimeUnit.MILLISECONDS);
+        factory = new TestTaskWrapperFactory();
+        executor = type.getExecutor(RATE, TimeUnit.MILLISECONDS, factory);
     }
 
     /**
@@ -130,7 +140,7 @@ public final class RatedExecutorTest
     {
         final CountingTask task = new CountingTask();
         executor.execute(task);
-        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+        waitForTask(0, 0);
 
         assertEquals(1, task.count);
     }
@@ -147,12 +157,12 @@ public final class RatedExecutorTest
     {
         final CountingTask task = new CountingTask();
         final Future<?> future = executor.submit(task);
-        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+        waitForTask(0, 0);
 
         assertTrue(future.isDone());
         assertFalse(future.isCancelled());
-        assertTrue(future.get() == null);
-        assertTrue(future.get(STD_EXTRA, TimeUnit.MILLISECONDS) == null);
+        assertNull(future.get());
+        assertNull(future.get(EXTRA_MILLS, TimeUnit.MILLISECONDS));
         assertEquals(1, task.count);
     }
 
@@ -168,7 +178,7 @@ public final class RatedExecutorTest
     {
         final CountingCallable task = new CountingCallable();
         executor.execute(task);
-        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+        waitForTask(0, 0);
 
         assertEquals(1, task.count);
     }
@@ -188,18 +198,18 @@ public final class RatedExecutorTest
 
         executor.execute(delayingTask);
         final Future<?> future = executor.submit(task);
-        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+        waitForTask(0, 0);
 
         assertFalse(future.isDone());
-        TimeUnit.MILLISECONDS.sleep(STD_RATE / 2);
+        TimeUnit.MILLISECONDS.sleep(RATE / 2);
 
         assertFalse(future.isDone());
-        TimeUnit.MILLISECONDS.sleep(STD_RATE / 2);
+        factory.getWrapper(1).getLatch(0).await();
 
         assertTrue(future.isDone());
         assertFalse(future.isCancelled());
-        assertTrue(future.get() == null);
-        assertTrue(future.get(STD_EXTRA, TimeUnit.MILLISECONDS) == null);
+        assertNull(future.get());
+        assertNull(future.get(EXTRA_MILLS, TimeUnit.MILLISECONDS));
         assertEquals(1, task.count);
     }
 
@@ -215,16 +225,17 @@ public final class RatedExecutorTest
         final CountingTask task1 = new CountingTask();
 
         final Future<?> future0 = executor.submit(task0);
-        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+        waitForTask(0, 0);
 
         assertTrue(future0.isDone());
         final Future<?> future1 = executor.submit(task1);
-        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+        TimeUnit.MILLISECONDS.sleep(RATE / 2);
 
         assertFalse(future1.isDone());
-        TimeUnit.MILLISECONDS.sleep(STD_RATE);
+        waitForTask(1, 0);
 
         assertTrue(future1.isDone());
+        assertThat(timeSince(0, 0, 1,0), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
     }
 
     /**
@@ -240,15 +251,17 @@ public final class RatedExecutorTest
         final CountingTask task1 = new CountingTask();
 
         final Future<?> future0 = executor.submit(task0);
-        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+        waitForTask(0, 0);
 
         assertTrue(future0.isDone());
-        TimeUnit.MILLISECONDS.sleep(STD_RATE);
+        TimeUnit.MILLISECONDS.sleep(RATE);
 
+        final long beforeSubmit = System.nanoTime();
         final Future<?> future1 = executor.submit(task1);
-        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+        waitForTask(1, 0);
 
         assertTrue(future1.isDone());
+        assertThat(startTimestamp(1, 0) - beforeSubmit, new LessThanLong(EXTRA_NANOS));
     }
 
     /**
@@ -263,10 +276,10 @@ public final class RatedExecutorTest
         final CountingTask task0 = new CountingTask();
 
         final Future<?> future0 = executor.submit(task0);
-        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+        waitForTask(0, 0);
 
         assertTrue(future0.isDone());
-        assertTrue(future0.get() == null);
+        assertNull(future0.get());
     }
 
     /**
@@ -281,7 +294,7 @@ public final class RatedExecutorTest
         final NumberCallable task0 = new NumberCallable(5);
 
         final Future<Integer> future0 = executor.submit(task0);
-        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+        waitForTask(0, 0);
 
         assertTrue(future0.isDone());
         assertEquals(Integer.valueOf(5), future0.get());
@@ -354,18 +367,23 @@ public final class RatedExecutorTest
     public void testRepeatingExecution0() throws InterruptedException
     {
         final CountingTask task = new CountingTask();
+        final long beforeSubmit = System.nanoTime();
         final Future<?> future = executor.schedule(task);
-        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+        waitForTask(0, 0);
 
+        assertThat(startTimestamp(0, 0) - beforeSubmit, new LessThanLong(EXTRA_NANOS));
         assertEquals(1, task.count);
-        TimeUnit.MILLISECONDS.sleep(STD_RATE);
+        waitForTask(0, 1);
 
+        assertThat(timeSince(0, 0, 0, 1), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
         assertEquals(2, task.count);
-        TimeUnit.MILLISECONDS.sleep(STD_RATE);
+        waitForTask(0, 2);
 
+        assertThat(timeSince(0, 1, 0, 2), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
         assertEquals(3, task.count);
         assertFalse("Task should not be done", future.isDone());
         assertFalse("Task should not be cancelled", future.isCancelled());
+        TimeUnit.MILLISECONDS.sleep(EXTRA_MILLS);
 
         final boolean cancelled = future.cancel(false);
         assertTrue("Cancel should succeed", cancelled);
@@ -385,7 +403,7 @@ public final class RatedExecutorTest
         final CountingTask task0 = new CountingTask();
 
         final IRepeatingFuture<?> future0 = executor.schedule(task0, repetitions);
-        TimeUnit.MILLISECONDS.sleep((STD_RATE + STD_EXTRA) * (repetitions + 3));
+        waitForTask(0, 4);
 
         assertEquals(repetitions, task0.count);
         assertTrue("Task should be done", future0.isDone());
@@ -403,25 +421,27 @@ public final class RatedExecutorTest
     {
         final CountingTask task = new CountingTask();
         final IRepeatingFuture<?> future = executor.schedule(task, 3);
-        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+        waitForTask(0, 0);
 
         assertEquals(1, task.count);
         assertEquals("Expected executions", 3, future.getExpectedExecutions());
         assertEquals("Completed executions", 1, future.getCompletedExecutions());
         assertFalse("Task should not be done", future.isDone());
-        TimeUnit.MILLISECONDS.sleep(STD_RATE);
 
+        waitForTask(0, 1);
         assertEquals(2, task.count);
         assertEquals("Expected executions", 3, future.getExpectedExecutions());
         assertEquals("Completed executions", 2, future.getCompletedExecutions());
         assertFalse("Task should not be done", future.isDone());
-        TimeUnit.MILLISECONDS.sleep(STD_RATE);
+        assertThat(timeSince(0, 0, 0, 1), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
 
+        waitForTask(0, 2);
         assertEquals(3, task.count);
         assertEquals("Expected executions", 3, future.getExpectedExecutions());
         assertEquals("Completed executions", 3, future.getCompletedExecutions());
         assertTrue("Task should have completed", future.isDone());
         assertFalse("Task should not be cancelled", future.isCancelled());
+        assertThat(timeSince(0, 1, 0, 2), new RateMatcher(RATE, TimeUnit.MILLISECONDS));
     }
 
     /**
@@ -438,13 +458,12 @@ public final class RatedExecutorTest
     {
         final CountingTask task = new CountingTask();
         final IRepeatingFuture<?> future = executor.schedule(task, 4);
-        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+        waitForTask(0, 0);
 
         assertEquals(1, task.count);
         assertEquals("Expected executions", 4, future.getExpectedExecutions());
         assertEquals("Completed executions", 1, future.getCompletedExecutions());
         assertFalse("Task should not be done", future.isDone());
-        TimeUnit.MILLISECONDS.sleep(STD_RATE);
 
         assertNull(future.getResult(2));
         assertEquals(3, task.count);
@@ -465,13 +484,12 @@ public final class RatedExecutorTest
     {
         final CountingTask task = new CountingTask();
         final IRepeatingFuture<?> future = executor.schedule(task, 4);
-        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+        waitForTask(0, 0);
 
         assertEquals(1, task.count);
         assertEquals("Expected executions", 4, future.getExpectedExecutions());
         assertEquals("Completed executions", 1, future.getCompletedExecutions());
         assertFalse("Task should not be done", future.isDone());
-        TimeUnit.MILLISECONDS.sleep(STD_RATE);
 
         future.getResult(2, 50L, TimeUnit.MILLISECONDS);
     }
@@ -490,13 +508,12 @@ public final class RatedExecutorTest
     {
         final CountingCallable task = new CountingCallable();
         final IRepeatingFuture<Integer> future = executor.schedule(task, 4);
-        TimeUnit.MILLISECONDS.sleep(STD_EXTRA);
+        waitForTask(0, 0);
 
         assertEquals(1, task.count);
         assertEquals("Expected executions", 4, future.getExpectedExecutions());
         assertEquals("Completed executions", 1, future.getCompletedExecutions());
         assertFalse("Task should not be done", future.isDone());
-        TimeUnit.MILLISECONDS.sleep(STD_RATE);
 
         assertNotNull(future.getResult(2));
         assertEquals(Integer.valueOf(3), future.getResult(2));
@@ -519,7 +536,7 @@ public final class RatedExecutorTest
         future.cancel(false);
         assertTrue(future.isCancelled());
         assertTrue(future.isDone());
-        TimeUnit.MILLISECONDS.sleep(STD_RATE * 3);
+        TimeUnit.MILLISECONDS.sleep(RATE * 3);
 
         assertEquals(0, task.count);
         future.get();
@@ -542,7 +559,7 @@ public final class RatedExecutorTest
         future.cancel(false);
         assertTrue(future.isCancelled());
         assertTrue(future.isDone());
-        TimeUnit.MILLISECONDS.sleep(STD_RATE * 3);
+        TimeUnit.MILLISECONDS.sleep(RATE * 3);
 
         future.get();
     }
@@ -563,7 +580,7 @@ public final class RatedExecutorTest
         future.cancel(false);
         assertTrue(future.isCancelled());
         assertTrue(future.isDone());
-        TimeUnit.MILLISECONDS.sleep(STD_RATE * 3);
+        TimeUnit.MILLISECONDS.sleep(RATE * 3);
 
         assertEquals(0, task.count);
         future.get();
@@ -585,7 +602,7 @@ public final class RatedExecutorTest
         future.cancel(false);
         assertTrue(future.isCancelled());
         assertTrue(future.isDone());
-        TimeUnit.MILLISECONDS.sleep(STD_RATE * 3);
+        TimeUnit.MILLISECONDS.sleep(RATE * 3);
 
         assertEquals(0, task.count);
         future.get();
@@ -604,9 +621,11 @@ public final class RatedExecutorTest
         final CountingTask task = new CountingTask();
         executor.submit(delayingTask);
         final IRepeatingFuture<?> future = executor.schedule(task,5);
-        TimeUnit.MILLISECONDS.sleep(STD_RATE * 3);
+        waitForTask(1, 2);
         assertFalse(future.isCancelled());
         assertFalse(future.isDone());
+
+        TimeUnit.MILLISECONDS.sleep(EXTRA_MILLS);
         future.cancel(false);
         assertTrue(future.isCancelled());
         assertTrue(future.isDone());
@@ -643,6 +662,37 @@ public final class RatedExecutorTest
         future.get();
     }
 
+    private long timeSince(final int firstTask, final int firstExecution, final int secondTask, final int secondExecution)
+    {
+        final long mostRecent = startTimestamp(secondTask, secondExecution);
+        final long leastRecent = startTimestamp(firstTask, firstExecution);
+        return mostRecent - leastRecent;
+    }
+
+    private long startTimestamp(final int task, final int execution)
+    {
+        @SuppressWarnings("rawtypes")
+        final TestTaskWrapper wrapper = factory.getWrapper(task);
+        return wrapper.getStartTimestamp(execution);
+    }
+
+    private void waitForTask(final int task, final int execution)
+    {
+        try
+        {
+            @SuppressWarnings("rawtypes")
+            final TestTaskWrapper wrapper = factory.getWrapper(task);
+            for (int i = 0; i <= execution; i++)
+            {
+                wrapper.getLatch(i).await(RATE * 2, TimeUnit.MILLISECONDS);
+            }
+        }
+        catch (final InterruptedException ex)
+        {
+            throw new AssertionError(ex);
+        }
+    }
+
     /**
      * Allow the setup method to create some type of {@link IRatedExecutor}.
      * 
@@ -654,34 +704,43 @@ public final class RatedExecutorTest
         STANDARD
         {
             @Override
-            public IRatedExecutor getExecutor(final long duration, final TimeUnit unit)
+            public IRatedExecutor getExecutor(final long duration, final TimeUnit unit, final ITaskWrapperFactory wrapperFactory)
             {
-                return RatedExecutors.ratedExecutor(duration, unit);
+                final TaskQueue queue = new TaskQueue();
+                final ThreadFactory factory = new RatedExecutorThreadFactory();
+                final IInternalExecutor executor = new ScheduledInternalExecutor(queue, duration, unit, factory);
+                return new RatedExecutor(queue, executor, wrapperFactory);
             }
         },
         INTERRUPTABLE
         {
             @Override
-            public IRatedExecutor getExecutor(final long duration, final TimeUnit unit)
+            public IRatedExecutor getExecutor(final long duration, final TimeUnit unit, final ITaskWrapperFactory wrapperFactory)
             {
-                return RatedExecutors.interruptableRatedExecutor(duration, unit);
+                final TaskQueue queue = new TaskQueue();
+                final ThreadFactory factory = new RatedExecutorThreadFactory();
+                final IInternalExecutor executor = new ThreadedInternalExecutor(queue, duration, unit, factory);
+                return new RatedExecutor(queue, executor, wrapperFactory);
             }
         },
         STANDARD_WITH_THREAD_FACTORY
         {
             @Override
-            public IRatedExecutor getExecutor(final long duration, final TimeUnit unit)
+            public IRatedExecutor getExecutor(final long duration, final TimeUnit unit, final ITaskWrapperFactory wrapperFactory)
             {
-                return RatedExecutors.ratedExecutor(duration, unit, new TestThreadFactory());
+                final TaskQueue queue = new TaskQueue();
+                final IInternalExecutor executor = new ScheduledInternalExecutor(queue, duration, unit, new TestThreadFactory());
+                return new RatedExecutor(queue, executor, wrapperFactory);
             }
         },
         INTERRUPTABLE_WITH_THREAD_FACTORY
         {
             @Override
-            public IRatedExecutor getExecutor(final long duration, final TimeUnit unit)
+            public IRatedExecutor getExecutor(final long duration, final TimeUnit unit, final ITaskWrapperFactory wrapperFactory)
             {
-                return RatedExecutors.interruptableRatedExecutor(duration, unit,
-                        new TestThreadFactory());
+                final TaskQueue queue = new TaskQueue();
+                final IInternalExecutor executor = new ThreadedInternalExecutor(queue, duration, unit, new TestThreadFactory());
+                return new RatedExecutor(queue, executor, wrapperFactory);
             }
         };
 
@@ -691,6 +750,6 @@ public final class RatedExecutorTest
          * @param unit The time unit of the duration
          * @return The executor
          */
-        public abstract IRatedExecutor getExecutor(final long duration, final TimeUnit unit);
+        public abstract IRatedExecutor getExecutor(long duration, TimeUnit unit, ITaskWrapperFactory wrapperFactory);
     }
 }

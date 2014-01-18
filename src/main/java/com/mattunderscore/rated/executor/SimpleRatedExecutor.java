@@ -26,10 +26,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 package com.mattunderscore.rated.executor;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
-import com.mattunderscore.executors.DiscardResult;
-import com.mattunderscore.executors.RunnableWrapper;
-import com.mattunderscore.executors.TaskWrapper;
+import com.mattunderscore.executors.ITaskWrapper;
+import com.mattunderscore.executors.ITaskWrapperFactory;
 import com.mattunderscore.executors.IUniversalExecutor;
 
 /**
@@ -40,24 +40,24 @@ import com.mattunderscore.executors.IUniversalExecutor;
 /*package*/ final class SimpleRatedExecutor implements IUniversalExecutor
 {
     private final IInternalExecutor executor;
+    private final ITaskWrapperFactory wrapperFactory;
 
-    public SimpleRatedExecutor(final IInternalExecutor executor)
+    public SimpleRatedExecutor(final IInternalExecutor executor, final ITaskWrapperFactory wrapperFactory)
     {
         this.executor = executor;
+        this.wrapperFactory = wrapperFactory;
     }
 
     @Override
-    public void execute(Runnable task)
+    public void execute(final Runnable task)
     {
-        final Callable<Void> wrappedTask = new RunnableWrapper(task);
-        final TaskWrapper<Void> thing = new TaskWrapper<Void>(wrappedTask, DiscardResult.voidDiscarder);
+        final ITaskWrapper thing = wrapperFactory.newWrapper(task);
         executor.submit(thing);
     }
 
-    public <V> void execute(Callable<V> task)
+    public <V> void execute(final Callable<V> task)
     {
-        final DiscardResult<V> processor = new DiscardResult<V>();
-        final TaskWrapper<V> thing = new TaskWrapper<V>(task, processor);
+        final ITaskWrapper thing = wrapperFactory.newWrapper(task);
         executor.submit(thing);
     }
 }

@@ -28,15 +28,13 @@ package com.mattunderscore.rated.executor;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import com.mattunderscore.executors.DiscardResult;
 import com.mattunderscore.executors.IRepeatingFuture;
 import com.mattunderscore.executors.ISettableFuture;
 import com.mattunderscore.executors.ITaskCanceller;
 import com.mattunderscore.executors.ITaskWrapper;
+import com.mattunderscore.executors.ITaskWrapperFactory;
 import com.mattunderscore.executors.RepeatingFuture;
-import com.mattunderscore.executors.RunnableWrapper;
 import com.mattunderscore.executors.SingleFuture;
-import com.mattunderscore.executors.TaskWrapper;
 import com.mattunderscore.executors.UnboundedFuture;
 
 /**
@@ -57,6 +55,7 @@ import com.mattunderscore.executors.UnboundedFuture;
 {
     private final IInternalExecutor executor;
     private final TaskQueue taskQueue;
+    private final ITaskWrapperFactory wrapperFactory;
 
     /**
      * Create a new RatedExecutor that will execute tasks at a fixed rate.
@@ -66,10 +65,11 @@ import com.mattunderscore.executors.UnboundedFuture;
      * @param unit
      *            The rate units
      */
-    public RatedExecutor(final TaskQueue taskQueue, final IInternalExecutor executor)
+    public RatedExecutor(final TaskQueue taskQueue, final IInternalExecutor executor, final ITaskWrapperFactory wrapperFactory)
     {
         this.taskQueue = taskQueue;
         this.executor = executor;
+        this.wrapperFactory = wrapperFactory;
     }
 
     /**
@@ -78,16 +78,14 @@ import com.mattunderscore.executors.UnboundedFuture;
     @Override
     public void execute(final Runnable task)
     {
-        final Callable<Void> wrappedTask = new RunnableWrapper(task);
-        final TaskWrapper<Void> thing = new TaskWrapper<Void>(wrappedTask,
-                DiscardResult.voidDiscarder);
+        final ITaskWrapper thing = wrapperFactory.newWrapper(task);
         executor.submit(thing);
     }
 
     @Override
     public <V> void execute(final Callable<V> task)
     {
-        final TaskWrapper<V> thing = new TaskWrapper<V>(task, new DiscardResult<V>());
+        final ITaskWrapper thing = wrapperFactory.newWrapper(task);
         executor.submit(thing);
     }
 
@@ -97,11 +95,10 @@ import com.mattunderscore.executors.UnboundedFuture;
     @Override
     public Future<?> submit(final Runnable task)
     {
-        final Callable<Void> wrappedTask = new RunnableWrapper(task);
         final ISettableFuture<Void> future = new SingleFuture<Void>(this);
         final RatedExecutorTaskResultProcessor<Void> processor = new RatedExecutorTaskResultProcessor<Void>(
                 future, executor);
-        final TaskWrapper<Void> thing = new TaskWrapper<Void>(wrappedTask, processor);
+        final ITaskWrapper thing = wrapperFactory.newWrapper(task, processor);
         future.setTask(thing);
         executor.submit(thing);
         return future;
@@ -116,7 +113,7 @@ import com.mattunderscore.executors.UnboundedFuture;
         final ISettableFuture<V> future = new SingleFuture<V>(this);
         final RatedExecutorTaskResultProcessor<V> processor = new RatedExecutorTaskResultProcessor<V>(
                 future, executor);
-        final TaskWrapper<V> thing = new TaskWrapper<V>(task, processor);
+        final ITaskWrapper thing = wrapperFactory.newWrapper(task, processor);
         future.setTask(thing);
         executor.submit(thing);
         return future;
@@ -128,11 +125,10 @@ import com.mattunderscore.executors.UnboundedFuture;
     @Override
     public Future<?> schedule(final Runnable task)
     {
-        final Callable<Void> wrappedTask = new RunnableWrapper(task);
         final ISettableFuture<Void> future = new UnboundedFuture(this);
         final RatedExecutorTaskResultProcessor<Void> processor = new RatedExecutorTaskResultProcessor<Void>(
                 future, executor);
-        final TaskWrapper<Void> thing = new TaskWrapper<Void>(wrappedTask, processor);
+        final ITaskWrapper thing = wrapperFactory.newWrapper(task, processor);
         future.setTask(thing);
         executor.submit(thing);
         return future;
@@ -144,11 +140,10 @@ import com.mattunderscore.executors.UnboundedFuture;
     @Override
     public IRepeatingFuture<?> schedule(final Runnable task, final int repetitions)
     {
-        final Callable<Void> wrappedTask = new RunnableWrapper(task);
         final RepeatingFuture<Void> future = new RepeatingFuture<Void>(this, repetitions);
         final RatedExecutorTaskResultProcessor<Void> processor = new RatedExecutorTaskResultProcessor<Void>(
                 future, executor);
-        final TaskWrapper<Void> thing = new TaskWrapper<Void>(wrappedTask, processor);
+        final ITaskWrapper thing = wrapperFactory.newWrapper(task, processor);
         future.setTask(thing);
         executor.submit(thing);
         return future;
@@ -164,7 +159,7 @@ import com.mattunderscore.executors.UnboundedFuture;
         final RepeatingFuture<V> future = new RepeatingFuture<V>(this, repetitions);
         final RatedExecutorTaskResultProcessor<V> processor = new RatedExecutorTaskResultProcessor<V>(
                 future, executor);
-        final TaskWrapper<V> thing = new TaskWrapper<V>(task, processor);
+        final ITaskWrapper thing = wrapperFactory.newWrapper(task, processor);
         future.setTask(thing);
         executor.submit(thing);
         return future;

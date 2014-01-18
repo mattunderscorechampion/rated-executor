@@ -1,14 +1,14 @@
-/* Copyright © 2013 Matthew Champion
+/* Copyright © 2014 Matthew Champion
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
+    * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
+    * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
- * Neither the name of mattunderscore.com nor the
+    * Neither the name of mattunderscore.com nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -28,52 +28,48 @@ package com.mattunderscore.executors;
 import java.util.concurrent.Callable;
 
 /**
- * A task wrapper for {@link Callable} tasks.
- * <P>
- * The handling of the result of the task is provided by the {@link ITaskResultProcessor}.
+ * Factory for ITaskWrapper objects.
+ *
  * @author Matt Champion
- * @param <V> The type returned by the task
- * @since 0.1.1
+ * @since 0.1.2
  */
-public class TaskWrapper<V> implements ITaskWrapper
+public interface ITaskWrapperFactory
 {
-    private final Callable<V> task;
-    private final ITaskResultProcessor<V> processor;
+    /**
+     * Create a task wrapper for callable tasks.
+     * <p>
+     * The result is discarded.
+     *
+     * @param task The task to wrap.
+     * @return The task wrapper.
+     */
+    public <V> ITaskWrapper newWrapper(Callable<V> task);
 
     /**
-     * Create the task wrapper
-     * @param task The task
-     * @param processor How to handle the result
+     * Create a task wrapper for runnable tasks.
+     * <p>
+     * The result is discarded.
+     *
+     * @param task The task to wrap.
+     * @return The task wrapper.
      */
-    public TaskWrapper(final Callable<V> task, final ITaskResultProcessor<V> processor)
-    {
-        this.task = task;
-        this.processor = processor;
-    }
+    public ITaskWrapper newWrapper(Runnable task);
 
-    @Override
-    public void execute()
-    {
-        try
-        {
-            final V result = task.call();
-            processor.onResult(this, result);
-        }
-        catch (Throwable t)
-        {
-            processor.onThrowable(this, t);
-        }
-    }
+    /**
+     * Create a task wrapper for callable tasks.
+     *
+     * @param task The task to wrap.
+     * @param processor The result processor.
+     * @return The task wrapper.
+     */
+    public <V> ITaskWrapper newWrapper(Callable<V> task, ITaskResultProcessor<V> processor);
 
-    @Override
-    public int hashCode()
-    {
-        return task.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object o)
-    {
-        return this == o;
-    }
+    /**
+     * Create a task wrapper for runnable tasks.
+     *
+     * @param task The task to wrap.
+     * @param processor The result processor.
+     * @return The task wrapper.
+     */
+    public ITaskWrapper newWrapper(Runnable task, ITaskResultProcessor<Void> processor);
 }

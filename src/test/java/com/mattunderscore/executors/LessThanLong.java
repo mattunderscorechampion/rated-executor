@@ -1,14 +1,14 @@
-/* Copyright © 2013 Matthew Champion
+/* Copyright © 2014 Matthew Champion
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
+    * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
+    * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
- * Neither the name of mattunderscore.com nor the
+    * Neither the name of mattunderscore.com nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -25,29 +25,32 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.executors;
 
-import net.jcip.annotations.Immutable;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
 
-/**
- * Handle the result of a task by discarding it.
- * @author Matt Champion
- * @param <V>
- * @since 0.1.1
- */
-@Immutable
-public final class DiscardResult<V> implements ITaskResultProcessor<V>
+public class LessThanLong extends TypeSafeMatcher<Long>
 {
-    /**
-     * Void implementation can be used with runnable tasks.
-     */
-    public final static DiscardResult<Void> VOID_DISCARDER = new DiscardResult<Void>();
-
-    @Override
-    public void onThrowable(ITaskWrapper task, Throwable t)
-    {
+    private final long max;
+    public LessThanLong(final long max) {
+        this.max = max;
     }
 
     @Override
-    public void onResult(ITaskWrapper task, V result)
+    public void describeTo(final Description desc)
     {
+        desc.appendText("less than " + max);
+    }
+
+    @Override
+    public void describeMismatchSafely(final Long l, Description desc)
+    {
+        final long lv = l.longValue();
+        desc.appendText(String.valueOf(lv));
+    }
+
+    @Override
+    protected boolean matchesSafely(final Long val)
+    {
+        return val.longValue() < max;
     }
 }
