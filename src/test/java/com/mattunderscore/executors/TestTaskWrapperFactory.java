@@ -28,6 +28,7 @@ package com.mattunderscore.executors;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A task wrapper factory. That keeps a list of all the test task wrappers.
@@ -73,5 +74,36 @@ public class TestTaskWrapperFactory implements ITaskWrapperFactory
     public synchronized TestTaskWrapper getWrapper(final int i)
     {
         return wrappers.get(i);
+    }
+
+    public long timeSince(final int firstTask, final int firstExecution, final int secondTask, final int secondExecution)
+    {
+        final long mostRecent = startTimestamp(secondTask, secondExecution);
+        final long leastRecent = startTimestamp(firstTask, firstExecution);
+        return mostRecent - leastRecent;
+    }
+
+    public long startTimestamp(final int task, final int execution)
+    {
+        @SuppressWarnings("rawtypes")
+        final TestTaskWrapper wrapper = getWrapper(task);
+        return wrapper.getStartTimestamp(execution);
+    }
+
+    public void waitForTask(final int task, final int execution, final long maxMilliseconds)
+    {
+        try
+        {
+            @SuppressWarnings("rawtypes")
+            final TestTaskWrapper wrapper = getWrapper(task);
+            for (int i = 0; i <= execution; i++)
+            {
+                wrapper.getLatch(i).await(maxMilliseconds, TimeUnit.MILLISECONDS);
+            }
+        }
+        catch (final InterruptedException ex)
+        {
+            throw new AssertionError(ex);
+        }
     }
 }

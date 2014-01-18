@@ -40,7 +40,6 @@ public final class TestTaskWrapper<V> extends TaskWrapper<V>
 {
     private final List<CountDownLatch> latches = Collections.synchronizedList(new ArrayList<CountDownLatch>());
     private final List<Long> startTimestamps = Collections.synchronizedList(new ArrayList<Long>());
-    private final List<Long> endTimestamps = Collections.synchronizedList(new ArrayList<Long>());
     private CountDownLatch currentLatch;
 
     public TestTaskWrapper(final Callable<V> task, final ITaskResultProcessor<V> processor)
@@ -56,7 +55,6 @@ public final class TestTaskWrapper<V> extends TaskWrapper<V>
         super.execute();
         synchronized (this)
         {
-            endTimestamps.add(System.nanoTime());
             final CountDownLatch latch = currentLatch;
             nextLatch();
             latch.countDown();
@@ -80,16 +78,6 @@ public final class TestTaskWrapper<V> extends TaskWrapper<V>
     public long getStartTimestamp(final int i)
     {
         return startTimestamps.get(i);
-    }
-
-    /**
-     * Get ending timestamp.
-     * @param i The stamp to get.
-     * @return
-     */
-    public long getEndTimestamp(final int i)
-    {
-        return endTimestamps.get(i);
     }
 
     private void nextLatch()
