@@ -56,7 +56,7 @@ import com.mattunderscore.executor.stubs.NumberCallable;
 public final class SingleFutureTest
 {
     private static final long TIMEOUT = 200L;
-    private static final long TIMEOUT_MAX = 204L;
+    private static final long TIMEOUT_MAX = 205L;
     private static final long M_2_N = 1000L * 1000L;
 
     private ITaskCanceller canceller;

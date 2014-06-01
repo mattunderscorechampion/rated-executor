@@ -252,14 +252,14 @@ public final class RatedExecutorTest
         final Future<?> future0 = executor.submit(task0);
         factory.waitForTask(0, 0, RATE * 2);
 
-        assertTrue(future0.isDone());
+        assertTrue("First task incomplete", future0.isDone());
         TimeUnit.MILLISECONDS.sleep(RATE);
 
         final long beforeSubmit = System.nanoTime();
         final Future<?> future1 = executor.submit(task1);
         factory.waitForTask(1, 0, RATE * 2);
 
-        assertTrue(future1.isDone());
+        assertTrue("Second task incomplete", future1.isDone());
         assumeThat(factory.startTimestamp(1, 0) - beforeSubmit, new LessThanLong(EXTRA_NANOS));
     }
 
