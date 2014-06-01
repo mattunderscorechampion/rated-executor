@@ -32,12 +32,11 @@ import java.util.concurrent.locks.LockSupport;
 
 import com.mattunderscore.executors.ITaskWrapper;
 
-/*package*/ final class ThreadedInternalExecutor implements IInternalExecutor
+/*package*/ final class ThreadedInternalExecutor implements IInternalExecutor, Runnable
 {
     private final long rate;
     private final TimeUnit unit;
     private final TaskQueue taskQueue;
-    private final LoopingTask thisTask;
     private final ThreadFactory factory;
     private volatile Thread thread;
     private final AtomicBoolean running = new AtomicBoolean(false);
@@ -47,7 +46,6 @@ import com.mattunderscore.executors.ITaskWrapper;
     /* package */ ThreadedInternalExecutor(final TaskQueue taskQueue, final long rate,
             final TimeUnit unit, final ThreadFactory factory)
     {
-        this.thisTask = new LoopingTask();
         this.factory = factory;
         this.taskQueue = taskQueue;
         this.rate = rate;
@@ -68,7 +66,7 @@ import com.mattunderscore.executors.ITaskWrapper;
     private void start()
     {
         if (running.compareAndSet(false, true)) {
-            final Thread newThread = factory.newThread(thisTask);
+            final Thread newThread = factory.newThread(this);
             thread = newThread;
             newThread.start();
         }
@@ -103,48 +101,45 @@ import com.mattunderscore.executors.ITaskWrapper;
         }
     }
 
-    private final class LoopingTask implements Runnable
+    @Override
+    public void run()
     {
-        public void run()
+        final long rateInNanos = TimeUnit.NANOSECONDS.convert(rate, unit);
+        long targetTime = System.nanoTime() + rateInNanos;
+        while (running.get())
         {
-            final long rateInNanos = TimeUnit.NANOSECONDS.convert(rate, unit);
-            long targetTime = System.nanoTime() + rateInNanos;
-            while (running.get())
+            // Execute next task
+            final ITaskWrapper task = taskQueue.poll();
+            if (task != null)
             {
-
-                // Execute next task
-                final ITaskWrapper task = taskQueue.poll();
-                if (task != null)
-                {
-                    interruptable = true;
-                    task.execute();
-                    taskQueue.clearCurrentTask();
-                    interruptable = false;
-                }
-                // Sleep until the next execution
-                while (true)
-                {
-                    // Time until target
-                    final long sleepFor = targetTime - System.nanoTime();
-                    if (sleepFor > 0)
-                    {
-                        LockSupport.parkNanos(sleepFor);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                // Stop if needed
-                if (stopping)
-                {
-                    stop();
-                }
-                // Calculate the next time to run off the time it was supposed to run last. This
-                // provides more accurate scheduling than calculating the next time to run off
-                // the time it actually ran
-                targetTime = targetTime + rateInNanos;
+                interruptable = true;
+                task.execute();
+                taskQueue.clearCurrentTask();
+                interruptable = false;
             }
+            // Sleep until the next execution
+            while (true)
+            {
+                // Time until target
+                final long sleepFor = targetTime - System.nanoTime();
+                if (sleepFor > 0)
+                {
+                    LockSupport.parkNanos(sleepFor);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            // Stop if needed
+            if (stopping)
+            {
+                stop();
+            }
+            // Calculate the next time to run off the time it was supposed to run last. This
+            // provides more accurate scheduling than calculating the next time to run off
+            // the time it actually ran
+            targetTime = targetTime + rateInNanos;
         }
     }
 }
