@@ -25,8 +25,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.executors;
 
+import net.jcip.annotations.Immutable;
+
 import java.util.concurrent.Callable;
 
+@Immutable
 public final class TaskWrapperFactory implements ITaskWrapperFactory
 {
     @Override

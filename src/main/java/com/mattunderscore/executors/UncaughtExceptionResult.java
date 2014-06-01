@@ -25,10 +25,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.mattunderscore.executors;
 
+import net.jcip.annotations.Immutable;
+
 /**
  * Task result processor that discards any return value but invokes an uncaught exception handler for any throwables.
  * @author matt on 01/06/14.
  */
+@Immutable
 public final class UncaughtExceptionResult<V> implements ITaskResultProcessor<V> {
     public static final UncaughtExceptionResult VOID_RESULT_PROCESSOR = new UncaughtExceptionResult<Void>();
 

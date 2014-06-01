@@ -31,12 +31,14 @@ import java.util.concurrent.Future;
 import com.mattunderscore.executors.ITaskWrapper;
 import com.mattunderscore.executors.ITaskWrapperFactory;
 import com.mattunderscore.executors.IUniversalExecutor;
+import net.jcip.annotations.ThreadSafe;
 
 /**
  * A simple rated executor that returns no {@link Future}s.
  * @author Matt Champion
  * @since 0.1.1
  */
+@ThreadSafe
 /*package*/ final class SimpleRatedExecutor implements IUniversalExecutor
 {
     private final IInternalExecutor executor;

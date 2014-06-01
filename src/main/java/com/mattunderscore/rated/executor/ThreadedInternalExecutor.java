@@ -31,7 +31,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.LockSupport;
 
 import com.mattunderscore.executors.ITaskWrapper;
+import net.jcip.annotations.ThreadSafe;
 
+@ThreadSafe
 /*package*/ final class ThreadedInternalExecutor implements IInternalExecutor, Runnable
 {
     private final long rate;
@@ -116,7 +118,7 @@ import com.mattunderscore.executors.ITaskWrapper;
                 task.execute();
                 interruptable = false;
                 taskQueue.clearCurrentTask();
-                thread.interrupted();
+                Thread.interrupted();
             }
             // Sleep until the next execution
             while (true)
