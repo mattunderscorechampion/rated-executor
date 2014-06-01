@@ -27,6 +27,7 @@ package com.mattunderscore.rated.executor;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.LockSupport;
 
 import com.mattunderscore.executors.ITaskWrapper;
@@ -39,7 +40,7 @@ import com.mattunderscore.executors.ITaskWrapper;
     private final LoopingTask thisTask;
     private final ThreadFactory factory;
     private volatile Thread thread;
-    private volatile boolean running = false;
+    private final AtomicBoolean running = new AtomicBoolean(false);
     private volatile boolean stopping = false;
     private volatile boolean interruptable = false;
 
@@ -58,10 +59,7 @@ import com.mattunderscore.executors.ITaskWrapper;
     {
         taskQueue.add(wrapper);
         stopping = false;
-        if (!running)
-        {
-            start();
-        }
+        start();
     }
 
     /**
@@ -69,8 +67,7 @@ import com.mattunderscore.executors.ITaskWrapper;
      */
     private void start()
     {
-        if (!running) {
-            running = true;
+        if (running.compareAndSet(false, true)) {
             final Thread newThread = factory.newThread(thisTask);
             thread = newThread;
             newThread.start();
@@ -89,10 +86,7 @@ import com.mattunderscore.executors.ITaskWrapper;
     @Override
     public void stop()
     {
-        if (running)
-        {
-            running = false;
-        }
+        running.compareAndSet(true, false);
     }
 
     @Override
@@ -115,7 +109,7 @@ import com.mattunderscore.executors.ITaskWrapper;
         {
             final long rateInNanos = TimeUnit.NANOSECONDS.convert(rate, unit);
             long targetTime = System.nanoTime() + rateInNanos;
-            while (running)
+            while (running.get())
             {
 
                 // Execute next task
