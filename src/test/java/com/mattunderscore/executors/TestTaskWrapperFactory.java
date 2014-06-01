@@ -43,13 +43,13 @@ public class TestTaskWrapperFactory implements ITaskWrapperFactory
     @Override
     public <V> ITaskWrapper newWrapper(final Callable<V> task)
     {
-        return add(task, new DiscardResult<V>());
+        return add(task, new UncaughtExceptionResult<V>());
     }
 
     @Override
     public ITaskWrapper newWrapper(final Runnable task)
     {
-        return add(new RunnableWrapper(task), DiscardResult.VOID_DISCARDER);
+        return add(new RunnableWrapper(task), UncaughtExceptionResult.VOID_RESULT_PROCESSOR);
     }
 
     @Override
