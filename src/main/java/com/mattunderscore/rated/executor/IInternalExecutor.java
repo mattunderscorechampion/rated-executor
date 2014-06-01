@@ -55,7 +55,7 @@ import com.mattunderscore.executors.ITaskWrapper;
 
     /**
      * Stop the internal executor running. Calling this will prevent the internal executor from
-     * trying to remove tasks from the queue. queue.
+     * trying to remove tasks from the queue.
      */
     public void stop();
 

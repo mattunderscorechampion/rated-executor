@@ -59,11 +59,6 @@ import com.mattunderscore.executors.UnboundedFuture;
 
     /**
      * Create a new RatedExecutor that will execute tasks at a fixed rate.
-     * 
-     * @param rate
-     *            The rate value
-     * @param unit
-     *            The rate units
      */
     public RatedExecutor(final TaskQueue taskQueue, final IInternalExecutor executor, final ITaskWrapperFactory wrapperFactory)
     {

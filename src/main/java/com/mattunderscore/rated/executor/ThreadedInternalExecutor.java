@@ -38,10 +38,11 @@ import com.mattunderscore.executors.ITaskWrapper;
     private final TaskQueue taskQueue;
     private final LoopingTask thisTask;
     private final ThreadFactory factory;
-    private Thread thread;
+    private volatile Thread thread;
     private volatile boolean running = false;
     private boolean stopping = false;
     private volatile boolean interruptable;
+    private volatile Thread.UncaughtExceptionHandler exceptionHandler;
 
     /* package */ThreadedInternalExecutor(final TaskQueue taskQueue, final long rate,
             final TimeUnit unit, final ThreadFactory factory)
@@ -76,8 +77,10 @@ import com.mattunderscore.executors.ITaskWrapper;
         else
         {
             running = true;
-            thread = factory.newThread(thisTask);
-            thread.start();
+            final Thread newThread = factory.newThread(thisTask);
+            exceptionHandler = newThread.getUncaughtExceptionHandler();
+            thread = newThread;
+            newThread.start();
         }
     }
 

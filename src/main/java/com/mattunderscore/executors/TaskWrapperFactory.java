@@ -32,13 +32,13 @@ public final class TaskWrapperFactory implements ITaskWrapperFactory
     @Override
     public <V> ITaskWrapper newWrapper(final Callable<V> task)
     {
-        return new TaskWrapper<V>(task, new DiscardResult<V>());
+        return new TaskWrapper<V>(task, new UncaughtExceptionResult<V>());
     }
 
     @Override
     public ITaskWrapper newWrapper(final Runnable task)
     {
-        return new TaskWrapper<Void>(new RunnableWrapper(task), DiscardResult.VOID_DISCARDER);
+        return new TaskWrapper<Void>(new RunnableWrapper(task), UncaughtExceptionResult.VOID_RESULT_PROCESSOR);
     }
 
     @Override

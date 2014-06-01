@@ -1,14 +1,14 @@
-/* Copyright © 2013 Matthew Champion
+/* Copyright © 2014 Matthew Champion
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
+ * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
+ * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of mattunderscore.com nor the
+ * Neither the name of mattunderscore.com nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -23,35 +23,28 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.mattunderscore.rated.executor;
-
-import java.util.concurrent.ThreadFactory;
+package com.mattunderscore.executors;
 
 /**
- * Thread factor used by rated default by rated executors.
- * @author Matt Champion
- * @since 0.1.1
+ * Task result processor that discards any return value but invokes an uncaught exception handler for any throwables.
+ * @author matt on 01/06/14.
  */
-/*package*/ final class RatedExecutorThreadFactory implements ThreadFactory
-{
-    private int threads = 0;
+public final class UncaughtExceptionResult<V> implements ITaskResultProcessor<V> {
+    public static final UncaughtExceptionResult VOID_RESULT_PROCESSOR = new UncaughtExceptionResult<Void>();
+
+    public UncaughtExceptionResult() {
+    }
 
     @Override
-    public Thread newThread(Runnable r)
-    {
-        final Thread thread = new Thread(r);
-        synchronized (this)
-        {
-            thread.setName("RatedExecutor-" + threads);
-            thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-                @Override
-                public void uncaughtException(Thread t, Throwable e) {
-                    System.err.println("Unhandled exception in thread " + t.getName());
-                    e.printStackTrace(System.err);
-                }
-            });
-            threads++;
+    public void onThrowable(ITaskWrapper task, Throwable t) {
+        final Thread currentThread = Thread.currentThread();
+        final Thread.UncaughtExceptionHandler handler = currentThread.getUncaughtExceptionHandler();
+        if (handler != null) {
+            handler.uncaughtException(currentThread, t);
         }
-        return thread;
+    }
+
+    @Override
+    public void onResult(ITaskWrapper task, V result) {
     }
 }
